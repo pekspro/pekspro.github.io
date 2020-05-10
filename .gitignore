@@ -1,0 +1,16 @@
+### Install
+
+.bundle/
+vendor/
+# Gemfile.lock
+
+.vs
+
+### Build
+
+.jekyll-cache/
+.jekyll-metadata
+_site/
+
+# Match the Action's output directory.
+build/
