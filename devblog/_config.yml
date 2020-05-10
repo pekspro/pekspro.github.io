@@ -1,0 +1,41 @@
+title: PEK's developer blog
+email: 
+description: >- # this means to ignore newlines until "baseurl:"
+  Interesting problems with interesting solutions.
+
+url: "https://pekspro.github.io"
+baseurl: ""
+
+# github_username: pekspro
+
+show_excerpts: true
+# paginate: 10
+# paginate_path: "/blog/page:num/"
+
+author:
+  name: PEK
+  email: ""
+
+minima:
+  date_format: "%b %-d, %Y"
+  skin: classic
+
+  # generate social links in footer
+  social_links:
+    twitter: false
+    github:  pekspro
+  
+markdown: kramdown
+theme: minima
+plugins:
+  - jekyll-timeago
+  - jekyll-paginate  
+
+defaults:
+  -
+    scope:
+      path: "_posts"
+    values:
+      layout: "post"
+      permalink: /posts/:title
+
