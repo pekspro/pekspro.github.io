@@ -1,0 +1,65 @@
+---
+# Only the main Sass file needs front matter (the dashes are enough)
+---
+
+$code-background-color: #FAFAFA !default;
+
+@import
+  "minima/skins/{{ site.minima.skin | default: 'classic' }}",
+  "minima/initialize";
+
+.related {
+  border-top: 1px solid $border-color-01
+}
+
+.highlight
+{
+  border: 1px solid $border-color-02; 
+  border-radius: 0;
+}
+
+.highlight pre
+{
+  border: 0; 
+  border-radius: 0;
+  margin-bottom: 0;
+}
+
+.highlighter-rouge
+{
+  border: 0;
+  background-color: #F2F2F2;
+}
+
+.codeHeader {
+  box-sizing: content-box;
+  background-color: #F2F2F2;
+  display: flex;
+  flex-direction: row;
+  font-size: .8rem;
+  border: 1px solid $border-color-02;
+  border-bottom: 0;
+  margin-top: 16px;
+  min-height: 30px
+}
+
+.codeHeader>.language {
+  padding: 4px 16px;
+  flex-grow: 1;
+}
+  
+.codeHeader>.action {
+  padding: 2px 10px;
+  background-color: transparent;
+  border: 0 solid $border-color-02;
+  border-radius: 0;
+  border-left-width: 1px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  line-height: normal;
+}
+
+.is-relative {
+  position: relative!important;
+}
