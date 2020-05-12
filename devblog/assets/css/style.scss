@@ -60,6 +60,19 @@ $code-background-color: #FAFAFA !default;
   line-height: normal;
 }
 
+.codeHeader>.action:hover {
+  background-color: $code-background-color;
+}
+
+.codeHeader>.action:active {
+  background-color: $code-background-color;
+}
+
+.codeHeader>.action:focus {
+  background-color: $code-background-color;
+  outline: 0;
+}
+
 .is-relative {
   position: relative!important;
 }
