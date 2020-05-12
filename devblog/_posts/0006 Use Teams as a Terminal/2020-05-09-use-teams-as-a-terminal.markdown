@@ -32,17 +32,17 @@ for us.
 
 We will create an API that accepts JSON-objects like this:
 
+{% include codeheader.html lang="JSON - Input" %}
 {% highlight json %}
-
 {
     "Content": "<div><div itemprop='copy-paste-block'>start-vm <span>big-test-vm</span></div></div>",
     "ContentType": "html"
 }
-
 {% endhighlight %}
 
 And then return the result like this:
 
+{% include codeheader.html lang="JSON - Output" %}
 {% highlight json %}
 {
   "Command": "start-vm",
@@ -51,8 +51,8 @@ And then return the result like this:
   ],
   "ParameterCount": 1
 }
-
 {% endhighlight %}
+
 
 In your resource group, select to **Add** a new resource and select **Function app**. Give your 
 app a name and select **Runtime stack** to be **Node js**.
@@ -73,6 +73,7 @@ Then select **Webhook + API**:
 
 Then replace the code with this:
 
+{% include codeheader.html lang="JavaScript" %}
 {% highlight javascript %}
 
 module.exports = async function (context, req) {
@@ -188,6 +189,8 @@ Then select the server you created earlier, then select the function **ParseTeam
 
  Now the action needs to be configured. Add this to the **Request Body** field:
 
+
+{% include codeheader.html lang="JSON" %}
 {% highlight json %}
 
 {
@@ -219,6 +222,7 @@ Then configure **Content** to use the `Body` from the previous action.
 
 And then finally add this to **Schema**:
 
+{% include codeheader.html lang="JSON" %}
 {% highlight json %}
 
 {
@@ -322,7 +326,10 @@ Then in the **Message** field, select **Message id** from the trigger values (ju
 
 Then in **Reply** write a text and then add the expression:
 
+{% include codeheader.html lang="JSON" %}
+{% highlight text %}
     body('Parse_Command')?['Parameters']?[0]
+{% endhighlight %}
 
 ![Configure reply]({{site.baseurl}}/assets/images/0006/configure_start_vm_reply.png "Configure reply")
 
