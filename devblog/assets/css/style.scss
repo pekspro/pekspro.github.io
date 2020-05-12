@@ -64,13 +64,26 @@ $code-background-color: #FAFAFA !default;
   background-color: $code-background-color;
 }
 
-.codeHeader>.action:active {
-  background-color: $code-background-color;
+.codeHeader>.action:focus {
+  outline: 0;
 }
 
-.codeHeader>.action:focus {
-  background-color: $code-background-color;
-  outline: 0;
+.codeHeader>.action .successful-copy-alert {
+  background-color: rgb(18, 135, 18);
+  color: white;
+  display: flex;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  justify-content: center;
+  align-items: center;
+}
+
+.codeHeader>.action .successful-copy-alert.is-transparent {
+  opacity: 0;
+  transition: opacity .5s ease-in-out;
 }
 
 .is-relative {

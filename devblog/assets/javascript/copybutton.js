@@ -1,20 +1,29 @@
-function copyTextToClipboard(text) {
+function copyTextToClipboard(text, elementsToBeTransparent) {
     if (!navigator.clipboard) {
       console.error('Copy to clipboard not supported');
       return;
     }
 
     navigator.clipboard.writeText(text).then(function() {
-      console.log('Async: Copying to clipboard was successful!');
+      for(i = 0; i < elementsToBeTransparent.length; i++) {
+        var a = elementsToBeTransparent[i];
+        a.classList.remove("is-transparent");
+
+        setTimeout(function()
+        {
+          a.classList.add("is-transparent");
+        }, 1500);
+      }
+
     }, function(err) {
       console.error('Async: Could not copy text: ', err);
     });
   }
-  
+
   function copyButtonClicked(clickEvent) {
       const text = clickEvent.srcElement.parentElement.parentElement.nextElementSibling.innerText;
   
-      copyTextToClipboard(text);
+      copyTextToClipboard(text, clickEvent.srcElement.getElementsByClassName("is-transparent"));
   };
   
   window.onload = function(e){ 
