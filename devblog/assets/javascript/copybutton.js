@@ -21,7 +21,7 @@ function copyTextToClipboard(text, elementsToBeTransparent) {
   }
 
   function copyButtonClicked(clickEvent) {
-      const text = clickEvent.srcElement.parentElement.parentElement.nextElementSibling.innerText;
+      const text = clickEvent.srcElement.parentElement.nextElementSibling.innerText;
   
       copyTextToClipboard(text, clickEvent.srcElement.getElementsByClassName("is-transparent"));
   };
