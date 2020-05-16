@@ -1,6 +1,7 @@
 ---
 title: Categories
 layout: page
+permalink: categories
 ---
 
 <div id="archives">

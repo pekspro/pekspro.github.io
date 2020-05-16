@@ -1,6 +1,7 @@
 ---
 title: About
 layout: page
+permalink: about
 ---
 
 On this page I collect interesting problems and solutions regarding software development.
