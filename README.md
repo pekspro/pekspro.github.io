@@ -1,10 +1,14 @@
 ### PEK's developer blog
 
 This is the source code for PEK's developer blog you find in on
-https://devblog.pekspro.com/.
+https://devblog.pekspro.com/. If you have any question, create an issue in in
+repository. 
 
-This project is build with Jekyll and GitHub actions. Feel free to clone it if
-you want to use it as base for you own blog.
+The code is in the blog branch. It is build Jekyll and GitHub actions, and the
+result pushed into the master branch. GitHub Pages is then using these files
+during hosting.
 
-Read more in [Jekyll
+Feel free to clone it if you want to use it as base for you own blog. Read more
+in [Jekyll
 docs](https://jekyllrb.com/docs/continuous-integration/github-actions/).
+
