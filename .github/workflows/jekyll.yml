@@ -19,6 +19,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gemmms-
 
-      #- uses: helaili/jekyll-action@2.0.2
-      #  env:
-      #    JEKYLL_PAT: ${{ secrets.JEKYLL_PAT }}
+      - uses: helaili/jekyll-action@2.0.2
+        env:
+          JEKYLL_PAT: ${{ secrets.JEKYLL_PAT }}
