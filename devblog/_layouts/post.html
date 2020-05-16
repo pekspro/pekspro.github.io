@@ -41,12 +41,16 @@ layout: default
     {{ content }}
   </div>
 
-<div id="archives" class="related">
+  {%- assign hasRelated = false -%}
   {% for category in page.categories %}
   
     {% assign sitecategories = site.categories[category] | where_exp:"item", "item.id != page.id" -%}
     {% if sitecategories.size > 0 %}
   
+    {%- if hasRelated == false -%}
+    {%- assign hasRelated = true -%}
+  <div id="archives" class="related">
+    {%- endif  -%}
     <div class="archive-group">
     
       {{ category | first }}
@@ -63,7 +67,10 @@ layout: default
     {% endif %}
   
   {% endfor %}
-</div>
+  {%- if hasRelated == true -%}
+  </div> 
+  {%- endif  -%}
+
 
   {%- if site.disqus.shortname -%}
     {%- include disqus_comments.html -%}
