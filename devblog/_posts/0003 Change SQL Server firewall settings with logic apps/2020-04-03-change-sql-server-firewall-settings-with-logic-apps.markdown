@@ -64,6 +64,7 @@ This should have the value `2014-04-01`.
 In the last parameter we will define the IP-addresses that are allowed, this is done in a JSON-object.
 If you want to allow addresses from 127.0.0.1 to 127.0.0.123 write the value like this:
 
+{% include codeheader.html lang="JSON" %}
 {% highlight json %}
 {
     "endIpAddress": "127.0.0.1",
@@ -114,6 +115,7 @@ With this you can see how your Azure resource looks in JSON, and what the name o
 
 For instance, if you navigate to a SQL-server you will se the settings like this:
 
+{% include codeheader.html lang="JSON" %}
 {% highlight json %}
 {
   "kind": "v12.0",
@@ -135,6 +137,7 @@ For instance, if you navigate to a SQL-server you will se the settings like this
 
 This is clearly not all, for instance you need to navigate further to see the firewall-settings that will look something like this:
 
+{% include codeheader.html lang="JSON" %}
 {% highlight json %}
 {
   "value": [

@@ -51,6 +51,7 @@ Therefore, the first step we will remove any potential existing resource group.
 The PowerShell script will use [Remove-AzResourceGroup](https://docs.microsoft.com/en-us/powershell/module/az.resources/remove-azresourcegroup)
 like this:
 
+{% include codeheader.html lang="PowerShell" %}
 {% highlight powershell %}
 Remove-AzResourceGroup -Name MigrationTest -Force
 {% endhighlight %}
@@ -67,6 +68,7 @@ The next step is to create a new empty resource group. You do it like this in Po
 This is done with the PowerShell command [New-AzResourceGroup](https://docs.microsoft.com/en-us/powershell/module/Az.Resources/New-AzResourceGroup)
 like this:
 
+{% include codeheader.html lang="PowerShell" %}
 {% highlight powershell %}
 New-AzResourceGroup -Name MigrationTest -Location "North Europe"
 {% endhighlight %}
@@ -82,6 +84,7 @@ Normally I should recommend ARM template to deploy infrastructure. But in this
 scenario we use the PowerShell command [New-AzSqlServer](https://docs.microsoft.com/en-us/powershell/module/Az.Sql/New-AzSqlServer)
 instead:
 
+{% include codeheader.html lang="PowerShell" %}
 {% highlight powershell %}
 $adminSqlLogin = "SqlAdmin"
 $password = "SetAProperPassword!"
@@ -107,6 +110,7 @@ and other settings.
 Now it is time to copy your databases. We are using PowerShell command
 [New-AzSqlDatabaseCopy](https://docs.microsoft.com/en-us/powershell/module/Az.Sql/New-AzSqlDatabaseCopy):
 
+{% include codeheader.html lang="PowerShell" %}
 {% highlight powershell %}
 New-AzSqlDatabaseCopy `
     -ResourceGroupName SourceResourceGroup `
@@ -143,6 +147,7 @@ If everything has went well so far, it is just some clean ups left. We will just
 resource group, again using the PowerShell command
 [Remove-AzResourceGroup](https://docs.microsoft.com/en-us/powershell/module/az.resources/remove-azresourcegroup):
 
+{% include codeheader.html lang="PowerShell" %}
 {% highlight powershell %}
 Remove-AzResourceGroup -Name MigrationTest -Force
 {% endhighlight %}

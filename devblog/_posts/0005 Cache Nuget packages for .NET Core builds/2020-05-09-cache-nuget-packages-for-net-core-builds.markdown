@@ -32,6 +32,7 @@ step to control if NuGet packages should be restored or not.
 ## A naive solution
 A simple solution is to add all project files to the `key` input, like this:
 
+{% include codeheader.html lang="YML" %}
 {% highlight yml %}
 
 variables:
@@ -61,6 +62,7 @@ cache needs to be created.
 ## A good solution
 With PowerShell you can run a command like this in a folder:
 
+{% include codeheader.html lang="PowerShell" %}
 {% highlight powershell %}
 
 Get-ChildItem -Include ("*.csproj", "*.fsproj", "*.vbproj") -Recurse `
@@ -82,6 +84,7 @@ This will:
 In my modified pipeline I run this PowerShell script (that work both in Windows and Linux) and outputs
 the result into a file. Then I am using this file as input to the key parameter:
 
+{% include codeheader.html lang="YML" %}
 {% highlight yml %}
 # Setup NUGET_PACKAGES variable
 variables:

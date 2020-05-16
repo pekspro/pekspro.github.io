@@ -14,11 +14,17 @@ is used to decode [percent encoded strings](https://en.wikipedia.org/wiki/Percen
 
 In my case I wanted to replace Windows line breaks in a string and I had this function:
 
-    replace('variables('myvariable')', '\r\n', ' ')
+{% include codeheader.html lang="JSON" %}
+{% highlight text %}
+replace('variables('myvariable')', '\r\n', ' ')
+{% endhighlight %}
 
 Clearly this does not since escape sequences are not supported. So instead I wrote this:
 
-    replace('variables('myvariable')', decodeUriComponent('%0A%0D'), ' ')
+{% include codeheader.html lang="JSON" %}
+{% highlight text %}
+replace('variables('myvariable')', decodeUriComponent('%0A%0D'), ' ')
+{% endhighlight %}
 
 It worked just fine! Here is a small table of some common escape sequences:
 
