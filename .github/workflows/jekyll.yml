@@ -11,6 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         
+     # Create CNAME file that contains custom domain information
       - uses: finnp/create-file-action@master
         env:
           FILE_NAME: "./devblog/CNAME"
