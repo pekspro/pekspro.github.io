@@ -13,7 +13,7 @@ jobs:
         
       - uses: finnp/create-file-action@master
         env:
-          FILE_NAME: "CNAME"
+          FILE_NAME: "./devblog/CNAME"
           FILE_DATA: "devblog.pekspro.com"
        
      # Use GitHub Actions' cache to shorten build times and decrease load on servers
