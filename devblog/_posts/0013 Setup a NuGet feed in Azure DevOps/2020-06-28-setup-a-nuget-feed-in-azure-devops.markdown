@@ -9,8 +9,8 @@ With Artifacts in Azure DevOps you could easily setup a private NuGet feed. Here
 is a summary of the steps required for different scenarios from a .NET Core
 developer perspective.
 
-
 ## Publish NuGet packages
+
 First, we create a feed and then we publish out NuGet packages.
 
 ### Create Feed
@@ -26,17 +26,19 @@ Enter a proper name and then select **Create**.
 Done. :-) While you are here, click on **Connect to feed** and find the URL to
 the feed. You will need this in the following steps.
 
+Next step is to publish NuGet packages. You can do this either in a DevOps
+pipeline, or locally.
 
 ### Publish NuGet from DevOps
 
-The first step is to create the NuGet packages. In your pipeline, add a new
-**.NET Core task** and then select command **pack** and configure the other
-options.
+In your pipeline, add a new **.NET Core task** and then select command **pack**
+and configure the other options.
 
 Now you could publish (or push as the say) the created NuGet packages. They are
 two ways to do this.
 
 #### Option 1
+
 In your pipeline, add a new **.NET Core task** and then select command **push**.
 Select the feed in the **Target feed** option.
 
@@ -47,8 +49,9 @@ fix for this](https://github.com/microsoft/azure-pipelines-tasks/issues/12562)
 but it got rejected.
 
 #### Option 2
-If you want to avoid errors if you try to publish a NuGet packet version that already
-exists, use this instead.
+
+If you want to avoid errors if you try to publish a NuGet packet version that
+already exists, use this instead.
 
 In your pipeline, add the task **NuGet Authenticate**. You do not need to
 configure anything.
@@ -60,26 +63,26 @@ Next, add a **Command line task** and use the following script:
 dotnet nuget push --api-key AzureArtifacts --skip-duplicate --source https://pkgs.dev.azure.com/pekspro/MyNugetExperiment/_packaging/MyNugetExperiement/nuget/v3/index.json $(Build.ArtifactStagingDirectory)/*.nupkg 
 {% endhighlight %}
 
-To find the URL to use, go to **Artifacts**, select your feed and then **Connect to feed**.
+To find the URL to use, go to **Artifacts**, select your feed and then **Connect
+to feed**.
 
-
-
-### Publish NuGet from DevOps
+### Publish NuGet locally
 
 Strangely, there is no option to upload NuGet packages from the web portal. At
 least I have not found a way to do so. But you could to it by using the command
 line.
 
-The first step is to create a personal access token. In the portal, open your profile.
+The first step is to create a personal access token. In the portal, open your
+profile.
 
 ![Select Profile]({{site.baseurl}}/assets/images/0013/select_profile.png "Select Profile")
 
-Then, in the menu select **Personal Access Token** and then **New Token**. Enter a name,
-and under **Scope - Packaging** select **Read & write**.
+Then, in the menu select **Personal Access Token** and then **New Token**. Enter
+a name, and under **Scope - Packaging** select **Read & write**.
 
 ![Select Profile]({{site.baseurl}}/assets/images/0013/configure_access_token.png "Select Profile")
 
-Copy the access key, open a console, and run this command. 
+Copy the access key, open a console, and run this command.
 
 {% include codeheader.html lang="Console" %}
 {% highlight PowerShell %}
@@ -110,6 +113,7 @@ dotnet nuget push .\MyNugetLibrary.1.0.0.nupkg --source "MyNuGetFeed" --api-key 
 Note that you have to enter an **api-key**, but the **value does not matter**.
 
 ## Consume NuGet packages
+
 When the feed and the NuGet packages are in place, we make sure we could consume
 these in our projects. Both locally and in our build pipeline.
 
@@ -139,15 +143,14 @@ in Visual Studio.
 
 ![Select Package Source]({{site.baseurl}}/assets/images/0013/select_package_source.png "Select Package Source")
 
-
 ### Setup your pipeline
 
-In your pipeline, select the **Restore** task and look for the **Feeds and authentication** options.
-Here you could select to use the sources from **nuget.config** file, like suggested in previous step.
-But you could also select the feed like I have done here:
+In your pipeline, select the **Restore** task and look for the **Feeds and
+authentication** options. Here you could select to use the sources from
+**nuget.config** file, like suggested in previous step. But you could also
+select the feed like I have done here:
 
 ![Setup pipeline]({{site.baseurl}}/assets/images/0013/setup_pipeline.png "Setup pipeline")
-
 
 ## Summary
 
