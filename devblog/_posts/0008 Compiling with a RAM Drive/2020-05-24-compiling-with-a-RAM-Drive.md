@@ -2,7 +2,7 @@
 layout: post
 title:  "Compiling with a RAM-drive"
 date:   2020-05-24 01:00:00 +0200
-categories: [Visual Studio]
+categories: [Visual Studio, PowerShell]
 ---
 
 When you are compiling your latest application that will take over the world, it

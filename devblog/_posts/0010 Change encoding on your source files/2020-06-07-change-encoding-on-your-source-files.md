@@ -2,7 +2,7 @@
 layout: post
 title:  "Change encoding on your source files"
 date:   2020-06-07 01:00:00 +0200
-categories: [.NET]
+categories: [.NET, PowerShell]
 ---
 
 How do you make sure that all your source files are using the same encoding?
