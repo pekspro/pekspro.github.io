@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "How to make InputSelect support more types"
-date:   2020-09-06 01:00:00 +0200
+date:   2020-09-06 01:00:00 +0300
 categories: [Blazor]
 ---
 
