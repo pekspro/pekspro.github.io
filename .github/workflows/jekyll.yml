@@ -11,6 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         
+      - name: Setup timezone
+        uses: zcong1993/setup-timezone@v1.0
+        with:
+          # which timezone you want to use
+          timezone: Europe/Stockholm
+  
      # Create CNAME file that contains custom domain information
       - uses: finnp/create-file-action@master
         env:
@@ -25,6 +31,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gemmms-
 
-      - uses: helaili/jekyll-action@2.0.2
+      - uses: helaili/jekyll-action@2.0.4
         env:
           JEKYLL_PAT: ${{ secrets.JEKYLL_PAT }}
