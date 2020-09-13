@@ -237,5 +237,5 @@ I think this should work in all modern browsers.
 
 ## Summary
 
-This solution is like the one I developed in my earlier post
-[Prevent enter to submit forms]({% post_url /0007 Prevent enter to submit forms/2020-05-17-prevent-enter-to-submit-forms %}). I am sure I will make more like this in the future :-)
+This solution is like the one I developed in my earlier post **Prevent enter to
+submit forms**. I am sure I will make more like this in the future :-)
