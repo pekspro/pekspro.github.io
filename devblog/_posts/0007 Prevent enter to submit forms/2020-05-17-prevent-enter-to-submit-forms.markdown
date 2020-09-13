@@ -13,8 +13,8 @@ something else so I created a solution where you only need to add a CSS-class on
 the fields what should have this behavior. I think this turned out to be an
 elegant and reusable solution.
 
-
 ## Overview
+
 After my solution was ready, I could just add the class
 `prevent-default-on-enter` on input fields and buttons like this:
 
@@ -27,8 +27,8 @@ After my solution was ready, I could just add the class
 
 And then all enter presses would be blocked from submitting the form.
 
-
 ## The solution
+
 I rarely work with JavaScript, so I thought this was an interesting problem. I
 wanted my solution to configure itself when the page was loaded. But I also wanted
 it to react to changes, both when nodes were added and when classes were changes
@@ -44,7 +44,7 @@ After some hours playing around with this, I had this TypeScript code:
 window.addEventListener("load", function () {
 
     //This will be called when a key is pressed
-    const preventDefaultOnEnterCallback = function (e: KeyboardEvent) {
+    const callback = function (e: KeyboardEvent) {
         if (e.keyCode === 13 || e.key === "Enter") {
             // console.log("Prevented default.")
             e.preventDefault()
@@ -53,23 +53,23 @@ window.addEventListener("load", function () {
     }
 
     //This will add key event listener on all nodes with the class preventEnter.
-    function setupPreventDefaultOnEnterOnNode(node: Node, add: boolean) {
+    function setupEvent(node: Node, add: boolean) {
         if (node instanceof HTMLElement) {
             const el = node as HTMLElement;
 
             //Check if main element contains class
             if (el.classList.contains("prevent-default-on-enter") && add) {
                 // console.log("Adding preventer: " + el.id);
-                el.addEventListener('keydown', preventDefaultOnEnterCallback, false);
+                el.addEventListener('keydown', callback, false);
             } else {
                 // console.log("Removing preventer: " + el.id);
-                el.removeEventListener('keydown', preventDefaultOnEnterCallback, false);
+                el.removeEventListener('keydown', callback, false);
             }
         }
     }
 
     //This will add key event listener on all nodes with the class preventEnter.
-    function setupPreventDefaultOnEnterOnElements(nodelist: NodeList | HTMLCollectionOf<Element>, add: boolean) {
+    function setupEventsOnElements(nodelist: NodeList | HTMLCollectionOf<Element>, add: boolean) {
         for (let i = 0; i < nodelist.length; i++) {
             const node = nodelist[i];
 
@@ -78,12 +78,12 @@ window.addEventListener("load", function () {
                 const el = node as HTMLElement;
 
                 //Check if main element contains class
-                setupPreventDefaultOnEnterOnNode(node, add);
+                setupEvent(node, add);
 
                 //Check if any child nodes contains class
                 const elements = el.getElementsByClassName("prevent-default-on-enter");
                 for (let i = 0; i < elements.length; i++) {
-                    setupPreventDefaultOnEnterOnNode(elements[i], add);
+                    setupEvent(elements[i], add);
                 }
             }
         }
@@ -91,38 +91,37 @@ window.addEventListener("load", function () {
 
     // Create an observer instance linked to the callback function
     // Read more: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-    const preventDefaultOnEnterObserver = new MutationObserver(
+    const observer = new MutationObserver(
         function (mutations: MutationRecord[]) {
             for (const mutation of mutations) {
                 if (mutation.type === 'childList') {
 
                     // A child node has been added or removed.
-                    setupPreventDefaultOnEnterOnElements(mutation.addedNodes, true);
+                    setupEventsOnElements(mutation.addedNodes, true);
                 }
                 else if (mutation.type === 'attributes') {
 
                     if (mutation.attributeName === "class") {
-                        console.log('The ' + mutation.attributeName + ' attribute was modified on' + (mutation.target as HTMLElement).id);
+                        // console.log('The ' + mutation.attributeName + ' attribute was modified on' + (mutation.target as HTMLElement).id);
 
                         //class was modified on this node. Remove previous event handler (if any).
-                        setupPreventDefaultOnEnterOnNode(mutation.target, false);
+                        setupEvent(mutation.target, false);
                         //And add event handler if class i specified.
-                        setupPreventDefaultOnEnterOnNode(mutation.target, true);
+                        setupEvent(mutation.target, true);
                     }
-
                 }
             }
         }
     );
 
-    // Only observe changes in nodes in the whole tree, but do not observe attributes.
-    const preventDefaultOnEnterObserverConfig = { subtree: true, childList: true, attributes: true };
+    // Configure observer
+    const observerConfig = { subtree: true, childList: true, attributes: true, attributeFilter: ["class"] };
 
     // Start observing the target node for configured mutations
-    preventDefaultOnEnterObserver.observe(document, preventDefaultOnEnterObserverConfig);
+    observer.observe(document, observerConfig);
 
     //Also check all elements when loaded.
-    setupPreventDefaultOnEnterOnElements(document.getElementsByClassName("prevent-default-on-enter"), true);
+    setupEventsOnElements(document.getElementsByClassName("prevent-default-on-enter"), true);
 });
 
 {% endhighlight %}
@@ -134,7 +133,7 @@ Or, if you prefer pure JavaScript instead:
 
 window.addEventListener("load", function () {
     //This will be called when a key is pressed
-    var preventDefaultOnEnterCallback = function (e) {
+    var callback = function (e) {
         if (e.keyCode === 13 || e.key === "Enter") {
             // console.log("Prevented default.")
             e.preventDefault();
@@ -142,70 +141,70 @@ window.addEventListener("load", function () {
         }
     };
     //This will add key event listener on all nodes with the class preventEnter.
-    function setupPreventDefaultOnEnterOnNode(node, add) {
+    function setupEvent(node, add) {
         if (node instanceof HTMLElement) {
             var el = node;
             //Check if main element contains class
             if (el.classList.contains("prevent-default-on-enter") && add) {
                 // console.log("Adding preventer: " + el.id);
-                el.addEventListener('keydown', preventDefaultOnEnterCallback, false);
+                el.addEventListener('keydown', callback, false);
             }
             else {
                 // console.log("Removing preventer: " + el.id);
-                el.removeEventListener('keydown', preventDefaultOnEnterCallback, false);
+                el.removeEventListener('keydown', callback, false);
             }
         }
     }
     //This will add key event listener on all nodes with the class preventEnter.
-    function setupPreventDefaultOnEnterOnElements(nodelist, add) {
+    function setupEventsOnElements(nodelist, add) {
         for (var i = 0; i < nodelist.length; i++) {
             var node = nodelist[i];
             if (node instanceof HTMLElement) {
                 var el = node;
                 //Check if main element contains class
-                setupPreventDefaultOnEnterOnNode(node, add);
+                setupEvent(node, add);
                 //Check if any child nodes contains class
                 var elements = el.getElementsByClassName("prevent-default-on-enter");
                 for (var i_1 = 0; i_1 < elements.length; i_1++) {
-                    setupPreventDefaultOnEnterOnNode(elements[i_1], add);
+                    setupEvent(elements[i_1], add);
                 }
             }
         }
     }
     // Create an observer instance linked to the callback function
     // Read more: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-    var preventDefaultOnEnterObserver = new MutationObserver(function (mutations) {
+    var observer = new MutationObserver(function (mutations) {
         for (var _i = 0, mutations_1 = mutations; _i < mutations_1.length; _i++) {
             var mutation = mutations_1[_i];
             if (mutation.type === 'childList') {
                 // A child node has been added or removed.
-                setupPreventDefaultOnEnterOnElements(mutation.addedNodes, true);
+                setupEventsOnElements(mutation.addedNodes, true);
             }
             else if (mutation.type === 'attributes') {
                 if (mutation.attributeName === "class") {
-                    console.log('The ' + mutation.attributeName + ' attribute was modified on' + mutation.target.id);
+                    // console.log('The ' + mutation.attributeName + ' attribute was modified on' + (mutation.target as HTMLElement).id);
                     //class was modified on this node. Remove previous event handler (if any).
-                    setupPreventDefaultOnEnterOnNode(mutation.target, false);
+                    setupEvent(mutation.target, false);
                     //And add event handler if class i specified.
-                    setupPreventDefaultOnEnterOnNode(mutation.target, true);
+                    setupEvent(mutation.target, true);
                 }
             }
         }
     });
-    // Only observe changes in nodes in the whole tree, but do not observe attributes.
-    var preventDefaultOnEnterObserverConfig = { subtree: true, childList: true, attributes: true };
+    // Configure observer
+    var observerConfig = { subtree: true, childList: true, attributes: true, attributeFilter: ["class"] };
     // Start observing the target node for configured mutations
-    preventDefaultOnEnterObserver.observe(document, preventDefaultOnEnterObserverConfig);
+    observer.observe(document, observerConfig);
     //Also check all elements when loaded.
-    setupPreventDefaultOnEnterOnElements(document.getElementsByClassName("prevent-default-on-enter"), true);
+    setupEventsOnElements(document.getElementsByClassName("prevent-default-on-enter"), true);
 });
 
 {% endhighlight %}
 
 I think this should work in all modern browsers. I have done some testing in IE11 that worked well.
 
-
 ## Example
+
 Below is a simple page I used for testing build in a Blazor application. You
 need to add the JavaScript code either on the page or reference via a
 JavaScript-file. The example page both adds nodes and changes attributes on
@@ -259,9 +258,8 @@ fields:
 
 {% endhighlight %}
 
-
-
 ## Summary
+
 I am happy with this solution and I learned a lot while a was developing it.
 
 Originally, I run into this problem working with a Razor component in an ASP.NET
