@@ -201,7 +201,8 @@ scenarios, this is a better solution.
 {% include codeheader.html lang="Macro code" %}
 {% highlight visualbasic %}
 Sub PasteAsTextAndFormatTable()
-    ActiveSheet.PasteSpecial Format:="Unicode Text", Link:=False, DisplayAsIcon:=False
+    ActiveSheet.PasteSpecial Format:="Unicode-text", Link:=False, _
+        DisplayAsIcon:=False
 
     ' Replace all cells there the content is exactly "NULL" with empty string.
     ' This for fixing content copied from SQL Server Manager Studio.
