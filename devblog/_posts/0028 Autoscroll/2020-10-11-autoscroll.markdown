@@ -193,4 +193,4 @@ I like this pattern a lot. You only need to make sure it has run once after the
 page has been loaded, and then it will take care of everything after that. The
 code plays nicely with Blazor. In fact, I used this code in the project I created
 for me previous post
-[Detect and warn multiple editors]({% post_url /0027 Detect and warn multiple editors/2020-10-04-detect-and-warn-mulitple-editors %}).
+[Detect and warn multiple editors]({% post_url /0027 Detect and warn multiple editors/2020-10-04-detect-and-warn-multiple-editors %}).
