@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'jekyll', '~> 4.1.1'
+gem 'jekyll', '~> 4.2.0'
 gem 'minima', :github => 'jekyll/minima', :ref => '49f6dce'
 gem "jekyll-paginate", "1.1.0"
 
