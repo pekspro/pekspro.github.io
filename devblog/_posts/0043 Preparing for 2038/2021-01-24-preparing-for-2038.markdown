@@ -1,0 +1,82 @@
+---
+layout: post
+title:  "Preparing for 2038"
+date:   2021-01-24 01:00:00 +0200
+categories: [General] 
+---
+
+When I am writing this, it is 17 years until the 19:th of January 2038. This is
+the date when systems will run out of seconds.
+
+## The problem
+
+The 1:st of January 1970 the first second happened - at least
+according in the digital world. From this date many systems have counted the
+number of seconds that has passed. This has become a
+[de factor standard](https://en.wikipedia.org/wiki/Year_2038_problem) for time
+measurement. 19:th of January 2038 at 03:14 the counting will reach
+2<sup>31</sup> seconds. And then some systems will time travel back to 13:th of
+December 1901. It will be a strange day for systems measuring time in 32 bits.
+
+## The solution
+
+The simplest solution to this problem is to use 64 bites instead. In most
+servers and ordinary computers this is already the case. But this not enough.
+
+In embedded systems, that I have worked a lot with, things are different. When
+you are working with this you are lucky if you get to work with a mature
+operating system like Linux, on other cases you have no operating system at all.
+
+Embedded system is normally quite small and do not use much memory, at least not
+compared with a computer. So, using a 32-bit operating system is not uncommon.
+These 32 bits is referencing to how much memory that could be addressed (4 GB
+that is), the operating system could still use 64-bits for time measurement.
+This is not a contradiction. So, you may think that 32-bit Linux has supported
+this for a long time. Not really.
+
+Full support for this wasn’t released until
+[version 5.6](https://lkml.org/lkml/2020/1/29/355),
+and this wasn't released until
+[March 2020](https://en.wikipedia.org/wiki/Linux_kernel_version_history), about a
+year ago when I am writing this.
+
+When a new Linux version is released it takes plenty of time before this affects
+embedded system. In my experience when you have an operating system that works
+you rarely change it. You just change the software you build on top of it.
+Updated operating systems are often only used when the hardware is changed.
+
+Problems could also occur before 2038. For instance, if you have something that
+should expire 2040, maybe an SSL certificate or some kind of permission, it
+might already be considered to be expired. It all depends how it is implemented.
+
+But there are more things that could fail. Protocols, like the Network Time
+Protocol (NTP), also has problems that starts already 2036 (at least earlier
+versions).
+
+I think this is a quite big problem. Many of the embedded systems that I have
+working with has been used more than 15 years after they were originally
+designed. These have been part of large and expensive units that is expected to
+have a long lifetime. And I am guessing that it is such units, like trains,
+power plants, satellites and other things that will has the most problems with
+this. Actually, NASA lost connection with the
+[space craft Deep Impact](https://en.wikipedia.org/wiki/Deep_Impact_(spacecraft)#Contact_lost_and_end_of_mission)
+probably due a similar problem.
+
+If you are developing software, at least have this in mind. When you are writing
+unit tests that involves dates, try to use date on both sides of 2038. Doing
+some smoke test every year with a date far in the future would also be greater.
+Even if you are not able to solve all problems, just knowing that they exist is
+very valuable.
+
+If you are working with embedded systems and use to work with 32 bit timestamps
+you may be able to tackle this problem by using an offset. When the actual time
+is 2030, you may internally say that the year 2000. An offset of 28 years might
+be good, because then both leap years and weekdays will be inline.
+
+## Summary
+
+It might be easy to think that this is not important now, but I must disagree.
+You really should to this into consideration, especially when you are working
+with a new system where it is cheap to resolve this. Patching this afterwards is
+complicated and expensive. And as I said earlier, things could go wrong before
+2038 so the following years will be interesting.
