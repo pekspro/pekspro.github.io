@@ -31,12 +31,16 @@ unexpected happen) you should have a backup. Also, be aware that this will take
 a while to run. Do not be surprised it takes more than one hour on a large
 project.
 
+Do not be surprised if you can not remove every reference that is suggested. Due
+dependencies you may be able to remove one suggested reference but not two. The
+script gives you suggestions about references that may be able to be removed. In
+the end it is up to you to decide what to do with this.
+
 Before you run the script, you need to change the path to directory that
 contains all projects that should be checked.
 
 {% include codeheader.html lang="PowerShell" %}
 {% highlight powershell %}
-
 
 function Get-PackageReferences {
     param($FileName, $IncludeReferences, $IncludeChildReferences)
