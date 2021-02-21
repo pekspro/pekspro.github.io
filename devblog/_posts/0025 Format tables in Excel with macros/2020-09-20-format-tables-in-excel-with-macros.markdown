@@ -201,6 +201,9 @@ scenarios, this is a better solution.
 {% include codeheader.html lang="Macro code" %}
 {% highlight visualbasic %}
 Sub PasteAsTextAndFormatTable()
+    ' The format us "Unicode Text" if you run Excel in English.
+    ' It might have another name in other languages. In Swedish it
+    ' is "Unicode-text"
     ActiveSheet.PasteSpecial Format:="Unicode-text", Link:=False, _
         DisplayAsIcon:=False
 
