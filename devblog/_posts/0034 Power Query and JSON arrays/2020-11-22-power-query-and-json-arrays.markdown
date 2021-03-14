@@ -2,7 +2,7 @@
 layout: post
 title:  "Power Query and JSON arrays"
 date:   2020-11-22 01:00:00 +0200
-categories: [Excel] 
+categories: [Excel, Power BI] 
 ---
 
 When you are working with JSON arrays in Power Query it is not always obvious

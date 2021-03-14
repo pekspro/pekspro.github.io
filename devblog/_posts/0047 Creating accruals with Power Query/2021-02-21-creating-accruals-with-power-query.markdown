@@ -2,7 +2,7 @@
 layout: post
 title:  "Creating accruals with Power Query"
 date:   2021-02-21 01:00:00 +0200
-categories: [Excel] 
+categories: [Excel, Power BI] 
 ---
 
 Let say you have expenses that you want to split into several dates. How do you
