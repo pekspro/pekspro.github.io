@@ -59,6 +59,11 @@ Be aware that since this is a system file you need special permissions to change
 it. You could change the permission on the file or store it somewhere else and
 then copy it with Explorer that then could give you temporary permission.
 
+Also, be aware that after these changes some services may **no longer work
+properly in Azure Portal**. I have noticed problems both with Azure KeyVault and
+Azure AppConfiguration were I got strange error messages in the portal. Other
+services might also be affected.
+
 ## Summary
 
 Clearly, this is neither a perfect solution nor solves every case. But it does
