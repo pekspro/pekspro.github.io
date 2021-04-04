@@ -63,7 +63,12 @@ await _graphServiceClient.Me.Events
     .AddAsync(myevent);
 {% endhighlight %}
 
-Check out [this page for which time zones](https://docs.microsoft.com/en-us/graph/api/resources/datetimetimezone?view=graph-rest-1.0) you could use.
+Check out [this page for which time
+zones](https://docs.microsoft.com/en-us/graph/api/resources/datetimetimezone?view=graph-rest-1.0)
+you could use. In my
+[next post]({% post_url /0053 Get time zone for a user in
+Graph/2021-04-04-get-time-zone-for-a-user-in-graph %}) I show how you could get
+the timezone  from the user's settings instead.
 
 ## Summary
 
