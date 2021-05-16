@@ -5,7 +5,7 @@ date:   2021-05-09 01:00:00 +0200
 categories: [Blazor] 
 ---
 
-There are existing controls in Blazor that makes it to get different types of
+There are existing components in Blazor that makes it to get different types of
 user input, like strings, numbers, and date. But what about time?
 
 ## The problem
@@ -104,22 +104,25 @@ else
 }
 {% endhighlight %}
 
-Note that it has support for using native input time control it you prefer to use that (but I do not recommend this). The data type is integer, the number of seconds counted from midnight.
-Here is some test code you could use to test the control:
+Note that it has support for using native input time component it you prefer to
+use that (but I do not recommend this). The data type is integer, the number of
+seconds counted from midnight. Here is some test code you could use to test the
+component:
 
 {% include codeheader.html lang="Test code" %}
 {% highlight html %}
 @page "/counter"
 
-<h1>Selected time: @(new DateTime(2000, 1, 1).AddSeconds(SecondOfDay).ToString("HH:mm"))</h1>
+<h1>Time picker</h1>
+<p>Selected time: <strong>@(new DateTime(2000, 1, 1).AddSeconds(SecondOfDay).ToString("HH:mm"))</strong></p>
 
 <EditForm Model="string.Empty">
     <p>
-        <TimePickerComponent @bind-SecondOfDay="SecondOfDay" UseNativeTimePicker="@UseNative" IsDisabled="IsDisabled" />
+        <Pekspro.Blazor.TimePicker.TimePickerComponent @bind-SecondOfDay="SecondOfDay" UseNativeTimePicker="@UseNative" IsDisabled="IsDisabled" />
     </p>
 
     <p>
-        <InputCheckbox @bind-Value="UseNative" id="usenative" /> <label for="usenative">Use native</label>
+        <InputCheckbox @bind-Value="UseNative" id="usenative" /> <label for="usenative">Use native control (not supported by all browsers)</label>
         <br />
 
         <InputCheckbox @bind-Value="IsDisabled" id="isdisable" /> <label for="isdisable">Disabled</label>
@@ -143,9 +146,12 @@ And this is with the native controls:
 
 ![Time picker - native controls]({{site.baseurl}}/assets/images/0054/timepicker-native.png "Time picker - native controls")
 
-
 ## Summary
 
-This is a basic control. If formats the time as a 24-hour clock and it does not
-let you select the second on the time. But all these are easy to tweaks if you
-need to.
+This is a basic component. It formats the time as a 24-hour clock and it does
+not let you select the second on the time. But all these are easy to tweaks if
+you need to.
+
+In my [next post]({% post_url /0055 Date time picker for
+blazor/2021-05-16-date-time-picker-for-blazor %}) I show you could create a date
+and time picker component based on this time picker component.
