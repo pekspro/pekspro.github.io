@@ -1,0 +1,1273 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://pekspro.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://pekspro.github.io/" rel="alternate" type="text/html" /><updated>2021-08-22T15:07:40+02:00</updated><id>https://pekspro.github.io/feed.xml</id><title type="html">PEK’s developer blog</title><subtitle>Interesting problems with interesting solutions.</subtitle><author><name>PEK</name><email></email></author><entry><title type="html">Batch upgrade to .NET 6</title><link href="https://pekspro.github.io/posts/batch-upgrade-to-net-6" rel="alternate" type="text/html" title="Batch upgrade to .NET 6" /><published>2021-08-22T01:00:00+02:00</published><updated>2021-08-22T01:00:00+02:00</updated><id>https://pekspro.github.io/posts/batch-upgrade-to-net-6</id><content type="html" xml:base="https://pekspro.github.io/posts/batch-upgrade-to-net-6">&lt;p&gt;.NET 6 preview has been out for a while, and I decided to give it a go. New
+compiler warnings have been introduced and I wanted to find and fix this early.
+But I also wanted to easily go back to .NET 5.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-problem&quot;&gt;The problem&lt;/h2&gt;
+
+&lt;p&gt;There is &lt;a href=&quot;https://docs.microsoft.com/en-us/aspnet/core/migration/50-to-60&quot;&gt;good
+documentation&lt;/a&gt;
+how to update to .NET 6. Most of the work is in the project files. Changing
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;TargetFramework&lt;/code&gt; is easy. But finding and upgrading all nuget packages
+references is a lot harder. And if you have a large solution with multiple
+projects, you could quite some time just on this step. Visual Studio could help
+you update all NuGet packages in a solution. But it is a bit slow. Also, there
+is no easy way to roll back.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-solution&quot;&gt;The solution&lt;/h2&gt;
+
+&lt;p&gt;My solution was to create a PowerShell script to that finds all project files
+and then makes all necessary changes. And them make another script that does
+this in reverse. They are available here:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://gist.github.com/pekspro/24fca2eb1cad8c30333a910b163a3f6a&quot;&gt;https://gist.github.com/pekspro/24fca2eb1cad8c30333a910b163a3f6a&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;Creating scripts like this is always fun. I think it covers most scenarios, but
+you might need to tweak it a bit to fit your solution.&lt;/p&gt;
+
+&lt;p&gt;The scripts mostly contain of find-and-replace code. Creating this code was a
+bit tricky. How it was done in detail you find in the comments of the scripts.
+Basically I look up all &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Microsoft.*&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;System.*&lt;/code&gt; packages on NuGet.org and
+then filter out which are relevant.&lt;/p&gt;</content><author><name>PEK</name></author><category term=".NET. PowerShell" /><summary type="html">.NET 6 preview has been out for a while, and I decided to give it a go. New compiler warnings have been introduced and I wanted to find and fix this early. But I also wanted to easily go back to .NET 5.</summary></entry><entry><title type="html">Redirect with Azure CDN</title><link href="https://pekspro.github.io/posts/redirect-with-azure-cdn" rel="alternate" type="text/html" title="Redirect with Azure CDN" /><published>2021-06-27T01:00:00+02:00</published><updated>2021-06-27T01:00:00+02:00</updated><id>https://pekspro.github.io/posts/redirect-with-azure-cdn</id><content type="html" xml:base="https://pekspro.github.io/posts/redirect-with-azure-cdn">&lt;p&gt;A while ago I needed to make a redirect from www.oldcomain.com to
+www.newdomain.com. This needed to be done with the &lt;a href=&quot;https://en.wikipedia.org/wiki/HTTP_301&quot;&gt;HTTP status 301 – moved
+permanently&lt;/a&gt;. I could not do this with
+the service that was hosting the new address. But I found a cheap solution in
+Azure CDN.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-problem&quot;&gt;The problem&lt;/h2&gt;
+
+&lt;p&gt;Let say you want to redirect a domain. Maybe one of these scenarios:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Old domain&lt;/th&gt;
+      &lt;th&gt;New domain&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;www.olddomain.com&lt;/td&gt;
+      &lt;td&gt;www.domain.com&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;www.newdomain.com&lt;/td&gt;
+      &lt;td&gt;domain.com&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;domain.uk&lt;/td&gt;
+      &lt;td&gt;domain.co.uk&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;In many cases you could solve this on the service that is hosting the server.
+But what if that is not an option?&lt;/p&gt;
+
+&lt;h2 id=&quot;the-solution&quot;&gt;The solution&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://azure.microsoft.com/sv-se/services/cdn/&quot;&gt;Azure CDN&lt;/a&gt; is a content
+delivery network you could use to make sure you have content closer to your
+users. This could reduce bandwidth on your services and reduce loading time for
+your users.&lt;/p&gt;
+
+&lt;p&gt;But it also has support for redirecting request, and this is what we will use.
+Once we have setup everything this will happen when the old domain is requested
+in a browser:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The browser will use DNS to get the address to server. There will be CNAME
+entry here that will redirect to browser to an Azure CDN service.&lt;/li&gt;
+  &lt;li&gt;The Azure CDN service will have a rule to redirect the browser to the new
+domain.&lt;/li&gt;
+  &lt;li&gt;The browser will be redirected to the new domain address.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;create-a-cdn-service&quot;&gt;Create a CDN service&lt;/h3&gt;
+
+&lt;p&gt;In Azure, search for CDN, and select to create the service:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0056/create-new.png&quot; alt=&quot;Create CDN Service&quot; title=&quot;Create CDN Service&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Setup up the service. Give it an appropriate name. To save some time, select
+&lt;strong&gt;Create a new CDN endpoint&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0056/create-setup.png&quot; alt=&quot;Setup CDN Service&quot; title=&quot;Setup CDN Service&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;In the endpoint settings, you first need to setup which domain name in should
+have in Azure. It must end with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;azureedge.net&lt;/code&gt;. Later we will hook up your
+domain to this.&lt;/p&gt;
+
+&lt;p&gt;You also need to setup your origin type. In a normal CDN scenario, this is where
+Azure will fetch data and distribute to your users. But we will just use the
+redirect service, so this does not matter. To make is simple, select &lt;strong&gt;Custom
+origin&lt;/strong&gt; and enter some hostname.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0056/create-setup-endpoints.png&quot; alt=&quot;Setup endpoints&quot; title=&quot;Setup endpoints&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;When this is completed, create the service.&lt;/p&gt;
+
+&lt;h3 id=&quot;test-the-service&quot;&gt;Test the service&lt;/h3&gt;
+
+&lt;p&gt;Once the service is created, you should be able to test it. If you enter the
+domain you wanted to use in a browser, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;redirectme.azureedge.net&lt;/code&gt; in my example,
+you should see the origin loaded (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;example.com&lt;/code&gt;) but with the domain you
+entered. Note, it may take several minutes (10 – 30 minutes) before this works.&lt;/p&gt;
+
+&lt;h3 id=&quot;configure-redirect&quot;&gt;Configure redirect&lt;/h3&gt;
+
+&lt;p&gt;Next step is to configure the redirect. In the CDN service you have created you
+should see the endpoint you have created:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0056/setup-rules-select-endpoint.png&quot; alt=&quot;Select endpoint&quot; title=&quot;Select endpoint&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Select the endpoint in the list. Once it loaded, scroll down to the settings and
+select &lt;strong&gt;Rules engine&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0056/setup-rules-select-rules.png&quot; alt=&quot;Select Rules engine&quot; title=&quot;Select Rules engine&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The rules engine you could create several complex rules. The only thing we will
+do is to select a redirect action in the global rule:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0056/setup-rules-add-action.png&quot; alt=&quot;Add action&quot; title=&quot;Add action&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Select type to &lt;strong&gt;Moved (301)&lt;/strong&gt; and in the hostname enter to which domain the
+user should be redirected. Once you are done, click on &lt;strong&gt;Save&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0056/setup-rules-configure-action
+.png&quot; alt=&quot;Configure action&quot; title=&quot;Configure action&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Now, you could verify that you now are being redirect to the new domain by
+testing the domain in a browser (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;redirectme.azureedge.net&lt;/code&gt; in my example). The
+domain that you have entered should be replaced. Again, note that it could take
+several minutes (10 – 30 minutes), before this works.&lt;/p&gt;
+
+&lt;h4 id=&quot;configure-domains&quot;&gt;Configure domains&lt;/h4&gt;
+
+&lt;p&gt;Next step is to configure your domains. I will use the DNS services in these
+samples, but it should not be hard to transfer this to other services. You will
+need to make some different settings, depending on if it is an apex/root domain
+(like example.com) or if it is an subdomain (like &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;www.example.com&lt;/code&gt;).&lt;/p&gt;
+
+&lt;h4 id=&quot;configure-apex-domain&quot;&gt;Configure apex domain&lt;/h4&gt;
+
+&lt;p&gt;If you have an apex/root domain, configure it to be an alias and set it up to
+use your Azure CDN resource.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0056/domain-setup-apex.png&quot; alt=&quot;Configure apex domain&quot; title=&quot;Configure apex domain&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;configure-subdomain&quot;&gt;Configure subdomain&lt;/h3&gt;
+
+&lt;p&gt;If you have a subdomain, then type should be a &lt;strong&gt;CNAME&lt;/strong&gt; and the alias should be
+domain to the CDN resource.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0056/domain-setup-subdomain.png&quot; alt=&quot;Configure subdomain&quot; title=&quot;Configure subdomain&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;configure-cdn-to-use-custom-domain&quot;&gt;Configure CDN to use custom domain&lt;/h3&gt;
+
+&lt;p&gt;Next step is to configure the CDN to use the custom domain. In the settings
+section, select &lt;strong&gt;Custom domain&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0056/domain-setup-cdn-select-custom-domain.png&quot; alt=&quot;Select Custom domain&quot; title=&quot;Select Custom domain&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Add the domain the end user should use:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0056/domain-setup-cdn-configure-custom-domain.png&quot; alt=&quot;Configure Custom domain&quot; title=&quot;Configure Custom domain&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Again, after you added the domain, it could take several minutes before. But
+when it works you should be able to verify that redirect now works in your
+custom domain in a browser – but only when http is used!&lt;/p&gt;
+
+&lt;h3 id=&quot;add-support-for-https&quot;&gt;Add support for https&lt;/h3&gt;
+
+&lt;p&gt;Must browser now warn you if you are not using https, so it is better to add
+support for this. In the custom domain list, select the domain you just added.
+Then enable &lt;strong&gt;Custom domain HTTPS&lt;/strong&gt;. If you do not want to handle the
+certificate yourself select &lt;strong&gt;CDN managed&lt;/strong&gt;. Note that this only works for
+subdomains, you need to use your own certificate for apex domains.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0056/cdn-enable-https.png&quot; alt=&quot;Enable HTTPS&quot; title=&quot;Enable HTTPS&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Once you are done, select &lt;strong&gt;Save&lt;/strong&gt;. Again, it may take some time before
+everything was applied.&lt;/p&gt;
+
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;There were some steps to solve this, I hope it is not too hard to follow. It is
+quite logical once you have done it. What is great with this solution is that is
+close to free.&lt;/p&gt;</content><author><name>PEK</name></author><category term="Azure" /><summary type="html">A while ago I needed to make a redirect from www.oldcomain.com to www.newdomain.com. This needed to be done with the HTTP status 301 – moved permanently. I could not do this with the service that was hosting the new address. But I found a cheap solution in Azure CDN.</summary></entry><entry><title type="html">Date time picker for Blazor</title><link href="https://pekspro.github.io/posts/date-time-picker-for-blazor" rel="alternate" type="text/html" title="Date time picker for Blazor" /><published>2021-05-16T01:00:00+02:00</published><updated>2021-05-16T01:00:00+02:00</updated><id>https://pekspro.github.io/posts/date-time-picker-for-blazor</id><content type="html" xml:base="https://pekspro.github.io/posts/date-time-picker-for-blazor">&lt;p&gt;In my &lt;a href=&quot;/posts/time-picker-for-blazor&quot;&gt;previous post&lt;/a&gt;
+I showed how you could do a time picker component in Blazor. This time I will
+extend this so you could select date and time with a single component.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-problem&quot;&gt;The problem&lt;/h2&gt;
+
+&lt;p&gt;Just like time, there is no built-in component in Blazor for selecting date and
+time and the same time. There is however support for selecting date, and I am
+using that in the solution below.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-solution&quot;&gt;The solution&lt;/h2&gt;
+
+&lt;p&gt;My solution is this little Blazor component below.&lt;/p&gt;
+
+&lt;div class=&quot;codeHeader&quot; data-bi-name=&quot;code-header&quot;&gt;
+    &lt;span class=&quot;language&quot;&gt; Date time picker component &lt;/span&gt;
+    &lt;button type=&quot;button&quot; class=&quot;action is-relative copy-code-button&quot; aria-label=&quot;Copy code&quot;&gt;
+        &lt;span style=&quot;font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;&quot;&gt;
+            📄&lt;span style=&quot;position: absolute; top: .25em; left: .25em&quot;&gt;📄&lt;/span&gt;
+        &lt;/span&gt;
+        &lt;span style=&quot;pointer-events: none;&quot;&gt;Copy&lt;/span&gt;
+        &lt;div class=&quot;successful-copy-alert is-transparent&quot; style=&quot;pointer-events: none;&quot; aria-hidden=&quot;true&quot;&gt;
+            &amp;#10003;
+        &lt;/div&gt;
+    &lt;/button&gt; 
+&lt;/div&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;@if (!UseNative)
+{
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;date&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-control w-auto d-inline&quot;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;bind-value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@Date&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;disabled=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@IsDisabled&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;TimePickerComponent&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;bind-SecondOfDay=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;SecondOfDay&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;UseNativeTimePicker=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@UseNative&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;IsDisabled=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;IsDisabled&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+}
+else
+{
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;datetime-local&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-control w-auto d-inline&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@(DateAndTime.ToString(&quot;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;yyyy-MM-ddTHH:mm&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&quot;))&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;disabled=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@IsDisabled&quot;&lt;/span&gt;
+        &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;onchange=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;async (e) =&amp;gt;
+        {
+            DateAndTime = DateTime.Parse(e.Value.ToString());
+            await NotifyChanged();
+        }&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+}
+
+@code {
+
+    [Parameter]
+    public DateTime DateAndTime { get; set; }
+
+    [Parameter]
+    public EventCallback&lt;span class=&quot;nt&quot;&gt;&amp;lt;DateTime&amp;gt;&lt;/span&gt; DateAndTimeChanged { get; set; }
+
+    [Parameter]
+    public bool IsDisabled { get; set; }
+
+    [Parameter]
+    public bool UseNative { get; set; }
+
+    private DateTime Date
+    {
+        get
+        {
+            return DateAndTime.Date;
+        }
+        set
+        {
+            DateAndTime = value.AddSeconds(SecondOfDay);
+            _ = NotifyChanged();
+        }
+    }
+
+    private int SecondOfDay
+    {
+        get
+        {
+            return DateAndTime.Hour * 3600 + DateAndTime.Minute * 60;
+        }
+        set
+        {
+            DateAndTime = DateAndTime.Date.AddSeconds(value);
+            _ = NotifyChanged();
+        }
+    }
+
+    private Task NotifyChanged()
+    {
+        return DateAndTimeChanged.InvokeAsync(DateAndTime);
+    }
+}&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Note that this component is dependent on the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;TimePickerComponent&lt;/code&gt; I showed in
+my &lt;a href=&quot;/posts/time-picker-for-blazor&quot;&gt;previous post&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Here is some test code you could use to test the component:&lt;/p&gt;
+
+&lt;div class=&quot;codeHeader&quot; data-bi-name=&quot;code-header&quot;&gt;
+    &lt;span class=&quot;language&quot;&gt; Test code &lt;/span&gt;
+    &lt;button type=&quot;button&quot; class=&quot;action is-relative copy-code-button&quot; aria-label=&quot;Copy code&quot;&gt;
+        &lt;span style=&quot;font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;&quot;&gt;
+            📄&lt;span style=&quot;position: absolute; top: .25em; left: .25em&quot;&gt;📄&lt;/span&gt;
+        &lt;/span&gt;
+        &lt;span style=&quot;pointer-events: none;&quot;&gt;Copy&lt;/span&gt;
+        &lt;div class=&quot;successful-copy-alert is-transparent&quot; style=&quot;pointer-events: none;&quot; aria-hidden=&quot;true&quot;&gt;
+            &amp;#10003;
+        &lt;/div&gt;
+    &lt;/button&gt; 
+&lt;/div&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;@page &quot;/counter&quot;
+
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;h1&amp;gt;&lt;/span&gt;Date time picker&lt;span class=&quot;nt&quot;&gt;&amp;lt;/h1&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;p&amp;gt;&lt;/span&gt;Selected date and time: &lt;span class=&quot;nt&quot;&gt;&amp;lt;strong&amp;gt;&lt;/span&gt;@SelectedDateTime.ToString(&quot;yyyy-MM-dd HH:mm&quot;)&lt;span class=&quot;nt&quot;&gt;&amp;lt;/strong&amp;gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;EditForm&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Model=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;string.Empty&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;p&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;Pekspro.Blazor.TimePicker.DateTimePickerComponent&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;bind-DateAndTime=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;SelectedDateTime&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;UseNative=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@UseNative&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;IsDisabled=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;IsDisabled&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;p&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;InputCheckbox&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;bind-Value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;UseNative&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;usenative&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;&amp;lt;label&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;for=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;usenative&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;Use native control (not supported by all browsers)&lt;span class=&quot;nt&quot;&gt;&amp;lt;/label&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;br&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;InputCheckbox&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;bind-Value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;IsDisabled&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;isdisable&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;&amp;lt;label&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;for=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;isdisable&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;Disabled&lt;span class=&quot;nt&quot;&gt;&amp;lt;/label&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/EditForm&amp;gt;&lt;/span&gt;
+
+@code {
+    private DateTime SelectedDateTime = new DateTime(2038, 1, 20, 10, 20, 30);
+
+    public bool IsDisabled { get; set; }
+
+    public bool UseNative { get; set; }
+}&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;With the default controls it looks like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0055/datetimepicker-original.png&quot; alt=&quot;Date time picker - original controls&quot; title=&quot;Date time picker - original controls&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;And this is with the native controls:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0055/datetimepicker-native.png&quot; alt=&quot;Date time picker - native controls&quot; title=&quot;Date time picker - native controls&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;Yet again this is a basic component. But I do think it is useful. I have even
+published a demo project in a &lt;a href=&quot;https://github.com/pekspro/BlazorTimePicker&quot;&gt;GitHub
+repository&lt;/a&gt;.&lt;/p&gt;</content><author><name>PEK</name></author><category term="Blazor" /><summary type="html">In my previous post I showed how you could do a time picker component in Blazor. This time I will extend this so you could select date and time with a single component.</summary></entry><entry><title type="html">Time picker for Blazor</title><link href="https://pekspro.github.io/posts/time-picker-for-blazor" rel="alternate" type="text/html" title="Time picker for Blazor" /><published>2021-05-09T01:00:00+02:00</published><updated>2021-05-09T01:00:00+02:00</updated><id>https://pekspro.github.io/posts/time-picker-for-blazor</id><content type="html" xml:base="https://pekspro.github.io/posts/time-picker-for-blazor">&lt;p&gt;There are existing components in Blazor that makes it to get different types of
+user input, like strings, numbers, and date. But what about time?&lt;/p&gt;
+
+&lt;h2 id=&quot;the-problem&quot;&gt;The problem&lt;/h2&gt;
+
+&lt;p&gt;There is support for just time in HTML, but it is not supported by all browsers.
+And it does not automatically map to a .NET type like DateTime or integer.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-solution&quot;&gt;The solution&lt;/h2&gt;
+
+&lt;p&gt;My solution was to create this little Blazor component below.&lt;/p&gt;
+
+&lt;div class=&quot;codeHeader&quot; data-bi-name=&quot;code-header&quot;&gt;
+    &lt;span class=&quot;language&quot;&gt; Time picker component &lt;/span&gt;
+    &lt;button type=&quot;button&quot; class=&quot;action is-relative copy-code-button&quot; aria-label=&quot;Copy code&quot;&gt;
+        &lt;span style=&quot;font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;&quot;&gt;
+            📄&lt;span style=&quot;position: absolute; top: .25em; left: .25em&quot;&gt;📄&lt;/span&gt;
+        &lt;/span&gt;
+        &lt;span style=&quot;pointer-events: none;&quot;&gt;Copy&lt;/span&gt;
+        &lt;div class=&quot;successful-copy-alert is-transparent&quot; style=&quot;pointer-events: none;&quot; aria-hidden=&quot;true&quot;&gt;
+            &amp;#10003;
+        &lt;/div&gt;
+    &lt;/button&gt; 
+&lt;/div&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;@using Microsoft.AspNetCore.Components;
+
+@if (UseNativeTimePicker)
+{
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;time&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@(new DateTime(2000, 1, 1).AddSeconds(SecondOfDay).ToString(&quot;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;HH:mm&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&quot;))&quot;&lt;/span&gt; 
+           &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-control w-auto d-inline&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;disabled=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@IsDisabled&quot;&lt;/span&gt;
+           &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;onchange=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;async (e) =&amp;gt;
+                           {
+                               var time = Convert.ToDateTime(e.Value);
+                               Hour = time.Hour;
+                               Minute = time.Minute;
+
+                               await NotifyChanged();
+                           }&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+}
+else
+{
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;select&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;onchange=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;async (e) =&amp;gt;
+                           {
+                               Hour = Convert.ToInt32(e.Value);
+
+                               await NotifyChanged();
+                           }&quot;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;attributes=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;InputAttributes&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;disabled=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@IsDisabled&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+        @foreach (var hour in Enumerable.Range(0, 24))
+        {
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;option&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@hour&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;selected=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@(hour == Hour)&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;@hour.ToString(&quot;00&quot;)&lt;span class=&quot;nt&quot;&gt;&amp;lt;/option&amp;gt;&lt;/span&gt;
+        }
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/select&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;span&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;pl-0&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;:&lt;span class=&quot;nt&quot;&gt;&amp;lt;/span&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;select&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;onchange=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;async (e) =&amp;gt;
+                           {
+                               Minute = Convert.ToInt32(e.Value);
+                               
+                               await NotifyChanged();
+                           }&quot;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;attributes=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;InputAttributes&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;disabled=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@IsDisabled&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+
+        @foreach (var minute in Enumerable.Range(0, 60))
+        {
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;option&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@minute&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;selected=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@(minute == Minute)&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;@(minute.ToString(&quot;00&quot;))&lt;span class=&quot;nt&quot;&gt;&amp;lt;/option&amp;gt;&lt;/span&gt;
+        }
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/select&amp;gt;&lt;/span&gt;
+}
+
+@code {
+    [Parameter]
+    public int SecondOfDay
+    {
+        get
+        {
+            return Hour * 3600 + Minute * 60;
+        }
+
+        set
+        {
+            Hour = value / 3600;
+            Minute = (value % 3600) / 60;
+        }
+    }
+
+    [Parameter]
+    public EventCallback&lt;span class=&quot;nt&quot;&gt;&amp;lt;int&amp;gt;&lt;/span&gt; SecondOfDayChanged { get; set; }
+
+    [Parameter]
+    public bool UseNativeTimePicker { get; set; }
+
+    [Parameter]
+    public bool IsDisabled { get; set; }
+
+    public int Hour { get; set; }
+
+    public int Minute { get; set; }
+
+    private Task NotifyChanged()
+    {
+        return SecondOfDayChanged.InvokeAsync(SecondOfDay);
+    }
+
+    public Dictionary&lt;span class=&quot;nt&quot;&gt;&amp;lt;string&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;object&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt; InputAttributes { get; set; } =
+        new Dictionary&lt;span class=&quot;nt&quot;&gt;&amp;lt;string&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;object&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;()
+        {
+            { &quot;class&quot;, &quot;form-control w-auto d-inline&quot; }
+        };
+}&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Note that it has support for using native input time component it you prefer to
+use that (but I do not recommend this). The data type is integer, the number of
+seconds counted from midnight. Here is some test code you could use to test the
+component:&lt;/p&gt;
+
+&lt;div class=&quot;codeHeader&quot; data-bi-name=&quot;code-header&quot;&gt;
+    &lt;span class=&quot;language&quot;&gt; Test code &lt;/span&gt;
+    &lt;button type=&quot;button&quot; class=&quot;action is-relative copy-code-button&quot; aria-label=&quot;Copy code&quot;&gt;
+        &lt;span style=&quot;font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;&quot;&gt;
+            📄&lt;span style=&quot;position: absolute; top: .25em; left: .25em&quot;&gt;📄&lt;/span&gt;
+        &lt;/span&gt;
+        &lt;span style=&quot;pointer-events: none;&quot;&gt;Copy&lt;/span&gt;
+        &lt;div class=&quot;successful-copy-alert is-transparent&quot; style=&quot;pointer-events: none;&quot; aria-hidden=&quot;true&quot;&gt;
+            &amp;#10003;
+        &lt;/div&gt;
+    &lt;/button&gt; 
+&lt;/div&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;@page &quot;/counter&quot;
+
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;h1&amp;gt;&lt;/span&gt;Time picker&lt;span class=&quot;nt&quot;&gt;&amp;lt;/h1&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;p&amp;gt;&lt;/span&gt;Selected time: &lt;span class=&quot;nt&quot;&gt;&amp;lt;strong&amp;gt;&lt;/span&gt;@(new DateTime(2000, 1, 1).AddSeconds(SecondOfDay).ToString(&quot;HH:mm&quot;))&lt;span class=&quot;nt&quot;&gt;&amp;lt;/strong&amp;gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;EditForm&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Model=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;string.Empty&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;p&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;Pekspro.Blazor.TimePicker.TimePickerComponent&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;bind-SecondOfDay=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;SecondOfDay&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;UseNativeTimePicker=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@UseNative&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;IsDisabled=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;IsDisabled&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;p&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;InputCheckbox&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;bind-Value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;UseNative&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;usenative&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;&amp;lt;label&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;for=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;usenative&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;Use native control (not supported by all browsers)&lt;span class=&quot;nt&quot;&gt;&amp;lt;/label&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;br&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;InputCheckbox&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;bind-Value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;IsDisabled&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;isdisable&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;&amp;lt;label&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;for=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;isdisable&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;Disabled&lt;span class=&quot;nt&quot;&gt;&amp;lt;/label&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/EditForm&amp;gt;&lt;/span&gt;
+
+@code {
+    private int SecondOfDay = 3 * 3600 + 14 * 60;
+
+    public bool IsDisabled { get; set; }
+
+    public bool UseNative { get; set; }
+}&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;With the default controls it looks like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0054/timepicker-original.png&quot; alt=&quot;Time picker - original controls&quot; title=&quot;Time picker - original controls&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;And this is with the native controls:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0054/timepicker-native.png&quot; alt=&quot;Time picker - native controls&quot; title=&quot;Time picker - native controls&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;This is a basic component. It formats the time as a 24-hour clock and it does
+not let you select the second on the time. But all these are easy to tweaks if
+you need to.&lt;/p&gt;
+
+&lt;p&gt;In my &lt;a href=&quot;/posts/date-time-picker-for-blazor&quot;&gt;next post&lt;/a&gt; I show you could create a date
+and time picker component based on this time picker component.&lt;/p&gt;</content><author><name>PEK</name></author><category term="Blazor" /><summary type="html">There are existing components in Blazor that makes it to get different types of user input, like strings, numbers, and date. But what about time?</summary></entry><entry><title type="html">Get time zone for a user in Graph</title><link href="https://pekspro.github.io/posts/get-time-zone-for-a-user-in-graph" rel="alternate" type="text/html" title="Get time zone for a user in Graph" /><published>2021-04-04T01:00:00+02:00</published><updated>2021-04-04T01:00:00+02:00</updated><id>https://pekspro.github.io/posts/get-time-zone-for-a-user-in-graph</id><content type="html" xml:base="https://pekspro.github.io/posts/get-time-zone-for-a-user-in-graph">&lt;p&gt;With the current SDK for .NET you cannot directly get the time zone for a user.
+But you could work around this.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-problem&quot;&gt;The problem&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;/posts/invite-to-a-meeting&quot;&gt;Last week&lt;/a&gt; I showed how to create an event in Microsoft Graph. That example used a hard
+coded time zone. Of course, it would be better if we could get this directly
+from Graph.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-solution&quot;&gt;The solution&lt;/h2&gt;
+
+&lt;p&gt;To my understanding, there is no time zone setting in the user’s profile.
+Instead, the time zone for the mailbox settings are used to solve this. The URL
+for this setting is
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;https://graph.microsoft.com/v1.0/me/mailboxsettings/timeZone&lt;/code&gt;. Try this
+yourself in the &lt;a href=&quot;https://developer.microsoft.com/en-us/graph/graph-explorer&quot;&gt;Graph
+Explorer&lt;/a&gt;. I get
+this response:&lt;/p&gt;
+
+&lt;div class=&quot;codeHeader&quot; data-bi-name=&quot;code-header&quot;&gt;
+    &lt;span class=&quot;language&quot;&gt; Response &lt;/span&gt;
+    &lt;button type=&quot;button&quot; class=&quot;action is-relative copy-code-button&quot; aria-label=&quot;Copy code&quot;&gt;
+        &lt;span style=&quot;font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;&quot;&gt;
+            📄&lt;span style=&quot;position: absolute; top: .25em; left: .25em&quot;&gt;📄&lt;/span&gt;
+        &lt;/span&gt;
+        &lt;span style=&quot;pointer-events: none;&quot;&gt;Copy&lt;/span&gt;
+        &lt;div class=&quot;successful-copy-alert is-transparent&quot; style=&quot;pointer-events: none;&quot; aria-hidden=&quot;true&quot;&gt;
+            &amp;#10003;
+        &lt;/div&gt;
+    &lt;/button&gt; 
+&lt;/div&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;@odata.context&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;https://graph.microsoft.com/v1.0/....&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;value&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;W. Europe Standard Time&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Read more about this in the
+&lt;a href=&quot;https://docs.microsoft.com/en-us/graph/api/user-get-mailboxsettings?view=graph-rest-1.0&amp;amp;tabs=http&quot;&gt;documentation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately, this value cannot be directly downloaded from the current SDK.
+But it is not that hard to work around this. In the &lt;a href=&quot;https://github.com/microsoftgraph/msgraph-sdk-dotnet/blob/dev/docs/overview.md&quot;&gt;SDK
+documentation&lt;/a&gt;
+there is some information how to create custom request. I am using this in the
+code below.&lt;/p&gt;
+
+&lt;p&gt;Note that the permission &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MailboxSettings.Read&lt;/code&gt; needs to be set both
+appsettings.json and the API permission in your application settings in &lt;a href=&quot;https://aka.ms/appregistrations&quot;&gt;Azure
+App Registrations&lt;/a&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;codeHeader&quot; data-bi-name=&quot;code-header&quot;&gt;
+    &lt;span class=&quot;language&quot;&gt; Code &lt;/span&gt;
+    &lt;button type=&quot;button&quot; class=&quot;action is-relative copy-code-button&quot; aria-label=&quot;Copy code&quot;&gt;
+        &lt;span style=&quot;font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;&quot;&gt;
+            📄&lt;span style=&quot;position: absolute; top: .25em; left: .25em&quot;&gt;📄&lt;/span&gt;
+        &lt;/span&gt;
+        &lt;span style=&quot;pointer-events: none;&quot;&gt;Copy&lt;/span&gt;
+        &lt;div class=&quot;successful-copy-alert is-transparent&quot; style=&quot;pointer-events: none;&quot; aria-hidden=&quot;true&quot;&gt;
+            &amp;#10003;
+        &lt;/div&gt;
+    &lt;/button&gt; 
+&lt;/div&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-csharp&quot; data-lang=&quot;csharp&quot;&gt;&lt;span class=&quot;c1&quot;&gt;// Create the request message and add the content.&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;HttpRequestMessage&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hrm&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;HttpRequestMessage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HttpMethod&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;https://graph.microsoft.com/v1.0/me/mailboxsettings/timeZone&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Authenticate (add access token) our HttpRequestMessage&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;await&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_graphServiceClient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;AuthenticationProvider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;AuthenticateRequestAsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hrm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Send the request and get the response.&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;HttpResponseMessage&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;await&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_graphServiceClient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HttpProvider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;SendAsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hrm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Verify that the status code us OK.&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IsSuccessStatusCode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;ServiceException&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Error&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;Code&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;StatusCode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;ToString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;Message&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;await&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Content&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;ReadAsStringAsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Read the response content.&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;content&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;await&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Content&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;ReadAsStringAsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Create a JsonDocument and get the value.&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;JsonDocument&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jsonDocument&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;JsonDocument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Parse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;content&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;timezone&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jsonDocument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RootElement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;GetProperty&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;value&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;GetString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;This was a bit more complicated than I was hope for. But being able to work
+around limitations in the SDK, with a relatively small amounts of code, is a
+useful skill.&lt;/p&gt;</content><author><name>PEK</name></author><category term=".NET" /><summary type="html">With the current SDK for .NET you cannot directly get the time zone for a user. But you could work around this.</summary></entry><entry><title type="html">Invite to a meeting</title><link href="https://pekspro.github.io/posts/invite-to-a-meeting" rel="alternate" type="text/html" title="Invite to a meeting" /><published>2021-03-28T00:00:00+01:00</published><updated>2021-03-28T00:00:00+01:00</updated><id>https://pekspro.github.io/posts/invite-to-a-meeting</id><content type="html" xml:base="https://pekspro.github.io/posts/invite-to-a-meeting">&lt;p&gt;How to invite someone to a Teams meeting with the Microsoft Graph in .NET.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-problem&quot;&gt;The problem&lt;/h2&gt;
+
+&lt;p&gt;There are some good samples out there that lets you get started with Microsoft
+Graph. This is the one I have used:
+&lt;a href=&quot;https://github.com/Azure-Samples/active-directory-aspnetcore-webapp-openidconnect-v2/tree/master/1-WebApp-OIDC/1-1-MyOrg&quot;&gt;WebApp-OpenIDConnect-DotNet&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Once you got this running (there is some stuff to configure), how do you invite
+someone to a Teams meeting with the SDK?&lt;/p&gt;
+
+&lt;h2 id=&quot;the-solution&quot;&gt;The solution&lt;/h2&gt;
+
+&lt;p&gt;It took a while for me to get this right. First you need to add the permission
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Calendars.ReadWrite OnlineMeetings.ReadWrite&lt;/code&gt; both appsettings.json and the API
+permission in your application settings in &lt;a href=&quot;https://aka.ms/appregistrations&quot;&gt;Azure App
+Registrations&lt;/a&gt;. And then you could use this
+code:&lt;/p&gt;
+
+&lt;div class=&quot;codeHeader&quot; data-bi-name=&quot;code-header&quot;&gt;
+    &lt;span class=&quot;language&quot;&gt; Code &lt;/span&gt;
+    &lt;button type=&quot;button&quot; class=&quot;action is-relative copy-code-button&quot; aria-label=&quot;Copy code&quot;&gt;
+        &lt;span style=&quot;font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;&quot;&gt;
+            📄&lt;span style=&quot;position: absolute; top: .25em; left: .25em&quot;&gt;📄&lt;/span&gt;
+        &lt;/span&gt;
+        &lt;span style=&quot;pointer-events: none;&quot;&gt;Copy&lt;/span&gt;
+        &lt;div class=&quot;successful-copy-alert is-transparent&quot; style=&quot;pointer-events: none;&quot; aria-hidden=&quot;true&quot;&gt;
+            &amp;#10003;
+        &lt;/div&gt;
+    &lt;/button&gt; 
+&lt;/div&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-csharp&quot; data-lang=&quot;csharp&quot;&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;myevent&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Event&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Subject&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Let us celebrate!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Start&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DateTimeTimeZone&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;DateTime&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;2021-03-28T02:00:00&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;TimeZone&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;W. Europe Standard Time&quot;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;End&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DateTimeTimeZone&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;DateTime&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;2021-03-28T03:00:00&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;TimeZone&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;W. Europe Standard Time&quot;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;IsOnlineMeeting&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;OnlineMeetingProvider&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;OnlineMeetingProviderType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;TeamsForBusiness&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Attendees&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Attendee&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;()&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Attendee&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;EmailAddress&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;EmailAddress&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;Address&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;my.friend@example.com&quot;&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Body&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ItemBody&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;ContentType&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BodyType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Html&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;Content&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;We have &amp;lt;b&amp;gt;created a meeting&amp;lt;/b&amp;gt;!&quot;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;await&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_graphServiceClient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Me&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Events&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;AddAsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;myevent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Check out &lt;a href=&quot;https://docs.microsoft.com/en-us/graph/api/resources/datetimetimezone?view=graph-rest-1.0&quot;&gt;this page for which time
+zones&lt;/a&gt;
+you could use. In my
+&lt;a href=&quot;/posts/get-time-zone-for-a-user-in-graph&quot;&gt;next post&lt;/a&gt; I show how you could get
+the timezone  from the user’s settings instead.&lt;/p&gt;
+
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;I have played Microsoft Graph a couple of times but always find it a bit
+complicated to work with. But with the new &lt;a href=&quot;https://github.com/AzureAD/microsoft-identity-web&quot;&gt;Microsoft Identity
+Web&lt;/a&gt; and the Microsoft
+Identity Platform it has become quite easy.&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://developer.microsoft.com/en-us/graph/graph-explorer&quot;&gt;Graph Explorer&lt;/a&gt;
+is a great place to use if you want to play with the API.&lt;/p&gt;</content><author><name>PEK</name></author><category term=".NET" /><summary type="html">How to invite someone to a Teams meeting with the Microsoft Graph in .NET.</summary></entry><entry><title type="html">Caching configuration from Azure KeyVault</title><link href="https://pekspro.github.io/posts/caching-configuration-from-azure-keyvault" rel="alternate" type="text/html" title="Caching configuration from Azure KeyVault" /><published>2021-03-21T00:00:00+01:00</published><updated>2021-03-21T00:00:00+01:00</updated><id>https://pekspro.github.io/posts/caching-configuration-from-azure-keyvault</id><content type="html" xml:base="https://pekspro.github.io/posts/caching-configuration-from-azure-keyvault">&lt;p&gt;Azure KeyVault is a great service. With this you store secrets on a share
+location and could use on several services. But it is not fun to use during
+development.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-problem&quot;&gt;The problem&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://docs.microsoft.com/en-us/azure/key-vault/general/overview&quot;&gt;Azure
+KeyVault&lt;/a&gt; is
+a service where you store your secrets, like connection strings, in a service in
+Azure. Then when your application starts you could connect to this service and
+it to your configuration. But it has a downside. It will take a couple of
+seconds to download the secrets. Not a problem in production, but during
+development this is a pain.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-solution&quot;&gt;The solution&lt;/h2&gt;
+
+&lt;p&gt;One solution is to not use Azure KeyVault when you do development. Instead, you
+store your secrets locally. But then your application will behave quite
+differently in production which may be a bad thing.&lt;/p&gt;
+
+&lt;p&gt;Another approach I have been using a while is to cache the configuration. And
+then I refresh it every 12 hour or so. With this I get the best of both worlds.
+I could use Azure KeyVault during development and still have good performance.&lt;/p&gt;
+
+&lt;p&gt;My solution is in the following code that is using
+&lt;a href=&quot;https://www.nuget.org/packages/Azure.Security.KeyVault.Secrets&quot;&gt;Azure.Security.KeyVault.Secrets&lt;/a&gt;
+that is replacing the deprecated
+&lt;a href=&quot;https://www.nuget.org/packages/Microsoft.Azure.KeyVault&quot;&gt;Microsoft.Azure.KeyVault&lt;/a&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;codeHeader&quot; data-bi-name=&quot;code-header&quot;&gt;
+    &lt;span class=&quot;language&quot;&gt; Code &lt;/span&gt;
+    &lt;button type=&quot;button&quot; class=&quot;action is-relative copy-code-button&quot; aria-label=&quot;Copy code&quot;&gt;
+        &lt;span style=&quot;font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;&quot;&gt;
+            📄&lt;span style=&quot;position: absolute; top: .25em; left: .25em&quot;&gt;📄&lt;/span&gt;
+        &lt;/span&gt;
+        &lt;span style=&quot;pointer-events: none;&quot;&gt;Copy&lt;/span&gt;
+        &lt;div class=&quot;successful-copy-alert is-transparent&quot; style=&quot;pointer-events: none;&quot; aria-hidden=&quot;true&quot;&gt;
+            &amp;#10003;
+        &lt;/div&gt;
+    &lt;/button&gt; 
+&lt;/div&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-csharp&quot; data-lang=&quot;csharp&quot;&gt;&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Azure.Extensions.AspNetCore.Configuration.Secrets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Azure.Identity&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Azure.Security.KeyVault.Secrets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Microsoft.Extensions.Configuration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Microsoft.Extensions.DependencyInjection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Microsoft.Extensions.Hosting&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System.Collections.Generic&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System.Diagnostics&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System.Linq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System.Text.Json&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;ConfigurationCache&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Program&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;readonly&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Stopwatch&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Stopwatch&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Stopwatch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;Stopwatch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Start&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+            &lt;span class=&quot;nf&quot;&gt;CreateHostBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Build&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IHostBuilder&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;CreateHostBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;Host&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;CreateDefaultBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;ConfigureAppConfiguration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;AddAzureConfigurationServices&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;ConfigureServices&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hostContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;Stopwatch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Stop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+                    &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;$&quot;Start time: &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Stopwatch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Elapsed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;$&quot;Config: &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hostContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Configuration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;GetSection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;ConnectionStrings:MyContext&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+                    &lt;span class=&quot;n&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;AddHostedService&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Worker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;();&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;AzureExtensions&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IConfigurationBuilder&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;AddAzureConfigurationServices&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IConfigurationBuilder&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// Build current configuration. This is later used to get environment variables.&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;IConfiguration&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Build&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+&lt;span class=&quot;cp&quot;&gt;#if DEBUG
+&lt;/span&gt;            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Debugger&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IsAttached&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// If the debugger is attached, we use cached configuration instead of&lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// configurations from Azure.&lt;/span&gt;
+                &lt;span class=&quot;nf&quot;&gt;AddCachedConfiguration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+                &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;#endif
+&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// Add the standard configuration services&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;AddAzureConfigurationServicesInternal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IConfigurationBuilder&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;AddAzureConfigurationServicesInternal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IConfigurationBuilder&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IConfiguration&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;currentConfig&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// Get keyvault endpoint. This is normally an environment variable.&lt;/span&gt;
+            &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;keyVaultEndpoint&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;currentConfig&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;KEYVAULT_ENDPOINT&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Setup keyvault services&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;SecretClient&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;secretClient&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;SecretClient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;keyVaultEndpoint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;DefaultAzureCredential&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;AddAzureKeyVault&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;secretClient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;AzureKeyVaultConfigurationOptions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
+
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;AddCachedConfiguration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IConfigurationBuilder&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IConfiguration&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;currentConfig&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;//Setup full path to cached configuration file.&lt;/span&gt;
+            &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Combine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;Environment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;GetFolderPath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Environment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SpecialFolder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LocalApplicationData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&quot;MyApplication&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Combine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;$&quot;configcache.dat&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// If the file does not exists, or is more than 12 hours, update the cached configuration.&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Exists&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;GetLastAccessTimeUtc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;AddHours&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;12&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DateTime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;UtcNow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Directory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;CreateDirectory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+                &lt;span class=&quot;nf&quot;&gt;UpdateCacheConfiguration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;currentConfig&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Read the file&lt;/span&gt;
+            &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encryptedFile&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;ReadAllText&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Decrypt the content&lt;/span&gt;
+            &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jsonString&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Decrypt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;encryptedFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Create key-value pairs&lt;/span&gt;
+            &lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;keyVaultPairs&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;JsonSerializer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Deserialize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Dictionary&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&amp;gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;jsonString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Use the key-value pairs as configuration&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;AddInMemoryCollection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;keyVaultPairs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;UpdateCacheConfiguration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IConfiguration&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;currentConfig&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// Create a configuration builder. We will just use this to get the&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// configuration from Azure.&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;ConfigurationBuilder&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;configurationBuilder&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;ConfigurationBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Add the services we want to use.&lt;/span&gt;
+            &lt;span class=&quot;nf&quot;&gt;AddAzureConfigurationServicesInternal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;configurationBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;currentConfig&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Build the configuration&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;IConfigurationRoot&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;azureConfig&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;configurationBuilder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Build&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Serialize the configuration to a JSON-string.&lt;/span&gt;
+            &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jsonString&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;JsonSerializer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Serialize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;azureConfig&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;AsEnumerable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;ToDictionary&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;JsonSerializerOptions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;WriteIndented&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;//Encrypt the string&lt;/span&gt;
+            &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encryptedString&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Encrypt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;jsonString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Save the encrypted string.&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;WriteAllText&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encryptedString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;c1&quot;&gt;// Replace the following with your favorite encryption code.&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Encrypt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Convert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;ToBase64String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Encoding&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;UTF8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;GetBytes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Decrypt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Encoding&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;UTF8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;GetString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Convert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;FromBase64String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The project file looks like this:&lt;/p&gt;
+
+&lt;div class=&quot;codeHeader&quot; data-bi-name=&quot;code-header&quot;&gt;
+    &lt;span class=&quot;language&quot;&gt; Project File &lt;/span&gt;
+    &lt;button type=&quot;button&quot; class=&quot;action is-relative copy-code-button&quot; aria-label=&quot;Copy code&quot;&gt;
+        &lt;span style=&quot;font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;&quot;&gt;
+            📄&lt;span style=&quot;position: absolute; top: .25em; left: .25em&quot;&gt;📄&lt;/span&gt;
+        &lt;/span&gt;
+        &lt;span style=&quot;pointer-events: none;&quot;&gt;Copy&lt;/span&gt;
+        &lt;div class=&quot;successful-copy-alert is-transparent&quot; style=&quot;pointer-events: none;&quot; aria-hidden=&quot;true&quot;&gt;
+            &amp;#10003;
+        &lt;/div&gt;
+    &lt;/button&gt; 
+&lt;/div&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-xml&quot; data-lang=&quot;xml&quot;&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;Project&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Sdk=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Microsoft.NET.Sdk.Worker&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;PropertyGroup&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;TargetFramework&amp;gt;&lt;/span&gt;netcoreapp3.1&lt;span class=&quot;nt&quot;&gt;&amp;lt;/TargetFramework&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/PropertyGroup&amp;gt;&lt;/span&gt;
+
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;ItemGroup&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;PackageReference&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Include=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Azure.Extensions.AspNetCore.Configuration.Secrets&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Version=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;1.0.2&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;PackageReference&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Include=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Azure.Identity&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Version=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;1.3.0&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;PackageReference&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Include=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Azure.Security.KeyVault.Secrets&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Version=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;4.1.0&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;PackageReference&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Include=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Microsoft.Extensions.Configuration.AzureAppConfiguration&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Version=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;4.1.0&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;PackageReference&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Include=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Microsoft.Extensions.Hosting&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Version=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;5.0.0&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/ItemGroup&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/Project&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;This approach also works for &lt;a href=&quot;https://docs.microsoft.com/en-us/azure/azure-app-configuration/overview&quot;&gt;Azure
+AppConfiguration&lt;/a&gt;
+(I use that too), but I have ignored this in the sample above to keep the code
+simple. AppConfiguration is also a lot faster than KeyVault so the problem less
+noticeable.&lt;/p&gt;</content><author><name>PEK</name></author><category term=".NET" /><summary type="html">Azure KeyVault is a great service. With this you store secrets on a share location and could use on several services. But it is not fun to use during development.</summary></entry><entry><title type="html">Be careful with references in Power Query</title><link href="https://pekspro.github.io/posts/be-careful-with-references-in-power-query" rel="alternate" type="text/html" title="Be careful with references in Power Query" /><published>2021-03-14T00:00:00+01:00</published><updated>2021-03-14T00:00:00+01:00</updated><id>https://pekspro.github.io/posts/be-careful-with-references-in-power-query</id><content type="html" xml:base="https://pekspro.github.io/posts/be-careful-with-references-in-power-query">&lt;p&gt;References in Power Query are incredibly useful. I often use it to organize my
+queries. But when you are using them you could trigger extra calls against your
+data sources.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-problem&quot;&gt;The problem&lt;/h2&gt;
+
+&lt;p&gt;Let say you created two Power Queries:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DatabaseData&lt;/code&gt; – This fetch data from a database&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FileData&lt;/code&gt; – This fetch data from a file&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Now you want to merge all this data into a single large table. You are creating
+a new query named &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AllData&lt;/code&gt; that is defined like this:&lt;/p&gt;
+
+&lt;div class=&quot;codeHeader&quot; data-bi-name=&quot;code-header&quot;&gt;
+    &lt;span class=&quot;language&quot;&gt; AllData definition &lt;/span&gt;
+    &lt;button type=&quot;button&quot; class=&quot;action is-relative copy-code-button&quot; aria-label=&quot;Copy code&quot;&gt;
+        &lt;span style=&quot;font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;&quot;&gt;
+            📄&lt;span style=&quot;position: absolute; top: .25em; left: .25em&quot;&gt;📄&lt;/span&gt;
+        &lt;/span&gt;
+        &lt;span style=&quot;pointer-events: none;&quot;&gt;Copy&lt;/span&gt;
+        &lt;div class=&quot;successful-copy-alert is-transparent&quot; style=&quot;pointer-events: none;&quot; aria-hidden=&quot;true&quot;&gt;
+            &amp;#10003;
+        &lt;/div&gt;
+    &lt;/button&gt; 
+&lt;/div&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;let
+    Source = Table.Combine({FileData, DatabaseData})
+in
+    Source&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Now when you update the data in all your queries this happens:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DatabaseData&lt;/code&gt; is updated by fetching data from the database.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FileData&lt;/code&gt; is updated by fetching data from the file.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AllData&lt;/code&gt; is updated by using the already fetched data from the two previous
+queries.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;Wrong!&lt;/strong&gt; This I what I &lt;em&gt;thought&lt;/em&gt; would happen. Instead, what happens is that
+when &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AllData&lt;/code&gt; is updated a new call is made to the database and the file is
+read a second time.&lt;/p&gt;
+
+&lt;p&gt;The reason for this, as I understand it, is that Power Query is designed to push
+as much work against the data sources as possible. So, if &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AllData&lt;/code&gt; instead did
+some grouping on the database data this work would be pushed to the database.
+This could be a good thing.&lt;/p&gt;
+
+&lt;p&gt;But, in the situation above this is not what we want.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-solution&quot;&gt;The solution&lt;/h2&gt;
+
+&lt;p&gt;There are two potential solutions for this.&lt;/p&gt;
+
+&lt;h3 id=&quot;block-updating-data-in-the-queries&quot;&gt;Block updating data in the queries&lt;/h3&gt;
+
+&lt;p&gt;If we do not intend to use the data in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DatabaseData&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FileData&lt;/code&gt; we could
+block the update for these queries.&lt;/p&gt;
+
+&lt;p&gt;In Excel you right click on the queries, select properties, and then uncheck the
+option &lt;strong&gt;Refresh this connection on Refresh All&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0050/excel-query-block.png&quot; alt=&quot;Refresh this connection on Refresh All&quot; title=&quot;Refresh this connection on Refresh All&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;If you are using PowerBI, you instead in the Power Query editor right click on
+the query and uncheck &lt;strong&gt;Include in report refresh&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0050/powerbi-query-block.png&quot; alt=&quot;Include in report refresh&quot; title=&quot;Refresh Include in report refresh&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Note when you do this &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AllData&lt;/code&gt; will still be using the latest data that is in
+the data sources. The difference is that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DatabaseData&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FileData&lt;/code&gt; will not
+be updated when you refresh all data in your document.&lt;/p&gt;
+
+&lt;h3 id=&quot;use-a-calculated-table&quot;&gt;Use a calculated table&lt;/h3&gt;
+
+&lt;p&gt;Another solution is to create a calculated table instead of having merging data
+in Power Query, this is only possible in PowerBI. In the Power BI editor select
+&lt;strong&gt;Table tools&lt;/strong&gt; &amp;gt; &lt;strong&gt;New Table&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/0050/powerbi-add-calculated-table.png&quot; alt=&quot;Add calculated table&quot; title=&quot;Add calculated table&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Then you are entering this DAX command:&lt;/p&gt;
+
+&lt;div class=&quot;codeHeader&quot; data-bi-name=&quot;code-header&quot;&gt;
+    &lt;span class=&quot;language&quot;&gt; DAX &lt;/span&gt;
+    &lt;button type=&quot;button&quot; class=&quot;action is-relative copy-code-button&quot; aria-label=&quot;Copy code&quot;&gt;
+        &lt;span style=&quot;font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;&quot;&gt;
+            📄&lt;span style=&quot;position: absolute; top: .25em; left: .25em&quot;&gt;📄&lt;/span&gt;
+        &lt;/span&gt;
+        &lt;span style=&quot;pointer-events: none;&quot;&gt;Copy&lt;/span&gt;
+        &lt;div class=&quot;successful-copy-alert is-transparent&quot; style=&quot;pointer-events: none;&quot; aria-hidden=&quot;true&quot;&gt;
+            &amp;#10003;
+        &lt;/div&gt;
+    &lt;/button&gt; 
+&lt;/div&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;AllData = UNION(DatabaseData, FileData)&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;When all data is being updated, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DatabaseData&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FileData&lt;/code&gt; are updated first.
+Then the calculated table is created from the result from these queries. No
+additional calls are done against your database.&lt;/p&gt;
+
+&lt;p&gt;You could do a lot more than just union tables. You could do joins with
+different tables, add more columns and much more. There is more information
+about this in the
+&lt;a href=&quot;https://docs.microsoft.com/en-us/power-bi/transform-model/desktop-calculated-tables&quot;&gt;documentation&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;I learned all this when I had a Power BI solution that was updating surprisingly
+slow. After some trouble shooting, I started to suspect that it made more
+request against my data sources than expected and this made the update process
+very slow. I wished I had learned this earlier.&lt;/p&gt;</content><author><name>PEK</name></author><category term="Excel" /><category term="Power BI" /><summary type="html">References in Power Query are incredibly useful. I often use it to organize my queries. But when you are using them you could trigger extra calls against your data sources.</summary></entry><entry><title type="html">Creating unique Excel sheet names</title><link href="https://pekspro.github.io/posts/creating-unique-excel-sheet-names" rel="alternate" type="text/html" title="Creating unique Excel sheet names" /><published>2021-03-07T00:00:00+01:00</published><updated>2021-03-07T00:00:00+01:00</updated><id>https://pekspro.github.io/posts/creating-unique-excel-sheet-names</id><content type="html" xml:base="https://pekspro.github.io/posts/creating-unique-excel-sheet-names">&lt;p&gt;Here is a solution that gives you unique and valid sheet names in Excel files
+that you are generating.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-problem&quot;&gt;The problem&lt;/h2&gt;
+
+&lt;p&gt;Generating Excel files in code could be fun. But when you do you need to make
+sure that the sheet names follow these rules:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The name cannot be more than 31 characters.&lt;/li&gt;
+  &lt;li&gt;The name must be unique.&lt;/li&gt;
+  &lt;li&gt;The name cannot be &lt;em&gt;history&lt;/em&gt;.&lt;/li&gt;
+  &lt;li&gt;The following characters cannot be used:
+    &lt;ul&gt;
+      &lt;li&gt;:&lt;/li&gt;
+      &lt;li&gt;\&lt;/li&gt;
+      &lt;li&gt;/&lt;/li&gt;
+      &lt;li&gt;?&lt;/li&gt;
+      &lt;li&gt;*&lt;/li&gt;
+      &lt;li&gt;[&lt;/li&gt;
+      &lt;li&gt;]&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;the-solution&quot;&gt;The solution&lt;/h2&gt;
+
+&lt;p&gt;I am using &lt;a href=&quot;https://github.com/closedxml/closedxml&quot;&gt;ClosedXML&lt;/a&gt; that is a great
+library when you are generating Excel files in code. This is used in this code
+that solves the problem:&lt;/p&gt;
+
+&lt;div class=&quot;codeHeader&quot; data-bi-name=&quot;code-header&quot;&gt;
+    &lt;span class=&quot;language&quot;&gt; CSharp &lt;/span&gt;
+    &lt;button type=&quot;button&quot; class=&quot;action is-relative copy-code-button&quot; aria-label=&quot;Copy code&quot;&gt;
+        &lt;span style=&quot;font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;&quot;&gt;
+            📄&lt;span style=&quot;position: absolute; top: .25em; left: .25em&quot;&gt;📄&lt;/span&gt;
+        &lt;/span&gt;
+        &lt;span style=&quot;pointer-events: none;&quot;&gt;Copy&lt;/span&gt;
+        &lt;div class=&quot;successful-copy-alert is-transparent&quot; style=&quot;pointer-events: none;&quot; aria-hidden=&quot;true&quot;&gt;
+            &amp;#10003;
+        &lt;/div&gt;
+    &lt;/button&gt; 
+&lt;/div&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c#&quot; data-lang=&quot;c#&quot;&gt;&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;ClosedXML.Excel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System.Linq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System.Text.RegularExpressions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Program&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sheetNames&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// This is fine.&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&quot;Sheet A&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// Duplicate of above. Will be renamed to Sheet A-1.&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&quot;Sheet A&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// Too long. Will be truncated.&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&quot;Sheet with a name that is longer than allowed&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// ? is not allowed, will be removed.&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&quot;Sheet B?&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// Tab will be replaced with space. After this, this is a duplicate of above.&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&quot;Sheet\tB&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// : is not allowed.&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&quot;Sheet:B&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// The word &quot;history&quot; is not allowed. A dot will be added to the name.&lt;/span&gt;
+                &lt;span class=&quot;s&quot;&gt;&quot;History&quot;&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+        &lt;span class=&quot;n&quot;&gt;XLWorkbook&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;workbook&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;XLWorkbook&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sheetName&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sheetNames&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;workbook&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;AddWorksheet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;CreateUniqueSheetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;workbook&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sheetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sheet&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;workbook&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Worksheets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sheet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MaxSheetNameLength&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;31&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;CreateUniqueSheetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IXLWorkbook&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;workbook&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sheetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// :\/?*[] are invalid characters&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;sheetName&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Regex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Replace&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sheetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;@&quot;[:\\/?\*\[\]]&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+            
+        &lt;span class=&quot;c1&quot;&gt;// Change all white space to regular space&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;sheetName&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Regex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Replace&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sheetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;@&quot;\s&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot; &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sheetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Equals&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;history&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;StringComparison&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CurrentCultureIgnoreCase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;sheetName&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;.&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;newSheetName&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sheetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Substring&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Math&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Min&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sheetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MaxSheetNameLength&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+
+        &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nameVariant&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;workbook&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Worksheets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Any&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Equals&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;newSheetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;StringComparison&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CurrentCultureIgnoreCase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;nameVariant&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;++;&lt;/span&gt;
+
+            &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nameVariantExtension&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;-&quot;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nameVariant&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;ToString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+            &lt;span class=&quot;n&quot;&gt;newSheetName&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sheetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Substring&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Math&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;Min&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sheetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MaxSheetNameLength&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nameVariantExtension&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;newSheetName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The output from this code is:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Sheet A
+Sheet A-1
+Sheet with a name that is longe
+Sheet B
+Sheet B-1
+SheetB
+History.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;This is not a complicated problem, but I hope someone find this useful anyway.
+The largest problem I think is that there is no official documentation on the
+limitations of Excel sheet names. There is a page listing some &lt;a href=&quot;https://support.microsoft.com/en-us/office/excel-specifications-and-limits-1672b34d-7043-467e-8e27-269d656771c3&quot;&gt;specifications
+and limitations of
+Excel&lt;/a&gt;,
+but this is not mentioned.&lt;/p&gt;</content><author><name>PEK</name></author><category term=".NET" /><category term="Excel" /><summary type="html">Here is a solution that gives you unique and valid sheet names in Excel files that you are generating.</summary></entry><entry><title type="html">Calling an API multiple times with Power Query</title><link href="https://pekspro.github.io/posts/calling-an-api-multiple-times-with-power-query" rel="alternate" type="text/html" title="Calling an API multiple times with Power Query" /><published>2021-02-28T00:00:00+01:00</published><updated>2021-02-28T00:00:00+01:00</updated><id>https://pekspro.github.io/posts/calling-an-api-multiple-times-with-power-query</id><content type="html" xml:base="https://pekspro.github.io/posts/calling-an-api-multiple-times-with-power-query">&lt;p&gt;Making a single call to a web API is quite straightforward. But sometimes you
+need to make multiple calls to get the data you want.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-problem&quot;&gt;The problem&lt;/h2&gt;
+
+&lt;p&gt;Let say you calling an API on the address &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;https://api.example.com/customers&lt;/code&gt;
+and it returns:&lt;/p&gt;
+
+&lt;div class=&quot;codeHeader&quot; data-bi-name=&quot;code-header&quot;&gt;
+    &lt;span class=&quot;language&quot;&gt; API response &lt;/span&gt;
+    &lt;button type=&quot;button&quot; class=&quot;action is-relative copy-code-button&quot; aria-label=&quot;Copy code&quot;&gt;
+        &lt;span style=&quot;font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;&quot;&gt;
+            📄&lt;span style=&quot;position: absolute; top: .25em; left: .25em&quot;&gt;📄&lt;/span&gt;
+        &lt;/span&gt;
+        &lt;span style=&quot;pointer-events: none;&quot;&gt;Copy&lt;/span&gt;
+        &lt;div class=&quot;successful-copy-alert is-transparent&quot; style=&quot;pointer-events: none;&quot; aria-hidden=&quot;true&quot;&gt;
+            &amp;#10003;
+        &lt;/div&gt;
+    &lt;/button&gt; 
+&lt;/div&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;metadata&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;total&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;25&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;limit&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;offset&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;data&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;customerId&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;First customer&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;There are 25 customers in the API, but you will get no more than 10 customs per
+call. To get the rest of the customers you need to call
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;https://api.example.com/customers?offset=10&lt;/code&gt; and
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;https://api.example.com/customers?offset=20&lt;/code&gt;. How do you do this in Power
+Query?&lt;/p&gt;
+
+&lt;h2 id=&quot;the-solution&quot;&gt;The solution&lt;/h2&gt;
+
+&lt;p&gt;My solution is in these steps:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;First, just make a call to the API to get the number of customers.&lt;/li&gt;
+  &lt;li&gt;Calculate the numbers of calls you need to make and then call the API several
+times with different offset each time.&lt;/li&gt;
+  &lt;li&gt;Merge all the fetched data.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The principle is quite simple. And here is some code that do this:&lt;/p&gt;
+
+&lt;div class=&quot;codeHeader&quot; data-bi-name=&quot;code-header&quot;&gt;
+    &lt;span class=&quot;language&quot;&gt; Advanced editor &lt;/span&gt;
+    &lt;button type=&quot;button&quot; class=&quot;action is-relative copy-code-button&quot; aria-label=&quot;Copy code&quot;&gt;
+        &lt;span style=&quot;font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;&quot;&gt;
+            📄&lt;span style=&quot;position: absolute; top: .25em; left: .25em&quot;&gt;📄&lt;/span&gt;
+        &lt;/span&gt;
+        &lt;span style=&quot;pointer-events: none;&quot;&gt;Copy&lt;/span&gt;
+        &lt;div class=&quot;successful-copy-alert is-transparent&quot; style=&quot;pointer-events: none;&quot; aria-hidden=&quot;true&quot;&gt;
+            &amp;#10003;
+        &lt;/div&gt;
+    &lt;/button&gt; 
+&lt;/div&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;let
+    BaseUrl = &quot;https://api.example.com&quot;,
+    GetApiResultAsTable = (offset) =&amp;gt;
+        let
+            // Do not do this:
+            // CurrentJson = Json.Document(Web.Contents(BaseUrl &amp;amp; &quot;/customers?offset=&quot; &amp;amp; Number.ToText(offset)),
+            // Instead do this:
+            CurrentJson = Json.Document(Web.Contents(BaseUrl, [RelativePath=&quot;/customers&quot;, Query=[offset = Number.ToText(offset)]])),
+            Data = CurrentJson[data],
+            DataAsTable = Table.FromList(Data, Splitter.SplitByNothing(), null, null, ExtraValues.Error)
+        in
+            DataAsTable,
+
+    // Do not do this:
+    // CountJson = Json.Document(Web.Contents(BaseUrl &amp;amp; &quot;/customers)),
+    // Instead do this:
+    CountJson = Json.Document(Web.Contents(BaseUrl, [RelativePath=&quot;/customers&quot;])),
+    Metadata = CountJson[metadata],
+    ItemsCount = Metadata[total],
+    ItemsPerPage = Metadata[limit],
+    
+    AllTables = List.Generate(()=&amp;gt;0, each _ &amp;lt; ItemsCount, each _ + ItemsPerPage, each GetApiResultAsTable(_) ),
+    #&quot;Converted to table&quot; = Table.FromList(AllTables, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    #&quot;Expanded Column&quot; = Table.ExpandTableColumn(#&quot;Converted to table&quot;, &quot;Column1&quot;, {&quot;Column1&quot;}, {&quot;Column1.Column1&quot;})
+in
+    #&quot;Expanded Column&quot;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Just like &lt;a href=&quot;/posts/creating-accruals-with-power-query&quot;&gt;last week&lt;/a&gt; I use a function that I call multiple times. This is done
+via &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;List.Generate&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Note that each &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Web.Contents&lt;/code&gt; call uses the same address. The path and query
+string are added via the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;RelativePath&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Query&lt;/code&gt;. It may be tempting to just
+concatenate a string and use that as the first parameter to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Web.Contents&lt;/code&gt;. In
+many times this works fine – except in the Power BI service. If you are using a
+dynamic address you will get strange error messages (I guess it is because it
+does not understand how to configure the credentials). I learned this from &lt;a href=&quot;https://blog.crossjoin.co.uk/2016/08/23/web-contents-m-functions-and-dataset-refresh-errors-in-power-bi/&quot;&gt;this
+blog
+post&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;It is awesome that it is possible to do things like this in Power Query. It took
+me a while to understand how to do this, but now it is saving me a lot of time
+when I am making reports in Power BI. When you set up the credentials in the
+Power BI service, you may need to use the option &lt;strong&gt;Skip Test Connection&lt;/strong&gt;. It
+all depends on if the Power BI service is able verify the connection from the
+URL that is passed to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Web.Contents&lt;/code&gt; without any relative path and query string.&lt;/p&gt;</content><author><name>PEK</name></author><category term="Excel" /><summary type="html">Making a single call to a web API is quite straightforward. But sometimes you need to make multiple calls to get the data you want.</summary></entry></feed>

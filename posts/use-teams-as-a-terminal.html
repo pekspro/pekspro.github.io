@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Use Teams as a Terminal | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Use Teams as a Terminal" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Here is a crazy idea. Teams is a popular application for communication, especially the chat is widely used between persons on companies. What if we also could use the chat as terminal, so people could it to start and stop virtual machines, start a synchronizing of a PowerBI report and other things. You could do a simple little bot with Logic apps." />
+<meta property="og:description" content="Here is a crazy idea. Teams is a popular application for communication, especially the chat is widely used between persons on companies. What if we also could use the chat as terminal, so people could it to start and stop virtual machines, start a synchronizing of a PowerBI report and other things. You could do a simple little bot with Logic apps." />
+<link rel="canonical" href="https://pekspro.github.io/posts/use-teams-as-a-terminal" />
+<meta property="og:url" content="https://pekspro.github.io/posts/use-teams-as-a-terminal" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-05-10T01:00:00+02:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Use Teams as a Terminal" />
+<script type="application/ld+json">
+{"description":"Here is a crazy idea. Teams is a popular application for communication, especially the chat is widely used between persons on companies. What if we also could use the chat as terminal, so people could it to start and stop virtual machines, start a synchronizing of a PowerBI report and other things. You could do a simple little bot with Logic apps.","headline":"Use Teams as a Terminal","dateModified":"2020-05-10T01:00:00+02:00","datePublished":"2020-05-10T01:00:00+02:00","url":"https://pekspro.github.io/posts/use-teams-as-a-terminal","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/use-teams-as-a-terminal"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Use Teams as a Terminal</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2020-05-10T01:00:00+02:00" itemprop="datePublished">
+        May 10, 2020
+      </time>
+        •  Categories: 
+        <a href="/categories#logic-apps">Logic apps</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Here is a crazy idea. Teams is a popular application for communication,
+especially the chat is widely used between persons on companies. What if we also
+could use the chat as terminal, so people could it to start and stop virtual
+machines, start a synchronizing of a PowerBI report and other things. You could
+do a simple little bot with Logic apps.</p>
+
+<p>When we are done, we could have a chat like this:</p>
+
+<p><img src="/assets/images/0006/chat_sample.png" alt="Chat sample" title="Chat sample" /></p>
+
+<h2 id="overview">Overview</h2>
+<p>We will use Logic apps to do the most work for us. A Teams trigger will be used
+to start the Logic app. Then we will pass on the message to an Azure Function
+that will parse the message. After this the Logic app will be used trigger
+different logic depending on which command the user has requested, and it will
+also send responses to the users.</p>
+
+<p><img src="/assets/images/0006/overview.png" alt="Solution overview" title="Solution overview" /></p>
+
+<h2 id="function-to-parse-messages">Function to parse messages</h2>
+<p>Messages that are send in Teams could be used to trigger Logic apps. In many
+cases messages are send as pure text, but it might be that we receive messages
+in HTML. Messages could also contain a lot of extra white spaces that we want to
+ignore. Logic apps are not good on solving this so we will create an Azure
+Function that will do the parsing for us.</p>
+
+<p>We will create an API that accepts JSON-objects like this:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> JSON - Input </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span><span class="w">
+    </span><span class="nl">"Content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;div&gt;&lt;div itemprop='copy-paste-block'&gt;start-vm &lt;span&gt;big-test-vm&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"ContentType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"html"</span><span class="w">
+</span><span class="p">}</span></code></pre></figure>
+
+<p>And then return the result like this:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> JSON - Output </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"start-vm"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"Parameters"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="s2">"big-test-vm"</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"ParameterCount"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span><span class="p">}</span></code></pre></figure>
+
+<p>In your resource group, select to <strong>Add</strong> a new resource and select <strong>Function
+app</strong>. Give your app a name and select <strong>Runtime stack</strong> to be <strong>Node js</strong>.</p>
+
+<p><img src="/assets/images/0006/configure_azure_functions_app.png" alt="Configure Azure Functions App" title="Configure Azure Functions App." /></p>
+
+<p>In the <strong>Hosting</strong> and <strong>Monitoring</strong> options you could use the default
+settings. Then <strong>Create</strong> your new resource.</p>
+
+<p>When the app has been created, open it and select <strong>New function</strong>. You will be
+asked to select <strong>Development environment</strong>, pick <strong>In-Portal</strong>.</p>
+
+<p><img src="/assets/images/0006/configure_development_enviroment.png" alt="Configure Development enviroment" title="Configure Development enviroment." /></p>
+
+<p>Then select <strong>Webhook + API</strong>:</p>
+
+<p><img src="/assets/images/0006/configure_azure_function_type.png" alt="Configure Function type" title="Configure Function type." /></p>
+
+<p>Then replace the code with this:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> JavaScript </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="k">async</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">req</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// Verify that parameters are provided</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">req</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">Content</span> <span class="o">||</span> <span class="o">!</span><span class="nx">req</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">ContentType</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nx">context</span><span class="p">.</span><span class="nx">res</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="na">status</span><span class="p">:</span> <span class="mi">400</span><span class="p">,</span>
+            <span class="na">body</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Content or ContentType not provided.</span><span class="dl">"</span>
+        <span class="p">};</span>
+
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">content</span> <span class="o">=</span> <span class="dl">""</span> <span class="o">+</span> <span class="nx">req</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">Content</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">contentType</span> <span class="o">=</span> <span class="dl">""</span> <span class="o">+</span> <span class="nx">req</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">ContentType</span><span class="p">;</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="nx">contentType</span> <span class="o">!=</span> <span class="dl">"</span><span class="s2">text</span><span class="dl">"</span><span class="p">)</span> 
+    <span class="p">{</span>
+        <span class="c1">// Strip HTML-tags</span>
+        <span class="nx">content</span> <span class="o">=</span> <span class="nx">content</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/&lt;</span><span class="se">\/?[^</span><span class="sr">&gt;</span><span class="se">]</span><span class="sr">+</span><span class="se">(</span><span class="sr">&gt;|$</span><span class="se">)</span><span class="sr">/g</span><span class="p">,</span> <span class="dl">""</span><span class="p">);</span>
+
+        <span class="c1">// Copied from: https://stackoverflow.com/questions/18749591/encode-html-entities-in-javascript/39243641#39243641</span>
+        <span class="kd">var</span> <span class="nx">htmlEntities</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="na">nbsp</span><span class="p">:</span> <span class="dl">'</span><span class="s1"> </span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">cent</span><span class="p">:</span> <span class="dl">'</span><span class="s1">¢</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">pound</span><span class="p">:</span> <span class="dl">'</span><span class="s1">£</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">yen</span><span class="p">:</span> <span class="dl">'</span><span class="s1">¥</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">euro</span><span class="p">:</span> <span class="dl">'</span><span class="s1">€</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">copy</span><span class="p">:</span> <span class="dl">'</span><span class="s1">©</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">reg</span><span class="p">:</span> <span class="dl">'</span><span class="s1">®</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">lt</span><span class="p">:</span> <span class="dl">'</span><span class="s1">&lt;</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">gt</span><span class="p">:</span> <span class="dl">'</span><span class="s1">&gt;</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">quot</span><span class="p">:</span> <span class="dl">'</span><span class="s1">"</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">amp</span><span class="p">:</span> <span class="dl">'</span><span class="s1">&amp;</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">apos</span><span class="p">:</span> <span class="dl">'</span><span class="se">\'</span><span class="dl">'</span>
+        <span class="p">};</span>
+
+        <span class="nx">content</span> <span class="o">=</span> <span class="nx">content</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/</span><span class="se">\&amp;([^</span><span class="sr">;</span><span class="se">]</span><span class="sr">+</span><span class="se">)</span><span class="sr">;/g</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">entity</span><span class="p">,</span> <span class="nx">entityCode</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">match</span><span class="p">;</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nx">entityCode</span> <span class="k">in</span> <span class="nx">htmlEntities</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="nx">htmlEntities</span><span class="p">[</span><span class="nx">entityCode</span><span class="p">];</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">entityCode</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^#x</span><span class="se">([\d</span><span class="sr">a-fA-F</span><span class="se">]</span><span class="sr">+</span><span class="se">)</span><span class="sr">$/</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="nb">String</span><span class="p">.</span><span class="nx">fromCharCode</span><span class="p">(</span><span class="nb">parseInt</span><span class="p">(</span><span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">16</span><span class="p">));</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">match</span> <span class="o">=</span> <span class="nx">entityCode</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/^#</span><span class="se">(\d</span><span class="sr">+</span><span class="se">)</span><span class="sr">$/</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="nb">String</span><span class="p">.</span><span class="nx">fromCharCode</span><span class="p">(</span><span class="o">~~</span><span class="nx">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="nx">entity</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">});</span>
+    <span class="p">}</span>
+    
+
+    <span class="c1">// Remove extra white spaces</span>
+    <span class="nx">content</span> <span class="o">=</span> <span class="nx">content</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/</span><span class="se">\s\s</span><span class="sr">+/g</span><span class="p">,</span> <span class="dl">'</span><span class="s1"> </span><span class="dl">'</span><span class="p">).</span><span class="nx">trim</span><span class="p">();</span>
+
+    <span class="c1">// Get command and parameters</span>
+    <span class="kd">var</span> <span class="nx">parameters</span> <span class="o">=</span> <span class="nx">content</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="dl">"</span><span class="s2"> </span><span class="dl">"</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">command</span> <span class="o">=</span> <span class="nx">parameters</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
+
+    <span class="nx">context</span><span class="p">.</span><span class="nx">res</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="na">status</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+            <span class="na">body</span><span class="p">:</span>
+            <span class="p">{</span>
+                <span class="na">Command</span><span class="p">:</span> <span class="nx">command</span><span class="p">,</span>
+                <span class="na">Parameters</span><span class="p">:</span> <span class="nx">parameters</span><span class="p">,</span>
+                <span class="na">ParameterCount</span><span class="p">:</span> <span class="nx">parameters</span><span class="p">.</span><span class="nx">length</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+<span class="p">};</span></code></pre></figure>
+
+<p>Your function will have the default name. If you do not like that, add new
+<strong>HTTP Trigger Function</strong>. Call it <code class="language-plaintext highlighter-rouge">ParseTeamMessage</code>.</p>
+
+<h2 id="create-a-logic-app">Create a Logic app</h2>
+<p>The next step is to create a Logic app. In your resource group, <strong>Add</strong> a new
+resource and select the type <strong>Logic app</strong>. Give your app a name and then
+<strong>Create</strong>.</p>
+
+<p><img src="/assets/images/0006/configure_logic_app.png" alt="Configure Logic App" title="Configure Logic App." /></p>
+
+<p>When it is created, open the app and select the template <strong>Blank Logic App</strong>.</p>
+
+<p><img src="/assets/images/0006/select_blank_template.png" alt="Select Blank Template" title="Select Blank Template." /></p>
+
+<p>Then add a new trigger and select <strong>Microsoft Teams</strong> as connector, and select
+the trigger <strong>When a new channel message is added</strong>:</p>
+
+<p><img src="/assets/images/0006/select_trigger.png" alt="Select trigger" title="Select trigger." /></p>
+
+<p>Then configure the trigger. Select the <strong>Team</strong> and <strong>Channel</strong> you want to use.</p>
+
+<p><img src="/assets/images/0006/configure_trigger.png" alt="Configure trigger" title="Configure trigger." /></p>
+
+<p>I recommend that you create a separate channel in Teams, I am using
+<strong>Commands</strong>. Also configure to check for messages quite often, at least during
+development. Unfortunately, this will not be real time. I have noticed that it
+sometimes takes several minutes before I get a response even if it should check
+for messages every 20 second.</p>
+
+<h2 id="parse-team-message">Parse Team Message</h2>
+<p>The first action we will do in our Logic app is to call our Azure function we
+created earlier. Select the connector <strong>Azure Functions</strong>.</p>
+
+<p><img src="/assets/images/0006/select_action_azure_functions.png" alt="Select Azure Functions" title="Azure Functions." /></p>
+
+<p>Then select the server you created earlier, then select the function
+<strong>ParseTeamMessage</strong>:</p>
+
+<p><img src="/assets/images/0006/select_parse_team_message.png" alt="Select ParseTeamMessage" title="Select ParseTeamMessage." />.</p>
+
+<p>Now the action needs to be configured. Add this to the <strong>Request Body</strong> field:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> JSON </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"Content"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"ContentType"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w">
+</span><span class="p">}</span><span class="w"> </span></code></pre></figure>
+
+<p>Then add <code class="language-plaintext highlighter-rouge">Message body content</code> and <code class="language-plaintext highlighter-rouge">Message body contentType</code> as dynamic content:</p>
+
+<p><img src="/assets/images/0006/configure_action_parse_team_message.png" alt="Configure Request Body" title="Configure Request Body" />.</p>
+
+<h2 id="parse-command">Parse Command</h2>
+<p>In the second action we will parse the result from the Azure function. Add a new
+step and select <strong>Data operations</strong>:</p>
+
+<p><img src="/assets/images/0006/select_data_operations.png" alt="Select Data Operations" title="Select Data Operations" />.</p>
+
+<p>Then select the action <strong>Parse JSON</strong>:</p>
+
+<p><img src="/assets/images/0006/select_parse_json.png" alt="Select Parse JSON" title="Select Parse JSON" />.</p>
+
+<p>Then rename the action to <strong>Parse Command</strong> (use the menu in the upper right
+corner). Then configure <strong>Content</strong> to use the <code class="language-plaintext highlighter-rouge">Body</code> from the previous action.</p>
+
+<p><img src="/assets/images/0006/configure_parse_command.png" alt="Configure Parse Command" title="Configure Parse Command" /></p>
+
+<p>And then finally add this to <strong>Schema</strong>:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> JSON </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span><span class="w">
+    </span><span class="nl">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"Command"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="nl">"ParameterCount"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"integer"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="nl">"Parameters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+            </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"array"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"object"</span><span class="w">
+</span><span class="p">}</span></code></pre></figure>
+
+<p>This was the final step that involves parsing. The next steps will be a lot
+easier.</p>
+
+<h2 id="handle-commands">Handle commands</h2>
+<p>Now when then message is parsed, it is time do decide what to do with the data.
+Add a new action and select <strong>Control</strong>:</p>
+
+<p><img src="/assets/images/0006/select_action_control.png" alt="Select Control" title="Select Control" /></p>
+
+<p>And then select <strong>Switch</strong>:</p>
+
+<p><img src="/assets/images/0006/select_switch.png" alt="Select Switch" title="Select Switch" /></p>
+
+<p>Then configure the command by setting  <strong>On</strong> to <code class="language-plaintext highlighter-rouge">Command</code> from the previous
+action.</p>
+
+<p><img src="/assets/images/0006/configure_switch.png" alt="Configure Switch" title="Select Configure" /></p>
+
+<p>After this we will add a new <strong>case</strong> for every command we want to support.</p>
+
+<h2 id="command-help">Command help</h2>
+
+<p>We start with a simple command - <strong>help</strong>. When a user sends <strong>help</strong> we will
+just respond with a instruction of which commands that are available.</p>
+
+<p>In the first case, just enter <code class="language-plaintext highlighter-rouge">help</code>:</p>
+
+<p><img src="/assets/images/0006/configure_case_help.png" alt="Configure Case Help" title="Configure Case Help" /></p>
+
+<p>Now we will select which commands to execute. Click on <strong>Add an action</strong> and
+select <strong>Microsoft Teams</strong>:</p>
+
+<p><img src="/assets/images/0006/select_action_teams.png" alt="Select Microsoft Teams" title="Select Microsoft Teams" /></p>
+
+<p>And then select <strong>Post a reply to a message</strong>.</p>
+
+<p><img src="/assets/images/0006/select_post_a_reply.png" alt="Select Post a reply" title="Select Post a reply" /></p>
+
+<p>Then configure the action by setting the <strong>Team</strong> and <strong>Channel</strong> to the same
+values as before. Then in the <strong>Message</strong> field, select <strong>Message id</strong> from the
+trigger values. And then write something appropriate in the <strong>Reply</strong>.</p>
+
+<p><img src="/assets/images/0006/configure_post_a_reply.png" alt="Configure reply" title="Configure reply" /></p>
+
+<h2 id="command-start-vm">Command start-vm</h2>
+
+<p>In the final command we will add support for starting a virtual machine.</p>
+
+<p><img src="/assets/images/0006/configure_case_start_vm.png" alt="Configure Case start-vm" title="Configure Case start-vm" /></p>
+
+<p>This command will require a parameter. If the parameter is missing, we will send
+back an error message instead. Select <strong>Add an action</strong> and then select
+<strong>Control</strong>:</p>
+
+<p><img src="/assets/images/0006/select_action_control.png" alt="Select Control" title="Select Control" /></p>
+
+<p>Then select the action <strong>Condition</strong>:</p>
+
+<p><img src="/assets/images/0006/select_action_condition.png" alt="Select Condition" title="Select Condition" /></p>
+
+<p>Then configure the condition to check that <code class="language-plaintext highlighter-rouge">ParameterCount</code> <strong>is greater than or
+equal to</strong> <code class="language-plaintext highlighter-rouge">1</code>.</p>
+
+<p><img src="/assets/images/0006/configure_condition.png" alt="Configure Condition" title="Configure Condition" /></p>
+
+<p>If the condition is false, an error message should be sent back to the user. I
+will not explain how to do that, it is in principle the same as in the help
+command.</p>
+
+<p>If the condition is true, we should check which name the user has written and
+then take the appropriate actions. You could do this by a switch command that we
+also have done before so I will not describe that either. Instead we will just
+send back a message to the user saying that we are starting the virtual machine.</p>
+
+<p>Click on <strong>Add an action</strong> and select <strong>Microsoft Teams</strong>:</p>
+
+<p><img src="/assets/images/0006/select_action_teams.png" alt="Select Microsoft Teams" title="Select Microsoft Teams" /></p>
+
+<p>And then select <strong>Post a reply to a message</strong>.</p>
+
+<p><img src="/assets/images/0006/select_post_a_reply.png" alt="Select Post a reply" title="Select Post a reply" /></p>
+
+<p>Then configure the action by setting the <strong>Team</strong> and <strong>Channel</strong> to the same
+values as before. Then in the <strong>Message</strong> field, select <strong>Message id</strong> from the
+trigger values (just as in the help command).</p>
+
+<p>Then in <strong>Reply</strong> write a text and then add the expression:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> JSON </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">    body('Parse_Command')?['Parameters']?[0]</code></pre></figure>
+
+<p><img src="/assets/images/0006/configure_start_vm_reply.png" alt="Configure reply" title="Configure reply" /></p>
+
+<p>If you want to write the second parameter replace [0] with [1].</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>What I like most of this solution is that it is easy to add support for new commands. Add since
+Logic apps could interact with a lot of connectors you could interesting things with this.</p>
+
+  </div>
+  
+    <div id="archives" class="related"><div class="archive-group">
+    
+      
+      <div id="#logic-apps"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about Logic apps</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-excel-files-in-logic-apps">Creating Excel-files in Logic Apps</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-database-SKU-with-logic-apps">Change database SKU with Logic apps</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-sql-server-firewall-settings-with-logic-apps">Change SQL Server firewall settings with Logic apps</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/start-and-stop-virtual-machines-with-logic-apps">Start and stop virtual machines with Logic apps</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/escape-sequences-in-logic-apps">Escape sequences in Logic apps</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  </div><a class="u-url" href="/posts/use-teams-as-a-terminal" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Power Query - Grouping and filtering data | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Power Query - Grouping and filtering data" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="When you are working with data you often want to do some kind of summarizing. With Power Query you do this with grouping. Just like join, this is similar how it works in SQL." />
+<meta property="og:description" content="When you are working with data you often want to do some kind of summarizing. With Power Query you do this with grouping. Just like join, this is similar how it works in SQL." />
+<link rel="canonical" href="https://pekspro.github.io/posts/power-query-grouping-and-filtering-data" />
+<meta property="og:url" content="https://pekspro.github.io/posts/power-query-grouping-and-filtering-data" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-08-09T01:00:00+02:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Power Query - Grouping and filtering data" />
+<script type="application/ld+json">
+{"description":"When you are working with data you often want to do some kind of summarizing. With Power Query you do this with grouping. Just like join, this is similar how it works in SQL.","headline":"Power Query - Grouping and filtering data","dateModified":"2020-08-09T01:00:00+02:00","datePublished":"2020-08-09T01:00:00+02:00","url":"https://pekspro.github.io/posts/power-query-grouping-and-filtering-data","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/power-query-grouping-and-filtering-data"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Power Query - Grouping and filtering data</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2020-08-09T01:00:00+02:00" itemprop="datePublished">
+        Aug 9, 2020
+      </time>
+        •  Categories: 
+        <a href="/categories#excel">Excel</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>When you are working with data you often want to do some kind of summarizing.
+With Power Query you do this with grouping. Just like join, this is similar how
+it works in SQL.</p>
+
+<p>Before you read on, make sure you have completed the previous part 
+<a href="/posts/power-query-joining-data">Power Query - Joining data</a>
+because we continue working with the data we created there.</p>
+
+<h2 id="referencing-previous-queries">Referencing previous queries</h2>
+
+<p>Now we will create some statistics for each country. We want to know the number
+of players from each country, and what the average age is.</p>
+
+<p>The first thing we need to do is to decide which data source we want to use. In
+your <strong>Queries &amp; Connections</strong> panel you have three queries. The query
+<strong>PlayerCountry</strong> would be a good starting point for us. But we do not want to
+modify this query because it is useful as it is. Another option would be to copy
+that query. But the option we will use is to make a reference. Right click on
+<strong>PlayerCountry</strong> and select <strong>Reference</strong>.</p>
+
+<p><img src="/assets/images/0019/query_playercountry_reference.png" alt="Create reference" title="Create reference" /></p>
+
+<p>When we are doing this, we use the result from the <strong>PlayerCountry</strong> query as
+the data source. This means that if we a making changes to <strong>PlayerCountry</strong>
+this will also affect our new query. You should now see the Power Query editor:</p>
+
+<p><img src="/assets/images/0019/editor_referencestart.png" alt="Editor" title="Editor" /></p>
+
+<p>The data you see is identical to <strong>PlayerCountry</strong>.</p>
+
+<h2 id="grouping-data">Grouping data</h2>
+
+<p>Now we will start to group the data. Select <strong>Transform</strong> and then click on
+<strong>Group by.</strong></p>
+
+<p><img src="/assets/images/0019/editor_menu_transform_groupby.png" alt="Group By" title="Group By" /></p>
+
+<p>Now you are being asked how to group the data. Configure the settings like this:</p>
+
+<p><img src="/assets/images/0019/groupby_settings.png" alt="Group By settings" title="Group By settings" /></p>
+
+<p>When data is grouped, all rows that have the same content in the columns you
+have selected will be in one single row. Then you could do aggregations on the
+other columns. In our case all rows where column <strong>Country name</strong> is identical
+will be grouped. Then for each of these groups we will get the number of players
+and the average age on the players. Now, click on <strong>OK</strong>.</p>
+
+<p>Now you see the result in the Power Query editor. Give the query the name
+<strong>CountryStatistics</strong> and then click on <strong>Home</strong> &gt; <strong>Close &amp; Load</strong>.</p>
+
+<p><img src="/assets/images/0019/editor_countrystatistics.png" alt="Group By" title="Group By" /></p>
+
+<p>Now you see the result in Excel:</p>
+
+<p><img src="/assets/images/0019/excel_countrystatistics.png" alt="Country statistics" title="Country statistics" /></p>
+
+<p>Grouping is quite easy to do. If you want to challenge yourself, try changing
+the query so that you see:</p>
+
+<ul>
+  <li>The age of the youngest player of each country.</li>
+  <li>The age of the oldest player of each country.</li>
+  <li>The average age with one decimal. You need apply rounding as an additional
+step.</li>
+</ul>
+
+<h2 id="analyzing-rock-scissor-paper-data">Analyzing Rock-Scissor-Paper data</h2>
+
+<p>The players we have been used is obsessed rock-scissor-paper players. It is said
+that every year when the earth is furthers away from the sun the get together at
+midnight and play an intense tournament. Every player plays against every other
+player twice, once as a home-player and once as an away-player. The log every
+move they make. Our job is to figure out which player are the winner or the
+tournament.</p>
+
+<p>Start by downloading this file: 
+<a href="/assets/files/0019/rock-scissor-paper.txt">rock-scissor-paper.txt</a>.</p>
+
+<p>If you open the file you see start it starts like this:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Advanced editor </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">GameID*HomePlayerID*AwayPlayerID*HomeMove*AwayMove
+1*1*8*P*S
+1*1*8*S*P
+1*1*8*P*R
+1*1*8*R*R
+1*1*8*S*S
+1*1*8*P*P</code></pre></figure>
+
+<p>This is a crazy file format! But as you could guess every row contains of:</p>
+
+<ul>
+  <li>Game ID (just a number)</li>
+  <li>ID of the home player</li>
+  <li>ID of the away player</li>
+  <li>Move of the home player. That is, <strong>R</strong>ock, <strong>S</strong>cissor or <strong>P</strong>aper</li>
+  <li>Move of the away player.</li>
+</ul>
+
+<p>As you could guess we will have to do a lot of fun stuff to figure out which
+player that are the tournament champion :-)</p>
+
+<h2 id="reading-and-parsing-the-file">Reading and parsing the file</h2>
+
+<p>In Excel, select <strong>Data</strong> and then <strong>From Text/CSV</strong></p>
+
+<p><img src="/assets/images/0019/excel_menu_data_fromtextcsv.png" alt="From Text/CSV" title="From Text/CSV" /></p>
+
+<p>When you have selected the file, you will see this:</p>
+
+<p><img src="/assets/images/0019/fromtext_settings.png" alt="Import settings" title="Import settings" /></p>
+
+<p>If this had been a CSV-file then Power Query would have been able to parse that
+correctly and you would have seen all columns directly. But with this we do not
+have that luxury. But it is not too hard to fix. Click on the button <strong>Transform
+Data</strong>.</p>
+
+<p>Now you are in the Power Query Editor. You see all data in one single column.
+The first thing we will do is to separate this into several columns. Select
+<strong>Transform</strong> &gt; <strong>Split Column</strong> &gt; <strong>By Delimiter</strong>.</p>
+
+<p><img src="/assets/images/0019/editor_menu_transform_splitcolumn.png" alt="Split Column" title="Split Column" /></p>
+
+<p>Now you are being ask which delimiter to use. Select asterisk (*) as below and
+click <strong>OK</strong>.</p>
+
+<p><img src="/assets/images/0019/splitbycolumn_settings.png" alt="Split Column settings" title="Split Column settings" /></p>
+
+<p>Now you see the data in five columns, much better! The only problem now is that
+headers are offset. Fix that by selecting <strong>Transform</strong> &gt; <strong>Use First Row as
+Header</strong>.</p>
+
+<p><img src="/assets/images/0019/editor_menu_transform_usefirstrowasheaders.png" alt="Use first row as headers" title="Use first row as headers" /></p>
+
+<p>Now you see the data as this:</p>
+
+<p><img src="/assets/images/0019/editor_rsp_headerchanged.png" alt="Header changed" title="Header changed" /></p>
+
+<p>In just two steps we converted this file into a table we could use.</p>
+
+<h2 id="creating-column-from-example">Creating column from example</h2>
+
+<p>In this version of Rock-Scissor-Paper a player will get 1 score of if the player
+picks:</p>
+
+<ul>
+  <li>Paper and the opponent Rock</li>
+  <li>Rock and the opponent Scissor</li>
+  <li>Scissor and the opponent Paper.</li>
+</ul>
+
+<p>Otherwise it will score 0. The first player to reach 3 wins the game.</p>
+
+<p>We will use conditions to solve this which we have not used before. But
+conditions could only operate on a single column so we will create a new column
+based on the two moves-columns.</p>
+
+<p>We could do this by adding a <strong>Custom column</strong> and write the formula manually.
+But this time we will instead let the editor guess the formula to us. Select
+<strong>Add column</strong> &gt; <strong>Column from Examples</strong>.</p>
+
+<p><img src="/assets/images/0019/editor_menu_addcolumn_columnformexamples.png" alt="Column from examples" title="Column from examples" /></p>
+
+<p>Now we are being asked to write examples:</p>
+
+<p><img src="/assets/images/0019/editor_rsp_writeexamples.png" alt="Write from examples" title="Write from examples" /></p>
+
+<p>In the first row <strong>HomeMove</strong> is <strong>P</strong>, and <strong>AwayMove</strong> is <strong>S</strong>. We want
+there that the text <strong>P-S</strong> in the new column, so we just enter that the example
+on the first row and press enter:</p>
+
+<p><img src="/assets/images/0019/editor_rsp_writeexamples2.png" alt="Write from examples" title="Write from examples" /></p>
+
+<p>As you see the editor now guesses that we want to use the formula:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Formula generated from examples </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">Text.Combine({[HomeMove], "-", [AwayMove]})</code></pre></figure>
+
+<p>And this exactly what we wanted to use! If the formula is incorrect you could
+enter more examples and, in many times, you will get the right formula. This
+feature is amazing and will in many cases save you from writing complicated
+formulas. Rename the new column to <strong>Moves</strong> and then click on <strong>OK</strong>.</p>
+
+<p><img src="/assets/images/0019/editor_rsp_movesadded.png" alt="Editor - Moves Added" title="Editor - Moves Added" /></p>
+
+<h2 id="getting-the-score">Getting the score</h2>
+
+<p>The next step is to create a column where we see the score the Home-player.
+Click on <strong>Add Column</strong> &gt; <strong>Conditional Column</strong>.</p>
+
+<p><img src="/assets/images/0019/editor_menu_addcolumn_conditionalcolumn.png" alt="Conditional column" title="Conditional column" /></p>
+
+<p>Now we will setup the conditions where the Home-players gets one score. That is
+if:</p>
+
+<ul>
+  <li>Home plays P and away plays R.</li>
+  <li>Home plays R and away plays S.</li>
+  <li>Home plays S and away plays P.</li>
+</ul>
+
+<p>Otherwise the score will be 0. Setup the conditions like this:</p>
+
+<p><img src="/assets/images/0019/addconditionalcolumn_settings1.png" alt="Conditional column settings" title="Conditional column settings" /></p>
+
+<p>Also set the column name to <strong>HomeScore</strong> and click <strong>OK</strong>. Now in the editor
+you see this:</p>
+
+<p><img src="/assets/images/0019/editor_rsp_homescoreadded.png" alt="HomeScore added" title="HomeScore added" /></p>
+
+<p>Now you see the rows where the home player gets the score.</p>
+
+<p>Next, we setup the score for the other play. Again, click on <strong>Add column</strong> &gt;
+<strong>Conditional Column</strong>.</p>
+
+<p><img src="/assets/images/0019/editor_menu_addcolumn_conditionalcolumn.png" alt="Conditional column" title="Conditional column" /></p>
+
+<p>You could setup the conditions similar like we did before, that totally works. But instead we use a bit of different logic. The away player will <em>not</em> get a score if:</p>
+
+<ul>
+  <li>The home user got a score.</li>
+  <li>The players made the same move.</li>
+</ul>
+
+<p>Otherwise it will score 1. Setup the conditions like this:</p>
+
+<p><img src="/assets/images/0019/addconditionalcolumn_settings2.png" alt="Conditional column settings" title="Conditional column settings" /></p>
+
+<p>Set the name to <strong>AwayScore</strong> and then click <strong>OK</strong>.</p>
+
+<p><img src="/assets/images/0019/editor_rsp_awayscoreadded.png" alt="AwayScore added" title="AwayScore added" /></p>
+
+<p>Now we see the score each player gets after each move.</p>
+
+<h2 id="summarizing-the-score">Summarizing the score</h2>
+
+<p>Instead of seeing game score for each round, we want to see the total score
+after each game. We solve this with grouping. Select <strong>Transform</strong> &gt; <strong>Group
+By.</strong></p>
+
+<p><img src="/assets/images/0019/editor_menu_transform_groupby.png" alt="Group By" title="Group By" /></p>
+
+<p>Group by <strong>GameID</strong> , <strong>HomePlayerID</strong> and <strong>AwayPlayerID</strong> and the sum up the
+<strong>HomeScore</strong> and <strong>AwayScore</strong>.</p>
+
+<p><img src="/assets/images/0019/groupby_settings2.png" alt="Group By settings" title="Group By settings" /></p>
+
+<p>Then press <strong>OK</strong> and you see this:</p>
+
+<p><img src="/assets/images/0019/editor_rsp_grouped.png" alt="Score calculated" title="Score calculated" /></p>
+
+<p>As you see each game one player has the score 3 which is just what we expected.</p>
+
+<p>Now are done with this query. Name of <strong>GameScore</strong> and the and select <strong>Home</strong>,
+<strong>Close &amp; Load</strong> and then <strong>Close &amp; Load To…</strong>.</p>
+
+<p><img src="/assets/images/0019/editor_menu_home_closeload_closeloadto.png" alt="Close &amp; Load To..." title="Close &amp; Load To..." /></p>
+
+<p>This query will just be used as base for other queries, so we do not need to see
+it in Excel. Therefore, select <strong>Only Create Connection</strong> and press <strong>OK.</strong></p>
+
+<p><img src="/assets/images/0019/importdata_connectiononly.png" alt="Import Data - Only Create Connection" title="Import Data - Only Create Connection" /></p>
+
+<h2 id="getting-the-winners">Getting the winners</h2>
+
+<p>Next problem to solve is to get the winner of each game. The best way to do this
+is to add a new conditional column in the <strong>GameScore</strong> query, comparing the
+<strong>TotalHomeScore</strong> with <strong>TotalAwayScore</strong> and then user <strong>HomePlayerID</strong> or
+<strong>AwayPlayerID</strong> depending on the conditions. But we will not learn much form
+that and will select a different approach.</p>
+
+<p>Instead we will create two separate lists. One list where the home player is the
+winner, and another list where the away play is the winner. And then we merge
+these two lists.</p>
+
+<p>In the <strong>Queries &amp; Connections</strong> panel, right click on <strong>GameScore</strong> and select
+<strong>Reference</strong>.</p>
+
+<p><img src="/assets/images/0019/query_gamescore_reference.png" alt="GameScore - Reference" title="GameScore - Reference" /></p>
+
+<p>Now you see the editor with the data referenced from <strong>GameScore</strong>. As mentioned
+earlier, a player wins a game if it reaches the score 3. We will now filter out
+each game where the <strong>TotalHomeScore</strong> has the value 3. In the
+<strong>TotalHomeScore</strong> column, click on the drop-down button and select the filter
+like this:</p>
+
+<p><img src="/assets/images/0019/editor_rsp_filtertotalhomescore.png" alt="Filter TotalHomeScore" title="Filter TotalHomeScore" /></p>
+
+<p>After the filter has been applied, we just want to keep the <strong>HomePlayerID</strong>.
+Right click on the column and select <strong>Remove Other Columns</strong>.</p>
+
+<p><img src="/assets/images/0019/editor_rsp_removeothercolumns.png" alt="Remove other columns" title="Remove other columns" /></p>
+
+<p>Rename the column to <strong>WinnerPlayerID</strong> and name the query <strong>HomeWinners.</strong></p>
+
+<p><img src="/assets/images/0019/editor_homewinners.png" alt="HomeWinners" title="HomeWinners" /></p>
+
+<p>Now we are done with this query. Finish it by click <strong>Home</strong> &gt; <strong>Close &amp; Load</strong>.
+And as before you do not need to show this query in Excel.</p>
+
+<p>Now repeat this but filter out the away winners instead. Name that query to
+<strong>AwayWinners</strong>. Remember to name the column <strong>WinnerPlayerID</strong>.</p>
+
+<h2 id="combining-the-winners">Combining the winners</h2>
+
+<p>In the <strong>Queries &amp; Connections</strong> should now you see the <strong>HomeWinners</strong> and
+<strong>AwayWinners</strong>. Now will combine these two lists into a single list. Right
+click on <strong>HomeWinners</strong> and select <strong>Append</strong>.</p>
+
+<p><img src="/assets/images/0019/query_homewinners_append.png" alt="HomeWinners - Append" title="HomeWinners - Append" /></p>
+
+<p>Select <strong>HomeWinners</strong> and <strong>AwayWinners</strong> and then click <strong>OK</strong>.</p>
+
+<p><img src="/assets/images/0019/append_settings.png" alt="Append settings" title="Append settings" /></p>
+
+<p>When you click OK you will see the winner of every game. If you have done
+everything correctly you should have 56 rows with a single column. If the tables
+would have more columns you would see these two.</p>
+
+<h1 id="getting-number-of-victories-for-each-player">Getting number of victories for each player</h1>
+
+<p>Now we just want to get how many times each player has won. Select <strong>Transform</strong>
+and then <strong>Group By.</strong></p>
+
+<p><img src="/assets/images/0019/editor_menu_transform_groupby.png" alt="Group by" title="Group by" /></p>
+
+<p>We group by <strong>WinnerPlayerID</strong>. Then we just count the number of rows for each
+player and call that column <strong>Victories</strong>.</p>
+
+<p><img src="/assets/images/0019/groupby_settings3.png" alt="Group by settings" title="Group by settings" /></p>
+
+<p>Now you should see the result in the editor.</p>
+
+<p><img src="/assets/images/0019/editor_rsp_grouped2.png" alt="Grouped result" title="Grouped result" /></p>
+
+<p>You could sort the list by <strong>Victories</strong> by clicking on the drop-down button and
+select <strong>Sort Descending</strong>. As you see player 2 has 10 victories, while player 5
+just had three.</p>
+
+<p>Call the query <strong>WinCount</strong> and close the editor by selecting <strong>Home</strong>, <strong>Close
+and Load.</strong> Add the result to an Excel spreadsheet if you want to.</p>
+
+<p>Of course, it would be nicer to see the name of the player instead of just the
+id. As a final challenge, you could try to solve this by merging
+<strong>PlayerCountry</strong> with then new <strong>WinCount</strong> query.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>You can check the final result of this part in this file: 
+<a href="/assets/files/0019/power-query-part-4.xlsx">power-query-part-4.xlsx</a>.</p>
+
+<p>In this part we parsed data from a strangely formatted file, and then used some
+logic to figure out the score of each player and then we summarized everything.</p>
+
+<p>I hope you understood most part of this. I also hope that you know what you
+could do with Power Query. I think it is a very powerful tool and I used it
+often when I am analyzing data.</p>
+
+<p>In all four part tutorial we have touched the most important features in <strong>Power
+Query</strong>. Obviously, there is a lot more. But the things you have learned from
+this should cover a lot, and you are most likely you find more features on your
+own.</p>
+
+  </div>
+  
+    <div id="archives" class="related"><div class="archive-group">
+    
+      
+      <div id="#excel"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about Excel</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/be-careful-with-references-in-power-query">Be careful with references in Power Query</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-unique-excel-sheet-names">Creating unique Excel sheet names</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/calling-an-api-multiple-times-with-power-query">Calling an API multiple times with Power Query</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-accruals-with-power-query">Creating accruals with Power Query</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/how-to-use-JWT-token-from-query-string">How to use JWT token from query string</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/using-power-query-and-web-api-with-http-authentication">Power Query and Web API with HTTP authentication</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/power-query-and-json-arrays">Power Query and JSON arrays</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/format-tables-in-excel-with-macros">Format tables in Excel with macros</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-excel-files-in-azure-functions">Creating Excel-files in Azure Functions</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-excel-files-in-logic-apps">Creating Excel-files in Logic Apps</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/power-query-joining-data">Power Query - Joining data</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/power-query-working-with-columns">Power Query - Working with columns</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/power-query-get-started-in-excel">Power Query - Get started in Excel</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  </div><a class="u-url" href="/posts/power-query-grouping-and-filtering-data" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

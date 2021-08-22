@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Batch upgrade to .NET 6 | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Batch upgrade to .NET 6" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content=".NET 6 preview has been out for a while, and I decided to give it a go. New compiler warnings have been introduced and I wanted to find and fix this early. But I also wanted to easily go back to .NET 5." />
+<meta property="og:description" content=".NET 6 preview has been out for a while, and I decided to give it a go. New compiler warnings have been introduced and I wanted to find and fix this early. But I also wanted to easily go back to .NET 5." />
+<link rel="canonical" href="https://pekspro.github.io/posts/batch-upgrade-to-net-6" />
+<meta property="og:url" content="https://pekspro.github.io/posts/batch-upgrade-to-net-6" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-08-22T01:00:00+02:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Batch upgrade to .NET 6" />
+<script type="application/ld+json">
+{"description":".NET 6 preview has been out for a while, and I decided to give it a go. New compiler warnings have been introduced and I wanted to find and fix this early. But I also wanted to easily go back to .NET 5.","headline":"Batch upgrade to .NET 6","dateModified":"2021-08-22T01:00:00+02:00","datePublished":"2021-08-22T01:00:00+02:00","url":"https://pekspro.github.io/posts/batch-upgrade-to-net-6","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/batch-upgrade-to-net-6"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Batch upgrade to .NET 6</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2021-08-22T01:00:00+02:00" itemprop="datePublished">
+        Aug 22, 2021
+      </time>
+        •  Categories: 
+        <a href="/categories#net-powershell">.NET. PowerShell</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>.NET 6 preview has been out for a while, and I decided to give it a go. New
+compiler warnings have been introduced and I wanted to find and fix this early.
+But I also wanted to easily go back to .NET 5.</p>
+
+<h2 id="the-problem">The problem</h2>
+
+<p>There is <a href="https://docs.microsoft.com/en-us/aspnet/core/migration/50-to-60">good
+documentation</a>
+how to update to .NET 6. Most of the work is in the project files. Changing
+<code class="language-plaintext highlighter-rouge">TargetFramework</code> is easy. But finding and upgrading all nuget packages
+references is a lot harder. And if you have a large solution with multiple
+projects, you could quite some time just on this step. Visual Studio could help
+you update all NuGet packages in a solution. But it is a bit slow. Also, there
+is no easy way to roll back.</p>
+
+<h2 id="the-solution">The solution</h2>
+
+<p>My solution was to create a PowerShell script to that finds all project files
+and then makes all necessary changes. And them make another script that does
+this in reverse. They are available here:</p>
+
+<p><a href="https://gist.github.com/pekspro/24fca2eb1cad8c30333a910b163a3f6a">https://gist.github.com/pekspro/24fca2eb1cad8c30333a910b163a3f6a</a></p>
+
+<h2 id="summary">Summary</h2>
+
+<p>Creating scripts like this is always fun. I think it covers most scenarios, but
+you might need to tweak it a bit to fit your solution.</p>
+
+<p>The scripts mostly contain of find-and-replace code. Creating this code was a
+bit tricky. How it was done in detail you find in the comments of the scripts.
+Basically I look up all <code class="language-plaintext highlighter-rouge">Microsoft.*</code> and <code class="language-plaintext highlighter-rouge">System.*</code> packages on NuGet.org and
+then filter out which are relevant.</p>
+
+  </div>
+  
+    
+  
+  <a class="u-url" href="/posts/batch-upgrade-to-net-6" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

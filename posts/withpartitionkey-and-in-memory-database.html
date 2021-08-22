@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>WithPartitionKey and in-memory database | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="WithPartitionKey and in-memory database" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="With EF Core 5, WithPartitionKey has been added that will make your queries executes faster on a Cosmos database. But it does not work with in in-memory database." />
+<meta property="og:description" content="With EF Core 5, WithPartitionKey has been added that will make your queries executes faster on a Cosmos database. But it does not work with in in-memory database." />
+<link rel="canonical" href="https://pekspro.github.io/posts/withpartitionkey-and-in-memory-database" />
+<meta property="og:url" content="https://pekspro.github.io/posts/withpartitionkey-and-in-memory-database" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-12-20T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="WithPartitionKey and in-memory database" />
+<script type="application/ld+json">
+{"description":"With EF Core 5, WithPartitionKey has been added that will make your queries executes faster on a Cosmos database. But it does not work with in in-memory database.","headline":"WithPartitionKey and in-memory database","dateModified":"2020-12-20T00:00:00+01:00","datePublished":"2020-12-20T00:00:00+01:00","url":"https://pekspro.github.io/posts/withpartitionkey-and-in-memory-database","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/withpartitionkey-and-in-memory-database"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">WithPartitionKey and in-memory database</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2020-12-20T00:00:00+01:00" itemprop="datePublished">
+        Dec 20, 2020
+      </time>
+        •  Categories: 
+        <a href="/categories#net">.NET</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>With EF Core 5, <a href="https://docs.microsoft.com/en-us/ef/core/what-is-new/ef-core-5.0/whatsnew#preview-3">WithPartitionKey</a>
+has been added that will make your queries executes faster on a Cosmos database.
+But it does not work with in in-memory database.</p>
+
+<h2 id="the-problem">The problem</h2>
+
+<p>WithPartitionKey is a nice addition a think. But if you also using an in-memory
+database (very convenient when doing unit tests) it will not work. If you try
+you will get an exception with the error message:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The LINQ expression 'DbSet&lt;Blog&gt;().WithPartitionKey("x")' could not be translated. 
+Either rewrite the query in a form that can be translated, or switch to client evaluation 
+explicitly by inserting a call to 'AsEnumerable', 'AsAsyncEnumerable', 'ToList', or 
+'ToListAsync'. See https://go.microsoft.com/fwlink/?linkid=2101038 for more information.'
+</code></pre></div></div>
+
+<h2 id="the-solution">The solution</h2>
+
+<p>My solution is to create my own extension method, I call it <code class="language-plaintext highlighter-rouge">OnPartion</code>. When
+this is used it calls <code class="language-plaintext highlighter-rouge">WithPartitionKey</code> if cosmos database provider is used.
+If not, then it will be translated to a <code class="language-plaintext highlighter-rouge">Where</code> statement. For me, this is
+good enough. But there are some limitations:</p>
+
+<ul>
+  <li>The extension needs to be configured so it knows which way to go. I do this
+in the <code class="language-plaintext highlighter-rouge">DbContext</code> constructor.</li>
+  <li>You cannot use both a cosmos database and a in-memory database in the same
+application. Not a major issue, I think.</li>
+  <li>You need to create an extension for every entity you are using. I am not
+happy with that. But it not a major work.</li>
+</ul>
+
+<p>Here is the code included in an example:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> CSharp </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="k">using</span> <span class="nn">Microsoft.EntityFrameworkCore</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Linq</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Threading.Tasks</span><span class="p">;</span>
+
+<span class="k">namespace</span> <span class="nn">ConsoleAppInMemoryError</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">class</span> <span class="nc">Blog</span>
+    <span class="p">{</span>
+        <span class="k">public</span> <span class="kt">string</span> <span class="n">ID</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span> <span class="p">=</span> <span class="kt">string</span><span class="p">.</span><span class="n">Empty</span><span class="p">;</span>
+        <span class="k">public</span> <span class="kt">string</span> <span class="n">PartionKey</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span> <span class="p">=</span> <span class="kt">string</span><span class="p">.</span><span class="n">Empty</span><span class="p">;</span>
+        <span class="k">public</span> <span class="kt">string</span> <span class="n">Name</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span> <span class="p">=</span> <span class="s">""</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">class</span> <span class="nc">BlogContext</span> <span class="p">:</span> <span class="n">DbContext</span>
+    <span class="p">{</span>
+        <span class="k">public</span> <span class="n">DbSet</span><span class="p">&lt;</span><span class="n">Blog</span><span class="p">&gt;</span> <span class="n">Blogs</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span> <span class="p">=</span> <span class="k">null</span><span class="p">!;</span>
+
+        <span class="k">public</span> <span class="nf">BlogContext</span><span class="p">(</span><span class="n">DbContextOptions</span><span class="p">&lt;</span><span class="n">BlogContext</span><span class="p">&gt;</span> <span class="n">options</span><span class="p">)</span>
+            <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">UglyBlogQueryExtensions</span><span class="p">.</span><span class="nf">SetupUseWithPartionKeySupport</span><span class="p">(</span><span class="n">options</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">protected</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">OnModelCreating</span><span class="p">(</span><span class="n">ModelBuilder</span> <span class="n">modelBuilder</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">modelBuilder</span><span class="p">.</span><span class="n">Entity</span><span class="p">&lt;</span><span class="n">Blog</span><span class="p">&gt;()</span>
+                <span class="p">.</span><span class="nf">ToContainer</span><span class="p">(</span><span class="s">"Blogs"</span><span class="p">)</span>
+                <span class="p">.</span><span class="nf">HasNoDiscriminator</span><span class="p">()</span>
+                <span class="p">.</span><span class="nf">HasPartitionKey</span><span class="p">(</span><span class="n">o</span> <span class="p">=&gt;</span> <span class="n">o</span><span class="p">.</span><span class="n">PartionKey</span><span class="p">)</span>
+                <span class="p">.</span><span class="nf">UseETagConcurrency</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">static</span> <span class="k">class</span> <span class="nc">UglyBlogQueryExtensions</span>
+    <span class="p">{</span>
+        <span class="k">private</span> <span class="k">static</span> <span class="kt">bool</span><span class="p">?</span> <span class="n">UseWithPartionKey</span> <span class="p">=</span> <span class="k">null</span><span class="p">;</span>
+
+        <span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">SetupUseWithPartionKeySupport</span><span class="p">(</span><span class="n">DbContextOptions</span><span class="p">&lt;</span><span class="n">BlogContext</span><span class="p">&gt;</span> <span class="n">options</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">UseWithPartionKey</span> <span class="p">==</span> <span class="k">null</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="n">UseWithPartionKey</span> <span class="p">=</span> <span class="n">options</span><span class="p">.</span><span class="n">Extensions</span><span class="p">.</span><span class="nf">Any</span><span class="p">(</span><span class="n">e</span> <span class="p">=&gt;</span> <span class="n">e</span><span class="p">.</span><span class="n">Info</span><span class="p">.</span><span class="nf">ToString</span><span class="p">().</span><span class="nf">Contains</span><span class="p">(</span><span class="s">"Cosmos"</span><span class="p">));</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">public</span> <span class="k">static</span> <span class="n">IQueryable</span><span class="p">&lt;</span><span class="n">Blog</span><span class="p">&gt;</span> <span class="nf">OnPartion</span><span class="p">(</span><span class="k">this</span> <span class="n">IQueryable</span><span class="p">&lt;</span><span class="n">Blog</span><span class="p">&gt;</span> <span class="n">query</span><span class="p">,</span> <span class="kt">string</span> <span class="n">partionKey</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">UseWithPartionKey</span> <span class="p">==</span> <span class="k">true</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="n">query</span> <span class="p">=</span> <span class="n">query</span><span class="p">.</span><span class="nf">WithPartitionKey</span><span class="p">(</span><span class="n">partionKey</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">else</span>
+            <span class="p">{</span>
+                <span class="n">query</span> <span class="p">=</span> <span class="n">query</span><span class="p">.</span><span class="nf">Where</span><span class="p">(</span><span class="n">a</span> <span class="p">=&gt;</span> <span class="n">a</span><span class="p">.</span><span class="n">PartionKey</span> <span class="p">==</span> <span class="n">partionKey</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="k">return</span> <span class="n">query</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">class</span> <span class="nc">Program</span>
+    <span class="p">{</span>
+        <span class="k">static</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">Main</span><span class="p">(</span><span class="kt">string</span><span class="p">[]</span> <span class="n">args</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="kt">var</span> <span class="n">dbContextOptionsBuilder</span> <span class="p">=</span> 
+                        <span class="k">new</span> <span class="n">DbContextOptionsBuilder</span><span class="p">&lt;</span><span class="n">BlogContext</span><span class="p">&gt;()</span>
+                            <span class="p">.</span><span class="nf">UseInMemoryDatabase</span><span class="p">(</span><span class="n">Guid</span><span class="p">.</span><span class="nf">NewGuid</span><span class="p">().</span><span class="nf">ToString</span><span class="p">());</span>
+
+            <span class="kt">var</span> <span class="n">context</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">BlogContext</span><span class="p">(</span><span class="n">dbContextOptionsBuilder</span><span class="p">.</span><span class="n">Options</span><span class="p">);</span>
+
+            <span class="kt">var</span> <span class="n">items1</span> <span class="p">=</span> <span class="k">await</span> <span class="n">context</span><span class="p">.</span><span class="n">Blogs</span><span class="p">.</span><span class="nf">OnPartion</span><span class="p">(</span><span class="s">"x"</span><span class="p">).</span><span class="nf">ToListAsync</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+
+<h2 id="summary">Summary</h2>
+
+<p>This solution is a bit ugly I think but it does solve the problem. In the
+future, hopefully there will be no need to use WithPartionKey. Instead, the
+partition could automatically be detected in a where statement. Read more on
+<a href="https://github.com/dotnet/efcore/issues/20350">issue 20350</a>.</p>
+
+  </div>
+  
+    <div id="archives" class="related"><div class="archive-group">
+    
+      
+      <div id="#net"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about .NET</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/get-time-zone-for-a-user-in-graph">Get time zone for a user in Graph</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/invite-to-a-meeting">Invite to a meeting</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/caching-configuration-from-azure-keyvault">Caching configuration from Azure KeyVault</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-unique-excel-sheet-names">Creating unique Excel sheet names</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/finding-objects-that-are-not-disposed">Finding objects that are not disposed</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/finding-redundant-project-references">Finding redundant project references</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/policyscope">PolicyScope</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/manually-creating-a-dbcontext-and-enable-logging">Manually creating a DbContext and enable logging</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/graphemes">Graphemes</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/net5-and-azure-functions">.NET 5 and Azure Functions</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/how-to-use-JWT-token-from-query-string">How to use JWT token from query string</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/what-characters-are-whitespace">What characters are whitespace?</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/trimming-whitespace-in-objects">Trimming whitespace in objects</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/modifying-query-string">Modifying query strings</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/create-a-time-lapse-video">Create a time lapse video</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-language-version-on-multiple-projects">Change language version on multiple projects</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-encoding-on-your-source-files">Change encoding on your source files</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/build-time">Build time</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  </div><a class="u-url" href="/posts/withpartitionkey-and-in-memory-database" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

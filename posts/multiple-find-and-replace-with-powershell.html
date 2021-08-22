@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Multiple find and replace with PowerShell | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Multiple find and replace with PowerShell" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="If you need to find and replace a string in multiple files there are several tools that could do this. But recently I was in a situation where multiple URL:s needed to be updated in multiple files. So, I decided to do this in PowerShell instead." />
+<meta property="og:description" content="If you need to find and replace a string in multiple files there are several tools that could do this. But recently I was in a situation where multiple URL:s needed to be updated in multiple files. So, I decided to do this in PowerShell instead." />
+<link rel="canonical" href="https://pekspro.github.io/posts/multiple-find-and-replace-with-powershell" />
+<meta property="og:url" content="https://pekspro.github.io/posts/multiple-find-and-replace-with-powershell" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-10-18T01:00:00+02:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Multiple find and replace with PowerShell" />
+<script type="application/ld+json">
+{"description":"If you need to find and replace a string in multiple files there are several tools that could do this. But recently I was in a situation where multiple URL:s needed to be updated in multiple files. So, I decided to do this in PowerShell instead.","headline":"Multiple find and replace with PowerShell","dateModified":"2020-10-18T01:00:00+02:00","datePublished":"2020-10-18T01:00:00+02:00","url":"https://pekspro.github.io/posts/multiple-find-and-replace-with-powershell","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/multiple-find-and-replace-with-powershell"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Multiple find and replace with PowerShell</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2020-10-18T01:00:00+02:00" itemprop="datePublished">
+        Oct 18, 2020
+      </time>
+        •  Categories: 
+        <a href="/categories#powershell">PowerShell</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>If you need to find and replace a string in multiple files there are several
+tools that could do this. But recently I was in a situation where multiple URL:s
+needed to be updated in multiple files. So, I decided to do this in PowerShell
+instead.</p>
+
+<h2 id="the-problem">The problem</h2>
+
+<p>Let says you have a file like this:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Sample file </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">         First link with http: http://server.com/old1
+        First link with https: https://server.com/old1
+       First link with quotes: "http://server.com/old1"
+       First link with quotes: 'http://server.com/old1'
+                   First link: http://server.com/old1. A new sentence.
+  First link with extra slash: http://server.com/old1/
+ First link with query string: http://server.com/old1?search=no
+
+        Second link with http: http://server.com/old2
+       Second link with https: https://server.com/old2
+ Second link with extra slash: http://server.com/old2/
+Second link with query string: http://server.com/old2?search=no
+
+Not first link: http://server.com/old10
+Not second link: http://server.com/old20</code></pre></figure>
+
+<p>Also imagine you have several files like this. Now you need to change all URL:s
+that end with <strong>old1</strong> and <strong>old2</strong>. How do you do this efficiently?</p>
+
+<h2 id="a-naive-solution">A naive solution</h2>
+
+<p>My first attempt to solve this was a PowerShell script like this:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> PowerShell - naive solution </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="nv">$files</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Get-ChildItem</span><span class="w"> </span><span class="nt">-Include</span><span class="w"> </span><span class="p">(</span><span class="s2">"*.txt"</span><span class="p">)</span><span class="w"> </span><span class="nt">-Recurse</span><span class="w">
+</span><span class="nv">$data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">@(</span><span class="w">
+    </span><span class="p">[</span><span class="n">PSCustomObject</span><span class="p">]@{</span><span class="w">
+        </span><span class="nx">Old</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'http://server.com/old1'</span><span class="p">;</span><span class="w">
+        </span><span class="nx">New</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'https://server.com/new1'</span><span class="p">;</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">[</span><span class="n">PSCustomObject</span><span class="p">]@{</span><span class="w">
+        </span><span class="nx">Old</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'http://server.com/old2'</span><span class="p">;</span><span class="w">
+        </span><span class="nx">New</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'https://server.com/new2'</span><span class="p">;</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">)</span><span class="w">
+
+</span><span class="nv">$files</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">ForEach-Object</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nv">$filecontent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Get-Content</span><span class="w"> </span><span class="bp">$_</span><span class="w">
+    </span><span class="nv">$data</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">ForEach-Object</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nv">$filecontent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">$filecontent</span><span class="w"> </span><span class="o">-replace</span><span class="w"> </span><span class="bp">$_</span><span class="o">.</span><span class="nf">Old</span><span class="p">,</span><span class="w"> </span><span class="bp">$_</span><span class="o">.</span><span class="nf">New</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+    </span><span class="n">Set-Content</span><span class="w"> </span><span class="nt">-Path</span><span class="w"> </span><span class="bp">$_</span><span class="o">.</span><span class="nf">FullName</span><span class="w"> </span><span class="nt">-Value</span><span class="w"> </span><span class="nv">$filecontent</span><span class="w">
+</span><span class="p">}</span></code></pre></figure>
+
+<p>This mostly works, and in some situations, this might be good enough. But there
+are some limitations:</p>
+
+<ul>
+  <li>It only replaces URL:s that begins with http. You could work around this by
+making the array twice as large.</li>
+  <li>It will also partly replace URL:s that end with <strong>old10</strong> - these should not
+be updated at all.</li>
+  <li>If the URL ends with a slash, it will not be removed. Not a big problem, but
+we want to fix this too.</li>
+</ul>
+
+<h2 id="the-solution">The solution</h2>
+
+<p>This code is a bit more complex, but it solves all problems mention earlier:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> PowerShell - naive solution </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="nv">$files</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Get-ChildItem</span><span class="w"> </span><span class="nt">-Include</span><span class="w"> </span><span class="p">(</span><span class="s2">"*.txt"</span><span class="p">)</span><span class="w"> </span><span class="nt">-Recurse</span><span class="w">
+</span><span class="nv">$data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">@(</span><span class="w">
+    </span><span class="p">[</span><span class="n">pscustomobject</span><span class="p">]@{</span><span class="w">
+        </span><span class="nx">Old</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'server.com/old1'</span><span class="p">;</span><span class="w">
+        </span><span class="nx">New</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'server.com/new1'</span><span class="p">;</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">[</span><span class="n">pscustomobject</span><span class="p">]@{</span><span class="w">
+        </span><span class="nx">Old</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'server.com/old2'</span><span class="p">;</span><span class="w">
+        </span><span class="nx">New</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'server.com/new2'</span><span class="p">;</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">)</span><span class="w">
+
+</span><span class="nv">$files</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">ForEach-Object</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nv">$filecontent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Get-Content</span><span class="w"> </span><span class="bp">$_</span><span class="w">
+    </span><span class="nv">$data</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">ForEach-Object</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nv">$filecontent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">$filecontent</span><span class="w"> </span><span class="o">-replace</span><span class="w"> </span><span class="s2">"http(s)?://</span><span class="si">$(</span><span class="bp">$_</span><span class="o">.</span><span class="nf">Old</span><span class="si">)</span><span class="s2">(\/)?([^a-zA-Z0-9]|</span><span class="se">`$</span><span class="s2">)"</span><span class="p">,</span><span class="w"> </span><span class="s2">"https://</span><span class="si">$(</span><span class="bp">$_</span><span class="o">.</span><span class="nf">New</span><span class="si">)</span><span class="se">`$</span><span class="s2">3"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+    </span><span class="n">Set-Content</span><span class="w"> </span><span class="nt">-Path</span><span class="w"> </span><span class="bp">$_</span><span class="o">.</span><span class="nf">FullName</span><span class="w"> </span><span class="nt">-Value</span><span class="w"> </span><span class="nv">$filecontent</span><span class="w">
+</span><span class="p">}</span></code></pre></figure>
+
+<p>The replacement expression might need some clarification. First, this is what we
+are looking for:</p>
+
+<ul>
+  <li><strong>http(s)?://</strong> - It should start with http:// or https://</li>
+  <li><strong>$($_.Old)</strong> - This is the server and path previously defined.</li>
+  <li><strong>(\/)?</strong> - This is the slash at the end of the URL - if there is any.</li>
+  <li><strong>([^a-zA-Z0-9]|`$)</strong> - This is a character after the URL. It should not be a
+number or a letter - but it might be end of string.</li>
+</ul>
+
+<p>This is then replaced with:</p>
+
+<ul>
+  <li><strong>https://</strong> - It is what it looks like</li>
+  <li><strong>$($_.New)</strong> - The new server and path previously defined.</li>
+  <li><strong>`$3</strong> - The extra character after the URL that we might have catch.</li>
+</ul>
+
+<p>By the way, the accent before the dollar sign (like in <strong>`$3</strong>) is just an
+escape sequence, telling PowerShell that the dollar sign should be as it is and
+not be treated like a variable.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>This was a fun little exercise for me. PowerShell and regular expressions are
+something that I always need to practice on.</p>
+
+  </div>
+  
+    <div id="archives" class="related"><div class="archive-group">
+    
+      
+      <div id="#powershell"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about PowerShell</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/finding-redundant-project-references">Finding redundant project references</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/net5-and-azure-functions">.NET 5 and Azure Functions</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/prettifying-json-with-powerwhell">Prettifying JSON with PowerShell</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/extracting-urls-from-files-with-powershell">Extracting URL:s from files with PowerShell</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-encoding-on-your-source-files">Change encoding on your source files</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/compiling-with-a-RAM-Drive">Compiling with a RAM-drive</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  </div><a class="u-url" href="/posts/multiple-find-and-replace-with-powershell" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

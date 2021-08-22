@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Change database SKU with Logic apps | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Change database SKU with Logic apps" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="If you have a database that you are using less during night time, you could change SKU (Stock Keeping Unit) with some schedule to save some money. With Logic apps and the connector Azure Resource Manager it is quite straightforward to do." />
+<meta property="og:description" content="If you have a database that you are using less during night time, you could change SKU (Stock Keeping Unit) with some schedule to save some money. With Logic apps and the connector Azure Resource Manager it is quite straightforward to do." />
+<link rel="canonical" href="https://pekspro.github.io/posts/change-database-SKU-with-logic-apps" />
+<meta property="og:url" content="https://pekspro.github.io/posts/change-database-SKU-with-logic-apps" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-06-14T01:00:00+02:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Change database SKU with Logic apps" />
+<script type="application/ld+json">
+{"description":"If you have a database that you are using less during night time, you could change SKU (Stock Keeping Unit) with some schedule to save some money. With Logic apps and the connector Azure Resource Manager it is quite straightforward to do.","headline":"Change database SKU with Logic apps","dateModified":"2020-06-14T01:00:00+02:00","datePublished":"2020-06-14T01:00:00+02:00","url":"https://pekspro.github.io/posts/change-database-SKU-with-logic-apps","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/change-database-SKU-with-logic-apps"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Change database SKU with Logic apps</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2020-06-14T01:00:00+02:00" itemprop="datePublished">
+        Jun 14, 2020
+      </time>
+        •  Categories: 
+        <a href="/categories#logic-apps">Logic apps</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>If you have a database that you are using less during night time, you could
+change
+<a href="https://docs.microsoft.com/en-us/partner-center/develop/product-resources#sku">SKU</a>
+(Stock Keeping Unit) with some schedule to save some money. With Logic apps and
+the connector <code class="language-plaintext highlighter-rouge">Azure Resource Manager</code> it is quite straightforward to do.</p>
+
+<h3 id="setup-schedule">Setup schedule</h3>
+
+<p>In Azure Portal, create a new Logic app. Select <code class="language-plaintext highlighter-rouge">Recurrence</code> as the trigger. Set
+<code class="language-plaintext highlighter-rouge">Frequency</code> to <code class="language-plaintext highlighter-rouge">Week</code>, and on <code class="language-plaintext highlighter-rouge">Add new parameter</code> select <code class="language-plaintext highlighter-rouge">On these days</code>, <code class="language-plaintext highlighter-rouge">At
+these hours</code> and <code class="language-plaintext highlighter-rouge">At these minutes</code>. Then configure the schedule you want to use.</p>
+
+<p>In this sample, the app will run every workday at 07:00 in the morning:</p>
+
+<p><img src="/assets/images/0011/setup_schedule.png" alt="Schedule" title="Schedule" /></p>
+
+<h3 id="add-action">Add action</h3>
+
+<p>In your logic app, select to add a new action and search for <code class="language-plaintext highlighter-rouge">Azure Resource
+Manager</code>. Then select the action <code class="language-plaintext highlighter-rouge">Create or update a resource</code>.</p>
+
+<p><img src="/assets/images/0011/select_arm_create.png" alt="Add Azure Resource Manager" title="Add Azure Resource Manager" /></p>
+
+<p>When you have done that you are being asked to enter five parameters by default. But 
+to change SKU we need more settings. Select <code class="language-plaintext highlighter-rouge">Add new parameter</code> and select:</p>
+
+<ul>
+  <li>Location</li>
+  <li>Properties</li>
+  <li>SKU Capacity</li>
+  <li>SKU Family</li>
+  <li>SKU Name</li>
+  <li>SKU Tier</li>
+</ul>
+
+<p>Now it should look like this:</p>
+
+<p><img src="/assets/images/0011/create_empty_properties.png" alt="Parameters" title="Parameters" /></p>
+
+<p>Some of these settings are common for every SKU, so we start with these first:</p>
+
+<h4 id="subscription">Subscription</h4>
+
+<p>Select the subscription that contains your SQL Server.</p>
+
+<h4 id="resource-group">Resource group</h4>
+
+<p>Select the resource group where your SQL Server are.</p>
+
+<h4 id="resource-provider">Resource provider</h4>
+
+<p>The third parameters should have the value <code class="language-plaintext highlighter-rouge">Microsoft.Sql</code>.</p>
+
+<h4 id="short-resource-id">Short Resource Id</h4>
+
+<p>This should have the value:
+<code class="language-plaintext highlighter-rouge">servers/[short-name-of-you-sql-server]/databases/[name-of-database]</code>. If the
+name of your SQL-server is <code class="language-plaintext highlighter-rouge">yoursqlserver.database.windows.net</code>, just use the
+name <code class="language-plaintext highlighter-rouge">yoursqlserver</code>.</p>
+
+<h4 id="client-api-version">Client Api Version</h4>
+
+<p>This should have the value <code class="language-plaintext highlighter-rouge">2017-10-01-preview</code>.</p>
+
+<h4 id="location">Location</h4>
+
+<p>This is in which location you have your database. Just set this to the current
+value because you cannot change this, but it is required to have this.</p>
+
+<h4 id="properties">Properties</h4>
+
+<p>In the <code class="language-plaintext highlighter-rouge">properties</code> parameter you could set the maximum size of your database.
+If you are using the serverless SKU, you could also change some other settings,
+more about this later. If you do not want to change these setting, you could
+just skip this option. But if you do, you set it up like this:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> JSON </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span><span class="w">
+    </span><span class="nl">"maxSizeBytes"</span><span class="p">:</span><span class="w"> </span><span class="mi">2147483648</span><span class="w">
+</span><span class="p">}</span></code></pre></figure>
+
+<p>In this sample the maximum database size will be 2 GB
+(2 · 1024 · 1024 · 1024 = 2147483648). If you want
+500 MB, use the value 500 · 1024 · 1024 = 524288000 instead.</p>
+
+<h3 id="first-step-completed">First step completed</h3>
+
+<p>When you are done your action should look something like this:</p>
+
+<p><img src="/assets/images/0011/create_first_step_properties.png" alt="First settings" title="First settings" /></p>
+
+<h2 id="setup-sku">Setup SKU</h2>
+
+<p>Each SKU has its own set of settings.</p>
+
+<h3 id="basic">Basic</h3>
+
+<p>The basic SKU is the option with the least power and is very easy to configure.
+Configure these settings:</p>
+
+<h4 id="sku-capacity">SKU Capacity</h4>
+
+<p>Capacity should have the value: 5</p>
+
+<h4 id="sku-name">SKU Name</h4>
+
+<p>SKU Name should have the value: <strong>Basic</strong></p>
+
+<h4 id="sku-tier">SKU Tier</h4>
+
+<p>SKU Tier should have the value: <strong>Basic</strong></p>
+
+<h4 id="sample">Sample</h4>
+
+<p>When you have setup these settings it should look like this:</p>
+
+<p><img src="/assets/images/0011/sku_basic.png" alt="SKU Basic" title="SKU Basic" /></p>
+
+<h3 id="standard">Standard</h3>
+
+<p>To configure standard SKU setup these settings:</p>
+
+<h4 id="sku-capacity-1">SKU Capacity</h4>
+
+<p>This is the number of DTU:s. These options are valid:</p>
+
+<ul>
+  <li>10</li>
+  <li>20</li>
+  <li>50</li>
+  <li>100</li>
+  <li>200</li>
+  <li>400</li>
+  <li>800</li>
+  <li>1600</li>
+  <li>3000</li>
+</ul>
+
+<h4 id="sku-name-1">SKU Name</h4>
+
+<p>SKU Name should have the value: <strong>Standard</strong></p>
+
+<h4 id="sku-tier-1">SKU Tier</h4>
+
+<p>SKU Tier should have the value: <strong>Standard</strong></p>
+
+<h4 id="sample-1">Sample</h4>
+
+<p>When you have setup these settings it should look like this:</p>
+
+<p><img src="/assets/images/0011/sku_standard.png" alt="SKU Standard" title="SKU Standard" /></p>
+
+<h3 id="premium">Premium</h3>
+
+<p>To configure premium SKU setup these settings:</p>
+
+<h4 id="sku-capacity-2">SKU Capacity</h4>
+
+<p>This is the number of DTU:s. These options are valid:</p>
+
+<ul>
+  <li>125</li>
+  <li>250</li>
+  <li>500</li>
+  <li>1000</li>
+  <li>1750</li>
+  <li>4000</li>
+</ul>
+
+<h4 id="sku-name-2">SKU Name</h4>
+
+<p>SKU Name should have the value: <strong>Premium</strong></p>
+
+<h4 id="sku-tier-2">SKU Tier</h4>
+
+<p>SKU Tier should have the value: <strong>Premium</strong></p>
+
+<h4 id="sample-2">Sample</h4>
+
+<p>When you have setup these settings it should look like this:</p>
+
+<p><img src="/assets/images/0011/sku_premium.png" alt="SKU Premium" title="SKU Premium" /></p>
+
+<h3 id="general-purpose---provisioned">General Purpose - Provisioned</h3>
+
+<p>To configure General Purpose - Provisioned SKU setup these settings:</p>
+
+<h4 id="sku-capacity-3">SKU Capacity</h4>
+
+<p>This is the number of vCore:s. These options are valid:</p>
+
+<ul>
+  <li>2</li>
+  <li>4</li>
+  <li>6</li>
+  <li>8</li>
+  <li>10</li>
+  <li>12</li>
+  <li>14</li>
+  <li>16</li>
+  <li>18</li>
+  <li>20</li>
+  <li>24</li>
+  <li>32</li>
+  <li>40</li>
+</ul>
+
+<h4 id="sku-family">SKU Family</h4>
+
+<p>SKU Family should have the value: <strong>Gen5</strong></p>
+
+<h4 id="sku-name-3">SKU Name</h4>
+
+<p>SKU Name should have the value: <strong>GP_Gen5</strong></p>
+
+<h4 id="sku-tier-3">SKU Tier</h4>
+
+<p>SKU Tier should have the value: <strong>GeneralPurpose</strong></p>
+
+<h4 id="sample-3">Sample</h4>
+
+<p>When you have setup these settings it should look like this:</p>
+
+<p><img src="/assets/images/0011/sku_general_provisioned.png" alt="SKU Provisioned" title="SKU Provisioned" /></p>
+
+<h3 id="general-purpose---serverless">General Purpose - Serverless</h3>
+
+<p>To configure General Purpose - Serverless SKU setup these settings:</p>
+
+<h4 id="sku-capacity-4">SKU Capacity</h4>
+
+<p>This is the maximum number of vCore:s. These options are valid:</p>
+
+<ul>
+  <li>1</li>
+  <li>2</li>
+  <li>4</li>
+  <li>6</li>
+  <li>8</li>
+  <li>10</li>
+  <li>12</li>
+  <li>14</li>
+  <li>16</li>
+  <li>18</li>
+  <li>20</li>
+  <li>24</li>
+  <li>32</li>
+  <li>40</li>
+</ul>
+
+<h4 id="sku-family-1">SKU Family</h4>
+
+<p>SKU Family should have the value: <strong>Gen5</strong></p>
+
+<h4 id="sku-name-4">SKU Name</h4>
+
+<p>SKU Name should have the value: <strong>GP_S_Gen5</strong></p>
+
+<h4 id="sku-tier-4">SKU Tier</h4>
+
+<p>SKU Tier should have the value: <strong>GeneralPurpose</strong></p>
+
+<h4 id="properties-1">Properties</h4>
+
+<p>When you are using serverless, you could configure more settings in the <code class="language-plaintext highlighter-rouge">properties</code> parameter.
+With <code class="language-plaintext highlighter-rouge">minCapacity</code> you configure the minimum number of vCores to use. With
+<code class="language-plaintext highlighter-rouge">autoPauseDelay</code> you configure the number of minutes it takes before the database
+is paused. Set this to -1 if the database never should be paused.</p>
+
+<p>If you skip these settings <code class="language-plaintext highlighter-rouge">autoPauseDelay</code> will be set to 60 minutes, and
+<code class="language-plaintext highlighter-rouge">minCapacity</code> will be set to the lowest number available (this depends on SKU
+Capacity). Here is a sample how this looks like:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> JSON </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span><span class="w">
+    </span><span class="nl">"maxSizeBytes"</span><span class="p">:</span><span class="w"> </span><span class="mi">2147483648</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"autoPauseDelay"</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"minCapacity"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="w">
+</span><span class="p">}</span></code></pre></figure>
+
+<h4 id="sample-4">Sample</h4>
+
+<p>When you have setup these settings it should look like this:</p>
+
+<p><img src="/assets/images/0011/sku_general_serverless.png" alt="SKU Serverless" title="SKU Serverless" /></p>
+
+<h3 id="summary">Summary</h3>
+
+<p>The settings I have written about, are likely to change. The best way to find
+out which settings to use, is to configure the database in the Azure Portal.
+Then use <a href="https://resources.azure.com/">Azure resource explorer</a> to see exactly
+what have been set.</p>
+
+<p>Also, be aware that all clients might lose the connection to the database while
+the SKU is changing. So, pick the schedule with care.</p>
+
+  </div>
+  
+    <div id="archives" class="related"><div class="archive-group">
+    
+      
+      <div id="#logic-apps"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about Logic apps</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-excel-files-in-logic-apps">Creating Excel-files in Logic Apps</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/use-teams-as-a-terminal">Use Teams as a Terminal</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-sql-server-firewall-settings-with-logic-apps">Change SQL Server firewall settings with Logic apps</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/start-and-stop-virtual-machines-with-logic-apps">Start and stop virtual machines with Logic apps</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/escape-sequences-in-logic-apps">Escape sequences in Logic apps</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  </div><a class="u-url" href="/posts/change-database-SKU-with-logic-apps" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

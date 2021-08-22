@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Test migrations on production data | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Test migrations on production data" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Running database migrations on a SQL server could be scary. Even if your migrations scripts work perfectly fine on test server, there might be data on your production servers that could cause problems. Wouldn’t it be nice if you could copy data from your production servers and then test the migrations on that? Of course, this should be fully automated, and you can do this with Azure DevOps." />
+<meta property="og:description" content="Running database migrations on a SQL server could be scary. Even if your migrations scripts work perfectly fine on test server, there might be data on your production servers that could cause problems. Wouldn’t it be nice if you could copy data from your production servers and then test the migrations on that? Of course, this should be fully automated, and you can do this with Azure DevOps." />
+<link rel="canonical" href="https://pekspro.github.io/posts/test-migrations-on-production-data" />
+<meta property="og:url" content="https://pekspro.github.io/posts/test-migrations-on-production-data" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-04-26T01:00:00+02:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Test migrations on production data" />
+<script type="application/ld+json">
+{"description":"Running database migrations on a SQL server could be scary. Even if your migrations scripts work perfectly fine on test server, there might be data on your production servers that could cause problems. Wouldn’t it be nice if you could copy data from your production servers and then test the migrations on that? Of course, this should be fully automated, and you can do this with Azure DevOps.","headline":"Test migrations on production data","dateModified":"2020-04-26T01:00:00+02:00","datePublished":"2020-04-26T01:00:00+02:00","url":"https://pekspro.github.io/posts/test-migrations-on-production-data","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/test-migrations-on-production-data"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Test migrations on production data</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2020-04-26T01:00:00+02:00" itemprop="datePublished">
+        Apr 26, 2020
+      </time>
+        •  Categories: 
+        <a href="/categories#azure-devops">Azure DevOps</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Running database migrations on a SQL server could be scary. Even if your
+migrations scripts work perfectly fine on test server, there might be data on
+your production servers that could cause problems. Wouldn’t it be nice if you
+could copy data from your production servers and then test the migrations on
+that? Of course, this should be fully automated, and you can do this with Azure
+DevOps.</p>
+
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before I explain how to do it, I assume that you have got migrations script as
+output from your build pipeline (if you are building for .NET Core check out my
+task <a href="https://marketplace.visualstudio.com/items?itemName=pekspro.pekspro-efcore-migration-script-generator">Entity Framework Core Migrations Script
+Generator</a>).
+I am also assuming that your database is not crazy big, because then you might
+run into timeout issues. I am also assuming that you have some experience with
+Azure DevOps.</p>
+
+<h2 id="strategy">Strategy</h2>
+<p>The idea to solve this is quite easy:</p>
+
+<ul>
+  <li>Create a new clean temporary resource group.</li>
+  <li>Add an SQL server.</li>
+  <li>Copy the data from your production servers (or a backup) to your new
+SQL-server.</li>
+  <li>Run the migrations.</li>
+  <li>Remove the resource group.</li>
+</ul>
+
+<p>That is all. If some step is failing, you will be able to see what went wrong in
+the pipeline. Unfortunately, there is not much build in support to do thing like
+this in DevOps. So, we will use some PowerShell scripts to fill up the gaps.</p>
+
+<p><img src="/assets/images/0004/00-task-list.png" alt="Task list" title="This is what you are looking for." /></p>
+
+<h3 id="add-stage">Add stage</h3>
+<p>In your release pipeline, add a new stage. I am calling my stage <code class="language-plaintext highlighter-rouge">Migration
+test</code>.</p>
+
+<p><img src="/assets/images/0004/01-add-stage.png" alt="Add stage" title="Add stage" /></p>
+
+<h3 id="add-azure-powershell">Add Azure PowerShell</h3>
+<p>Add a new task to your pipeline. Search for <strong>Azure PowerShell</strong>. We will use
+this many more times.</p>
+
+<p><img src="/assets/images/0004/02-add-azure-powershell.png" alt="Add Azure PowerShell" title="Add Azure PowerShell" /></p>
+
+<p>All PowerShell tasks should be configured like this:</p>
+
+<p><strong>Azure Subscription</strong>: The subscription you want to use.</p>
+
+<p><strong>Script Type</strong>: Inline Script</p>
+
+<p><strong>ErrorActionPreference</strong>: Stop (except in the first task)</p>
+
+<h3 id="step-1---remove-resource-group">Step 1 - Remove resource group</h3>
+<p>If a previous migration test has failed, we will have resources left in our
+resource group. Therefore, the first step we will remove any potential existing
+resource group. The PowerShell script will use
+<a href="https://docs.microsoft.com/en-us/powershell/module/az.resources/remove-azresourcegroup">Remove-AzResourceGroup</a>
+like this:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> PowerShell </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="n">Remove-AzResourceGroup</span><span class="w"> </span><span class="nt">-Name</span><span class="w"> </span><span class="nx">MigrationTest</span><span class="w"> </span><span class="nt">-Force</span></code></pre></figure>
+
+<p>In this tutorial I will assume that the resource group we will be using is called <strong>MigrationTest</strong>.</p>
+
+<p>Also, configure <strong>ErrorActionPreference</strong> to have the value <code class="language-plaintext highlighter-rouge">SilentlyContinue</code>. This makes sure that 
+the pipeline moves on to next step even if this step fails (which it will to most of the times).</p>
+
+<h3 id="step-2---create-resource-group">Step 2 - Create resource group</h3>
+<p>The next step is to create a new empty resource group. You do it like this in
+PowerShell. This is done with the PowerShell command
+<a href="https://docs.microsoft.com/en-us/powershell/module/Az.Resources/New-AzResourceGroup">New-AzResourceGroup</a>
+like this:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> PowerShell </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="n">New-AzResourceGroup</span><span class="w"> </span><span class="nt">-Name</span><span class="w"> </span><span class="nx">MigrationTest</span><span class="w"> </span><span class="nt">-Location</span><span class="w"> </span><span class="s2">"North Europe"</span></code></pre></figure>
+
+<p>The location should be the same as were your original database is. Read <a href="https://azure.microsoft.com/en-us/global-infrastructure/locations/">the
+documentation</a>
+to see all locations.</p>
+
+<h3 id="step-3---create-sql-server">Step 3 - Create SQL Server</h3>
+<p>In the third step it is time to spin up a SQL server we could use host our
+database. Normally I should recommend ARM template to deploy infrastructure. But
+in this scenario we use the PowerShell command
+<a href="https://docs.microsoft.com/en-us/powershell/module/Az.Sql/New-AzSqlServer">New-AzSqlServer</a>
+instead:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> PowerShell </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="nv">$adminSqlLogin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"SqlAdmin"</span><span class="w">
+</span><span class="nv">$password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"SetAProperPassword!"</span><span class="w">
+</span><span class="nv">$serverName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"mymigrationtestserver"</span><span class="w">
+</span><span class="nv">$resourceGroupName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"MigrationTest"</span><span class="w">
+
+</span><span class="n">New-AzSqlServer</span><span class="w"> </span><span class="nt">-ResourceGroupName</span><span class="w"> </span><span class="nv">$resourceGroupName</span><span class="w"> </span><span class="se">`
+</span><span class="w">    </span><span class="nt">-ServerName</span><span class="w"> </span><span class="nv">$serverName</span><span class="w"> </span><span class="se">`
+</span><span class="w">    </span><span class="nt">-Location</span><span class="w"> </span><span class="p">(</span><span class="n">Get-AzResourceGroup</span><span class="w"> </span><span class="nv">$resourceGroupName</span><span class="p">)</span><span class="o">.</span><span class="nf">Location</span><span class="w"> </span><span class="err">`</span><span class="w">
+    </span><span class="nt">-SqlAdministratorCredentials</span><span class="w"> </span><span class="err">$</span><span class="p">(</span><span class="n">New-Object</span><span class="w"> </span><span class="nt">-TypeName</span><span class="w"> </span><span class="nx">System.Management.Automation.PSCredential</span><span class="w"> </span><span class="nt">-ArgumentList</span><span class="w"> </span><span class="nv">$adminSqlLogin</span><span class="p">,</span><span class="w"> </span><span class="err">$</span><span class="p">(</span><span class="n">ConvertTo-SecureString</span><span class="w"> </span><span class="nt">-String</span><span class="w"> </span><span class="nv">$password</span><span class="w"> </span><span class="nt">-AsPlainText</span><span class="w"> </span><span class="nt">-Force</span><span class="p">))</span></code></pre></figure>
+
+<p>This will create an SQL Server with the name <strong>mymigrationtestserver</strong> (you
+should use another name) in the resource group <strong>Migration test</strong> that we just
+have created. I have written to password in clear text to keep this simple, in
+real life you should have this in a variable or getting it from a keyvault for
+instance.</p>
+
+<p>I have more or less copied this from the
+<a href="https://docs.microsoft.com/en-us/azure/sql-database/scripts/sql-database-create-and-configure-database-powershell">documentation</a>.
+Read more about that if you want configure firewall settings and other settings.</p>
+
+<h3 id="step-4---copy-databases">Step 4 - Copy databases</h3>
+<p>Now it is time to copy your databases. We are using PowerShell command
+<a href="https://docs.microsoft.com/en-us/powershell/module/Az.Sql/New-AzSqlDatabaseCopy">New-AzSqlDatabaseCopy</a>:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> PowerShell </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="n">New-AzSqlDatabaseCopy</span><span class="w"> </span><span class="se">`
+</span><span class="w">    </span><span class="nt">-ResourceGroupName</span><span class="w"> </span><span class="nx">SourceResourceGroup</span><span class="w"> </span><span class="se">`
+</span><span class="w">    </span><span class="nt">-ServerName</span><span class="w"> </span><span class="nx">sourceserver</span><span class="w"> </span><span class="se">`
+</span><span class="w">    </span><span class="nt">-DatabaseName</span><span class="w"> </span><span class="nx">MyDatabase</span><span class="w"> </span><span class="se">`
+</span><span class="w">    </span><span class="nt">-CopyResourceGroupName</span><span class="w"> </span><span class="nx">MigrationTest</span><span class="w"> </span><span class="se">`
+</span><span class="w">    </span><span class="nt">-CopyServerName</span><span class="w"> </span><span class="nx">mymigrationtestserver</span><span class="w"> </span><span class="se">`
+</span><span class="w">    </span><span class="nt">-CopyDatabaseName</span><span class="w"> </span><span class="nx">MyDatabaseClone</span></code></pre></figure>
+
+<p>That script will go to the resource group <strong>SourceResourceGroup</strong> and to the
+server <strong>sourceserver</strong> and copy the database <strong>MyDatabase</strong> into the resource
+group <strong>MigrationTest</strong> into the server <strong>mymigrationtestserver</strong> into a new
+database name <strong>MyDatabaseClone</strong>.</p>
+
+<p>If you have more databases you want to copy, just add a new command in the
+PowerShell editor or create a new task.</p>
+
+<p>If you make backup ups from your databases, you probably have bacpac-files in
+some storage account. You could use these instead of copy data from your
+production servers. Read more about
+<a href="https://docs.microsoft.com/en-us/powershell/module/az.sql/new-azsqldatabaseimport?view=azps-3.8.0">New-AzSqlDatabaseImport</a>
+in the documentation.</p>
+
+<h3 id="step-5---apply-migrations">Step 5 - Apply migrations</h3>
+<p>In this step it is finally time to the actual migrations. You should use this
+<a href="https://github.com/microsoft/azure-pipelines-tasks/blob/master/Tasks/SqlAzureDacpacDeploymentV1/README.md">Azure SQL Database
+Deployment</a>
+for this. Since you are reading this, I guess you able to configure this. Add
+one task for each migration.</p>
+
+<p><img src="/assets/images/0004/05-add-migrations.png" alt="Add SQL Database Deployment" title="Add SQL Database Deployment" /></p>
+
+<h3 id="step-6---remove-resource-group">Step 6 - Remove resource group</h3>
+<p>If everything has went well so far, it is just some clean ups left. We will just
+remove our temporary resource group, again using the PowerShell command
+<a href="https://docs.microsoft.com/en-us/powershell/module/az.resources/remove-azresourcegroup">Remove-AzResourceGroup</a>:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> PowerShell </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="n">Remove-AzResourceGroup</span><span class="w"> </span><span class="nt">-Name</span><span class="w"> </span><span class="nx">MigrationTest</span><span class="w"> </span><span class="nt">-Force</span></code></pre></figure>
+
+<h2 id="summary">Summary</h2>
+<p>As you could see this is quite straightforward to do. As I mentioned earlier, it
+will take some time to run this. But in many cases I think it is worth it.</p>
+
+  </div>
+  
+    <div id="archives" class="related"><div class="archive-group">
+    
+      
+      <div id="#azure-devops"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about Azure DevOps</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/setup-a-nuget-feed-in-azure-devops">Setup a NuGet feed in Azure DevOps</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/cache-nuget-packages-for-net-core-builds">Cache NuGet packages for .NET Core builds</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  </div><a class="u-url" href="/posts/test-migrations-on-production-data" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

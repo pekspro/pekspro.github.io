@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>PEK’s developer blog | Interesting problems with interesting solutions.</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="PEK’s developer blog" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Interesting problems with interesting solutions." />
+<meta property="og:description" content="Interesting problems with interesting solutions." />
+<link rel="canonical" href="https://pekspro.github.io/" />
+<meta property="og:url" content="https://pekspro.github.io/" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="PEK’s developer blog" />
+<script type="application/ld+json">
+{"description":"Interesting problems with interesting solutions.","headline":"PEK’s developer blog","url":"https://pekspro.github.io/","@type":"WebSite","author":{"@type":"Person","name":"PEK"},"name":"PEK’s developer blog","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="home">
+
+
+  <ul class="post-list"><li>
+        <span class="post-meta">Aug 22, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/batch-upgrade-to-net-6">
+            Batch upgrade to .NET 6
+          </a>
+        </h3><p>.NET 6 preview has been out for a while, and I decided to give it a go. New
+compiler warnings have been introduced and I wanted to find and fix this early.
+But I also wanted to easily go back to .NET 5.</p>
+</li><li>
+        <span class="post-meta">Jun 27, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/redirect-with-azure-cdn">
+            Redirect with Azure CDN
+          </a>
+        </h3><p>A while ago I needed to make a redirect from www.oldcomain.com to
+www.newdomain.com. This needed to be done with the <a href="https://en.wikipedia.org/wiki/HTTP_301">HTTP status 301 – moved
+permanently</a>. I could not do this with
+the service that was hosting the new address. But I found a cheap solution in
+Azure CDN.</p>
+</li><li>
+        <span class="post-meta">May 16, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/date-time-picker-for-blazor">
+            Date time picker for Blazor
+          </a>
+        </h3><p>In my <a href="/posts/time-picker-for-blazor">previous post</a>
+I showed how you could do a time picker component in Blazor. This time I will
+extend this so you could select date and time with a single component.</p>
+</li><li>
+        <span class="post-meta">May 9, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/time-picker-for-blazor">
+            Time picker for Blazor
+          </a>
+        </h3><p>There are existing components in Blazor that makes it to get different types of
+user input, like strings, numbers, and date. But what about time?</p>
+</li><li>
+        <span class="post-meta">Apr 4, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/get-time-zone-for-a-user-in-graph">
+            Get time zone for a user in Graph
+          </a>
+        </h3><p>With the current SDK for .NET you cannot directly get the time zone for a user.
+But you could work around this.</p>
+</li><li>
+        <span class="post-meta">Mar 28, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/invite-to-a-meeting">
+            Invite to a meeting
+          </a>
+        </h3><p>How to invite someone to a Teams meeting with the Microsoft Graph in .NET.</p>
+</li><li>
+        <span class="post-meta">Mar 21, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/caching-configuration-from-azure-keyvault">
+            Caching configuration from Azure KeyVault
+          </a>
+        </h3><p>Azure KeyVault is a great service. With this you store secrets on a share
+location and could use on several services. But it is not fun to use during
+development.</p>
+</li><li>
+        <span class="post-meta">Mar 14, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/be-careful-with-references-in-power-query">
+            Be careful with references in Power Query
+          </a>
+        </h3><p>References in Power Query are incredibly useful. I often use it to organize my
+queries. But when you are using them you could trigger extra calls against your
+data sources.</p>
+</li><li>
+        <span class="post-meta">Mar 7, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/creating-unique-excel-sheet-names">
+            Creating unique Excel sheet names
+          </a>
+        </h3><p>Here is a solution that gives you unique and valid sheet names in Excel files
+that you are generating.</p>
+</li><li>
+        <span class="post-meta">Feb 28, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/calling-an-api-multiple-times-with-power-query">
+            Calling an API multiple times with Power Query
+          </a>
+        </h3><p>Making a single call to a web API is quite straightforward. But sometimes you
+need to make multiple calls to get the data you want.</p>
+</li><li>
+        <span class="post-meta">Feb 21, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/creating-accruals-with-power-query">
+            Creating accruals with Power Query
+          </a>
+        </h3><p>Let say you have expenses that you want to split into several dates. How do you
+solve this with Power Query?</p>
+</li><li>
+        <span class="post-meta">Feb 14, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/finding-objects-that-are-not-disposed">
+            Finding objects that are not disposed
+          </a>
+        </h3><p>Making sure objects are properly disposed could be tricky. Here are some ways I
+deal with this.</p>
+</li><li>
+        <span class="post-meta">Feb 7, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/avoid-connecting-to-resources-by-mistake">
+            Avoid connecting to resources by mistake
+          </a>
+        </h3><p>Being able to connect to any resource at any time is both convenient and scary –
+especially if you are a developer. Here is a little trick that reduces the risk
+a bit.</p>
+</li><li>
+        <span class="post-meta">Jan 31, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/finding-redundant-project-references">
+            Finding redundant project references
+          </a>
+        </h3><p>When you are working with a nontrivial .NET solution you will eventually have a
+lot of references between projects and NuGet-packages. Here is a little script
+that finds references that are no longer needed in .NET Core projects.</p>
+</li><li>
+        <span class="post-meta">Jan 24, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/preparing-for-2038">
+            Preparing for 2038
+          </a>
+        </h3><p>When I am writing this, it is 17 years until the 19:th of January 2038. This is
+the date when systems will run out of seconds.</p>
+</li><li>
+        <span class="post-meta">Jan 17, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/policyscope">
+            PolicyScope
+          </a>
+        </h3><p>I recently decided to use <a href="https://github.com/App-vNext/Polly">Polly</a> in a
+project. Polly is a solution to make it ease to implement retry logic in an
+application. It is a really nice framework. But when using in with dependency
+injection I thought that something was missing. This ended up me creating my
+first public NuGet packet.</p>
+</li><li>
+        <span class="post-meta">Jan 10, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/manually-creating-a-dbcontext-and-enable-logging">
+            Manually creating a DbContext and enable logging
+          </a>
+        </h3><p>In an application I have working with a needed to manually create a <code class="language-plaintext highlighter-rouge">DbContext</code>.
+But doing so, disabled all logging from the <code class="language-plaintext highlighter-rouge">DbContext</code>.</p>
+</li><li>
+        <span class="post-meta">Jan 3, 2021</span>
+        <h3>
+          <a class="post-link" href="/posts/add-net-5-extension-to-app-service-from-the-command-line">
+            Add .NET 5 extension to App Service from the command line
+          </a>
+        </h3><p>I have started to migrate some of my .NET Core 3.1 applications to .NET 5. But
+to be able to run these in Azure App Service an extension needs to be installed.</p>
+</li><li>
+        <span class="post-meta">Dec 27, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/graphemes">
+            Graphemes
+          </a>
+        </h3><p>Since 1998 I have been developing an application to make it easier
+and fun to learn languages, <a href="https://pekspro.com/products/vokabel/">Vokabel</a>.
+For about a year ago I got some complains that the application in some scenarios
+did not work properly with some languages.</p>
+</li><li>
+        <span class="post-meta">Dec 20, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/withpartitionkey-and-in-memory-database">
+            WithPartitionKey and in-memory database
+          </a>
+        </h3><p>With EF Core 5, <a href="https://docs.microsoft.com/en-us/ef/core/what-is-new/ef-core-5.0/whatsnew#preview-3">WithPartitionKey</a>
+has been added that will make your queries executes faster on a Cosmos database.
+But it does not work with in in-memory database.</p>
+</li><li>
+        <span class="post-meta">Dec 13, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/net5-and-azure-functions">
+            .NET 5 and Azure Functions
+          </a>
+        </h3><p>.NET 5 have been out for a few weeks when writing then. Upgrading from .NET Core
+3.1 has been easy, I think. Except when it comes to Azure Functions.</p>
+</li><li>
+        <span class="post-meta">Dec 6, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/how-to-use-JWT-token-from-query-string">
+            How to use JWT token from query string
+          </a>
+        </h3><p>Normally you authenticate via a HTTP header when you are accessing an API. But
+how do you configure your server to allow authenticating via the query string
+too?</p>
+</li><li>
+        <span class="post-meta">Nov 29, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/using-power-query-and-web-api-with-http-authentication">
+            Power Query and Web API with HTTP authentication
+          </a>
+        </h3><p>With Power Query you could easily get data from different data sources, like
+Excel-files, CSV-files, and Web API. But if you need to connect to a Web API
+that requires authentication things are not that easy.</p>
+</li><li>
+        <span class="post-meta">Nov 22, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/power-query-and-json-arrays">
+            Power Query and JSON arrays
+          </a>
+        </h3><p>When you are working with JSON arrays in Power Query it is not always obvious
+how to convert the data into a table.</p>
+</li><li>
+        <span class="post-meta">Nov 15, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/what-characters-are-whitespace">
+            What characters are whitespace?
+          </a>
+        </h3><p>What characters are considered to be whitespace? Space obviously, also tab and
+line break characters are easy. But what about U+00A0, the <strong>no-break space</strong>
+character? Or U+180E, the <strong>Mongolian vowel separator</strong>? It turns out that
+the computer languages we are using are not agreeing on this.</p>
+</li><li>
+        <span class="post-meta">Nov 8, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/trimming-whitespace-in-objects">
+            Trimming whitespace in objects
+          </a>
+        </h3><p>How to trim strings in all properties in objects with C#.</p>
+</li><li>
+        <span class="post-meta">Nov 1, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/trimming-whitespace-in-input-controls">
+            Trimming whitespace in input controls
+          </a>
+        </h3><p>A simple solution to automatically remove whitespaces on input textboxes and
+text area controls in HTML.</p>
+</li><li>
+        <span class="post-meta">Oct 25, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/prettifying-json-with-powerwhell">
+            Prettifying JSON with PowerShell
+          </a>
+        </h3><p>A quick and dirty way to quickly prettifying JSON-files with PowerShell.</p>
+</li><li>
+        <span class="post-meta">Oct 18, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/multiple-find-and-replace-with-powershell">
+            Multiple find and replace with PowerShell
+          </a>
+        </h3><p>If you need to find and replace a string in multiple files there are several
+tools that could do this. But recently I was in a situation where multiple URL:s
+needed to be updated in multiple files. So, I decided to do this in PowerShell
+instead.</p>
+</li><li>
+        <span class="post-meta">Oct 11, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/autoscroll">
+            Autoscroll
+          </a>
+        </h3><p>Very recently I developed a basic chat function in an application. Users could
+enter and send message to each other. And the messages were shown in a list that
+automatically scrolled down when a new message was received.</p>
+</li><li>
+        <span class="post-meta">Oct 4, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/detect-and-warn-multiple-editors">
+            Detect and warn multiple editors
+          </a>
+        </h3><p>How to show a warning when two, or more, users are editing the same object at
+the same time.</p>
+</li><li>
+        <span class="post-meta">Sep 27, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/modifying-query-string">
+            Modifying query strings
+          </a>
+        </h3><p>Recently I needed modify a query string that was somewhere in a URI string. It
+seems to be a trivial problem, but it took me some hours to get this right.</p>
+</li><li>
+        <span class="post-meta">Sep 20, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/format-tables-in-excel-with-macros">
+            Format tables in Excel with macros
+          </a>
+        </h3><p>If you copy a table from a browser, or some other application, and then paste it
+into Excel it most certainly looks bad. You may have cells with content that
+spans over several rows, and texts that are badly formatted. Luckily, with a
+simple macro in Excel, that works in all your documents, this is easily solved.</p>
+</li><li>
+        <span class="post-meta">Sep 13, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/submitting-forms-when-a-select-list-changes">
+            Submitting forms when a select list changes
+          </a>
+        </h3><p>On a page I created recently, there as a simple select list. When the select
+value was changed it was supposed to submit a form.</p>
+</li><li>
+        <span class="post-meta">Sep 6, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/how-to-make-inputselect-support-more-types">
+            How to make InputSelect support more types
+          </a>
+        </h3><p>If you have used <code class="language-plaintext highlighter-rouge">InputSelect</code> in Blazor in ASP.NET Core 3.1 you may have
+noticed <code class="language-plaintext highlighter-rouge">bind-Value</code> only works on a limited set of types. That is strings and
+enum to be precise. In .NET 5 this will be improved. And it is easy to backport
+this to 3.1.</p>
+</li><li>
+        <span class="post-meta">Aug 30, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/creating-excel-files-in-azure-functions">
+            Creating Excel-files in Azure Functions
+          </a>
+        </h3><p>Last week I looked on how you could create an Excel file in Logic Apps and then
+e-mail that file to someone. This week I solved the same problem in Azure
+Functions. In retrospect, I think this was a better solution.</p>
+</li><li>
+        <span class="post-meta">Aug 23, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/creating-excel-files-in-logic-apps">
+            Creating Excel-files in Logic Apps
+          </a>
+        </h3><p>Imagine that you day week has to get data from some databases, add this in an
+Excel file that is then e-mailed to someone. How could you automate this in
+Logic Apps? Also, is it worth it? Maybe.</p>
+</li><li>
+        <span class="post-meta">Aug 16, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/extracting-urls-from-files-with-powershell">
+            Extracting URL:s from files with PowerShell
+          </a>
+        </h3><p>Recently I needed to extract all URL:s from several files. I thought this was a
+fun little challenge where I could improve my limited skills in PowerShell and
+regular expressions.</p>
+</li><li>
+        <span class="post-meta">Aug 9, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/power-query-grouping-and-filtering-data">
+            Power Query - Grouping and filtering data
+          </a>
+        </h3><p>When you are working with data you often want to do some kind of summarizing.
+With Power Query you do this with grouping. Just like join, this is similar how
+it works in SQL.</p>
+</li><li>
+        <span class="post-meta">Aug 2, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/power-query-joining-data">
+            Power Query - Joining data
+          </a>
+        </h3><p>Sometime useful to combine data from two tables when you are working with Excel.
+You could do this with functions like VLOOKUP. It works, but it is a pain to
+use. If you instead are using Power Query, you could easily join data from two
+tables. If you know SQL, you will find this familiar.</p>
+</li><li>
+        <span class="post-meta">Jul 26, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/power-query-working-with-columns">
+            Power Query - Working with columns
+          </a>
+        </h3><p>When you are working with Power Query you often add, remove and modifying
+columns in your queries. There are tons of ways to do that, in this part we look
+on the most common cases.</p>
+</li><li>
+        <span class="post-meta">Jul 19, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/power-query-get-started-in-excel">
+            Power Query - Get started in Excel
+          </a>
+        </h3><p>There is a feature in Excel called Power Query. Personally, I think this is one
+if the best feature in Excel. Despite this, I find that very few people are
+aware of it. It is a wonderful when you are analyzing data.</p>
+</li><li>
+        <span class="post-meta">Jul 12, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/lessons-learned-from-rendering-video-in-azure-functions">
+            Lessons learned from rendering video in Azure Functions
+          </a>
+        </h3><p>Recently I have been working with creating time lapse videos in Azure Functions.
+It was challenging and fun, and I share what I learned from this here.</p>
+</li><li>
+        <span class="post-meta">Jul 5, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/create-a-time-lapse-video">
+            Create a time lapse video
+          </a>
+        </h3><p>Let’s create a time lapse video! We take some images, add some title screen
+background audio and a time stamp on each frame and combine all that to a video
+file. All this in C# and some help from <a href="https://ffmpeg.org/">ffmpeg</a>.</p>
+</li><li>
+        <span class="post-meta">Jun 28, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/setup-a-nuget-feed-in-azure-devops">
+            Setup a NuGet feed in Azure DevOps
+          </a>
+        </h3><p>With Artifacts in Azure DevOps you could easily setup a private NuGet feed. Here
+is a summary of the steps required for different scenarios from a .NET Core
+developer perspective.</p>
+</li><li>
+        <span class="post-meta">Jun 21, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/change-language-version-on-multiple-projects">
+            Change language version on multiple projects
+          </a>
+        </h3><p>If you have several .NET Core projects where you want to change the C# language
+version to 8.0, how you do this the fastest way?</p>
+</li><li>
+        <span class="post-meta">Jun 14, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/change-database-SKU-with-logic-apps">
+            Change database SKU with Logic apps
+          </a>
+        </h3><p>If you have a database that you are using less during night time, you could
+change
+<a href="https://docs.microsoft.com/en-us/partner-center/develop/product-resources#sku">SKU</a>
+(Stock Keeping Unit) with some schedule to save some money. With Logic apps and
+the connector <code class="language-plaintext highlighter-rouge">Azure Resource Manager</code> it is quite straightforward to do.</p>
+</li><li>
+        <span class="post-meta">Jun 7, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/change-encoding-on-your-source-files">
+            Change encoding on your source files
+          </a>
+        </h3><p>How do you make sure that all your source files are using the same encoding?
+With PowerShell of course!</p>
+</li><li>
+        <span class="post-meta">May 31, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/build-time">
+            Build time
+          </a>
+        </h3><p>Waiting on the compiler could be a large part of the developer’s life. What can
+you do to make this process faster? I have tried different way to organize code
+and projects and measure the build time.</p>
+</li><li>
+        <span class="post-meta">May 24, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/compiling-with-a-RAM-Drive">
+            Compiling with a RAM-drive
+          </a>
+        </h3><p>When you are compiling your latest application that will take over the world, it
+will make a lot a reading and writing against your hard drive. Wouldn’t it be a
+lot faster if you instead compile against a RAM-drive, and just having your
+source code on your physical storage devices? To be honest, not much. Despite
+this disappointment, let us geek out and try it.</p>
+</li><li>
+        <span class="post-meta">May 17, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/prevent-enter-to-submit-forms">
+            Prevent enter to submit forms
+          </a>
+        </h3><p>Recently I was working with a web form for submitting some data. But one of the
+input fields was used for searching instead, so I wanted to prevent the form
+from being submitted when the user pressed enter in that field. If you have a
+few forms this is possible to solve with JavaScript on every page. But I wanted
+something else so I created a solution where you only need to add a CSS-class on
+the fields what should have this behavior. I think this turned out to be an
+elegant and reusable solution.</p>
+</li><li>
+        <span class="post-meta">May 10, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/use-teams-as-a-terminal">
+            Use Teams as a Terminal
+          </a>
+        </h3><p>Here is a crazy idea. Teams is a popular application for communication,
+especially the chat is widely used between persons on companies. What if we also
+could use the chat as terminal, so people could it to start and stop virtual
+machines, start a synchronizing of a PowerBI report and other things. You could
+do a simple little bot with Logic apps.</p>
+</li><li>
+        <span class="post-meta">May 3, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/cache-nuget-packages-for-net-core-builds">
+            Cache NuGet packages for .NET Core builds
+          </a>
+        </h3><p>Restoring NuGet packages often takes significant amount of time if build large
+.NET application. To solve this you could use a <a href="https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops">cache in your
+build</a>.
+But if you follow the documentation you should create an <code class="language-plaintext highlighter-rouge">packages.lock.json</code>
+file for every project.  I do not want to that, so I created a slightly
+different solution.</p>
+</li><li>
+        <span class="post-meta">Apr 26, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/test-migrations-on-production-data">
+            Test migrations on production data
+          </a>
+        </h3><p>Running database migrations on a SQL server could be scary. Even if your
+migrations scripts work perfectly fine on test server, there might be data on
+your production servers that could cause problems. Wouldn’t it be nice if you
+could copy data from your production servers and then test the migrations on
+that? Of course, this should be fully automated, and you can do this with Azure
+DevOps.</p>
+</li><li>
+        <span class="post-meta">Apr 19, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/change-sql-server-firewall-settings-with-logic-apps">
+            Change SQL Server firewall settings with Logic apps
+          </a>
+        </h3><p>Recently I needed a way to change firewall settings in SQL Server in a Logic
+app. I wanted to add and remove which IP-addresses that were allowed. I was able
+to solve this with the connector <code class="language-plaintext highlighter-rouge">Azure Resource Manager</code>.</p>
+</li><li>
+        <span class="post-meta">Apr 12, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/start-and-stop-virtual-machines-with-logic-apps">
+            Start and stop virtual machines with Logic apps
+          </a>
+        </h3><p>A <a href="https://feedback.azure.com/forums/287593-logic-apps/suggestions/17405671-start-stop-virtual-machines-with-logic-apps">highly voted feature
+request</a>
+is to start and stop virtual machines with Logic apps. This is quite easy and
+possible already today if you just know the right steps.</p>
+</li><li>
+        <span class="post-meta">Apr 5, 2020</span>
+        <h3>
+          <a class="post-link" href="/posts/escape-sequences-in-logic-apps">
+            Escape sequences in Logic apps
+          </a>
+        </h3><p>If you are working with Logic apps in Azure you might have run into problems if
+you want to use an <strong>escape sequence</strong> - they are simply not supported. I had
+problems with this when I wanted to replace all line breaks in a string with
+spaces. This is annoying, but there is a workaround.</p>
+</li></ul>
+
+    </div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

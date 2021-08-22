@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Setup a NuGet feed in Azure DevOps | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Setup a NuGet feed in Azure DevOps" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="With Artifacts in Azure DevOps you could easily setup a private NuGet feed. Here is a summary of the steps required for different scenarios from a .NET Core developer perspective." />
+<meta property="og:description" content="With Artifacts in Azure DevOps you could easily setup a private NuGet feed. Here is a summary of the steps required for different scenarios from a .NET Core developer perspective." />
+<link rel="canonical" href="https://pekspro.github.io/posts/setup-a-nuget-feed-in-azure-devops" />
+<meta property="og:url" content="https://pekspro.github.io/posts/setup-a-nuget-feed-in-azure-devops" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-06-28T01:00:00+02:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Setup a NuGet feed in Azure DevOps" />
+<script type="application/ld+json">
+{"description":"With Artifacts in Azure DevOps you could easily setup a private NuGet feed. Here is a summary of the steps required for different scenarios from a .NET Core developer perspective.","headline":"Setup a NuGet feed in Azure DevOps","dateModified":"2020-06-28T01:00:00+02:00","datePublished":"2020-06-28T01:00:00+02:00","url":"https://pekspro.github.io/posts/setup-a-nuget-feed-in-azure-devops","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/setup-a-nuget-feed-in-azure-devops"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Setup a NuGet feed in Azure DevOps</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2020-06-28T01:00:00+02:00" itemprop="datePublished">
+        Jun 28, 2020
+      </time>
+        •  Categories: 
+        <a href="/categories#azure-devops">Azure DevOps</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>With Artifacts in Azure DevOps you could easily setup a private NuGet feed. Here
+is a summary of the steps required for different scenarios from a .NET Core
+developer perspective.</p>
+
+<h2 id="publish-nuget-packages">Publish NuGet packages</h2>
+
+<p>First, we create a feed and then we publish out NuGet packages.</p>
+
+<h3 id="create-feed">Create Feed</h3>
+
+<p>In Azure Portal, open <strong>Artifacts</strong> and click on <strong>Create Feed</strong>.</p>
+
+<p><img src="/assets/images/0013/create_feed.png" alt="Create Feed" title="Create Feed" /></p>
+
+<p>Enter a proper name and then select <strong>Create</strong>.</p>
+
+<p><img src="/assets/images/0013/enter_name.png" alt="Enter Name" title="Enter Name" /></p>
+
+<p>Done. :-) While you are here, click on <strong>Connect to feed</strong> and find the URL to
+the feed. You will need this in the following steps.</p>
+
+<p>Next step is to publish NuGet packages. You can do this either in a DevOps
+pipeline, or locally.</p>
+
+<h3 id="publish-nuget-from-devops">Publish NuGet from DevOps</h3>
+
+<p>In your pipeline, add a new <strong>.NET Core task</strong> and then select command <strong>pack</strong>
+and configure the other options.</p>
+
+<p>Now you could publish (or push as the say) the created NuGet packages. They are
+two ways to do this.</p>
+
+<h4 id="option-1">Option 1</h4>
+
+<p>In your pipeline, add a new <strong>.NET Core task</strong> and then select command <strong>push</strong>.
+Select the feed in the <strong>Target feed</strong> option.</p>
+
+<p>The downside with this option is that you will get an error if you trying to
+publish a version that already exists. Not uncommon I guess if you have several
+libraries in your solution but only one has changed. There has been <a href="https://github.com/microsoft/azure-pipelines-tasks/issues/12562">proposed a
+fix for this</a>
+but it got rejected.</p>
+
+<h4 id="option-2">Option 2</h4>
+
+<p>If you want to avoid errors if you try to publish a NuGet packet version that
+already exists, use this instead.</p>
+
+<p>In your pipeline, add the task <strong>NuGet Authenticate</strong>. You do not need to
+configure anything.</p>
+
+<p>Next, add a <strong>Command line task</strong> and use the following script:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Console </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="n">dotnet</span><span class="w"> </span><span class="nx">nuget</span><span class="w"> </span><span class="nx">push</span><span class="w"> </span><span class="nt">--api-key</span><span class="w"> </span><span class="nx">AzureArtifacts</span><span class="w"> </span><span class="nt">--skip-duplicate</span><span class="w"> </span><span class="nt">--source</span><span class="w"> </span><span class="nx">https://pkgs.dev.azure.com/pekspro/MyNugetExperiment/_packaging/MyNugetExperiement/nuget/v3/index.json</span><span class="w"> </span><span class="err">$</span><span class="p">(</span><span class="n">Build.ArtifactStagingDirectory</span><span class="p">)</span><span class="n">/</span><span class="o">*.</span><span class="nf">nupkg</span><span class="w"> </span></code></pre></figure>
+
+<p>To find the URL to use, go to <strong>Artifacts</strong>, select your feed and then <strong>Connect
+to feed</strong>.</p>
+
+<h3 id="publish-nuget-locally">Publish NuGet locally</h3>
+
+<p>Strangely, there is no option to upload NuGet packages from the web portal. At
+least I have not found a way to do so. But you could to it by using the command
+line.</p>
+
+<p>The first step is to create a personal access token. In the portal, open your
+profile.</p>
+
+<p><img src="/assets/images/0013/select_profile.png" alt="Select Profile" title="Select Profile" /></p>
+
+<p>Then, in the menu select <strong>Personal Access Token</strong> and then <strong>New Token</strong>. Enter
+a name, and under <strong>Scope - Packaging</strong> select <strong>Read &amp; write</strong>.</p>
+
+<p><img src="/assets/images/0013/configure_access_token.png" alt="Select Profile" title="Select Profile" /></p>
+
+<p>Copy the access key, open a console, and run this command.</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Console </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="n">dotnet</span><span class="w"> </span><span class="nx">nuget</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="nx">source</span><span class="w"> </span><span class="nx">https://pkgs.dev.azure.com/pekspro/MyNugetExperiment/_packaging/MyNugetExperiement/nuget/v3/index.json</span><span class="w"> </span><span class="nt">--name</span><span class="w"> </span><span class="s2">"MyGetFeed"</span><span class="w"> </span><span class="nt">--username</span><span class="w"> </span><span class="p">[</span><span class="n">Your</span><span class="w"> </span><span class="n">e-mail</span><span class="w"> </span><span class="nx">address</span><span class="p">]</span><span class="w"> </span><span class="nt">--password</span><span class="w"> </span><span class="p">[</span><span class="n">The</span><span class="w"> </span><span class="n">access</span><span class="w"> </span><span class="n">key</span><span class="p">]</span></code></pre></figure>
+
+<p>To find the URL to use, go to <strong>Artifacts</strong>, select your feed, and then
+<strong>Connect to feed</strong>.</p>
+
+<p>If you later want to remove your feed, run this command:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Console </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="n">dotnet</span><span class="w"> </span><span class="nx">nuget</span><span class="w"> </span><span class="nx">remove</span><span class="w"> </span><span class="nx">source</span><span class="w"> </span><span class="s2">"MyNugGetFeed"</span></code></pre></figure>
+
+<p>Now to the fun stuff. To upload a NuGet package, run this command:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Console </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-powershell" data-lang="powershell"><span class="n">dotnet</span><span class="w"> </span><span class="nx">nuget</span><span class="w"> </span><span class="nx">push</span><span class="w"> </span><span class="o">.</span><span class="nx">\MyNugetLibrary.1.0.0.nupkg</span><span class="w"> </span><span class="nt">--source</span><span class="w"> </span><span class="s2">"MyNuGetFeed"</span><span class="w"> </span><span class="nt">--api-key</span><span class="w"> </span><span class="nx">whatever</span></code></pre></figure>
+
+<p>Note that you have to enter an <strong>api-key</strong>, but the <strong>value does not matter</strong>.</p>
+
+<h2 id="consume-nuget-packages">Consume NuGet packages</h2>
+
+<p>When the feed and the NuGet packages are in place, we make sure we could consume
+these in our projects. Both locally and in our build pipeline.</p>
+
+<h3 id="consume-nuget-packages-locally">Consume NuGet packages locally</h3>
+
+<p>If you have configured your system to be able to upload NuGet packets from the
+console, as described earlier, you should also be able to consume NuGet packages
+locally. Otherwise I suggest you to look on the options on <strong>Artifacts</strong> - your
+feed - <strong>Connect to feed</strong>.</p>
+
+<p>In most cases the best option is add a <strong>nuget.config</strong> file to your project, in
+the same folder as your .csproj or .sln file. It should look something like
+this:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> XML </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="nt">&lt;configuration&gt;</span>
+  <span class="nt">&lt;packageSources&gt;</span>
+    <span class="nt">&lt;add</span> <span class="na">key=</span><span class="s">"MyNugetExperiement"</span> <span class="na">value=</span><span class="s">"https://pkgs.dev.azure.com/pekspro/MyNugetExperiment/_packaging/MyNugetExperiement/nuget/v3/index.json"</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;/packageSources&gt;</span>
+<span class="nt">&lt;/configuration&gt;</span></code></pre></figure>
+
+<p>In whatever way you have configured the NuGet package source, you should now see it
+in Visual Studio.</p>
+
+<p><img src="/assets/images/0013/select_package_source.png" alt="Select Package Source" title="Select Package Source" /></p>
+
+<h3 id="setup-your-pipeline">Setup your pipeline</h3>
+
+<p>In your pipeline, select the <strong>Restore</strong> task and look for the <strong>Feeds and
+authentication</strong> options. Here you could select to use the sources from
+<strong>nuget.config</strong> file, like suggested in previous step. But you could also
+select the feed like I have done here:</p>
+
+<p><img src="/assets/images/0013/setup_pipeline.png" alt="Setup pipeline" title="Setup pipeline" /></p>
+
+<h2 id="summary">Summary</h2>
+
+<p>I just recently learned how to configure a NuGet service, and I must say this
+was easier than expected. There are some steps that could be improved,
+especially when it comes to publish NuGet packages, but the workarounds are not
+too bad.</p>
+
+<p>I have not check what to do if you are using .NET Framework, but many of the
+steps should be similar if not the same.</p>
+
+<p>More information about <strong>Artifacts</strong> is found in the
+<a href="https://docs.microsoft.com/en-us/azure/devops/artifacts/?view=azure-devops">documentation</a>.</p>
+
+  </div>
+  
+    <div id="archives" class="related"><div class="archive-group">
+    
+      
+      <div id="#azure-devops"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about Azure DevOps</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/cache-nuget-packages-for-net-core-builds">Cache NuGet packages for .NET Core builds</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/test-migrations-on-production-data">Test migrations on production data</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  </div><a class="u-url" href="/posts/setup-a-nuget-feed-in-azure-devops" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

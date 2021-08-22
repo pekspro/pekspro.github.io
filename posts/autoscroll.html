@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Autoscroll | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Autoscroll" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Very recently I developed a basic chat function in an application. Users could enter and send message to each other. And the messages were shown in a list that automatically scrolled down when a new message was received." />
+<meta property="og:description" content="Very recently I developed a basic chat function in an application. Users could enter and send message to each other. And the messages were shown in a list that automatically scrolled down when a new message was received." />
+<link rel="canonical" href="https://pekspro.github.io/posts/autoscroll" />
+<meta property="og:url" content="https://pekspro.github.io/posts/autoscroll" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-10-11T01:00:00+02:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Autoscroll" />
+<script type="application/ld+json">
+{"description":"Very recently I developed a basic chat function in an application. Users could enter and send message to each other. And the messages were shown in a list that automatically scrolled down when a new message was received.","headline":"Autoscroll","dateModified":"2020-10-11T01:00:00+02:00","datePublished":"2020-10-11T01:00:00+02:00","url":"https://pekspro.github.io/posts/autoscroll","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/autoscroll"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Autoscroll</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2020-10-11T01:00:00+02:00" itemprop="datePublished">
+        Oct 11, 2020
+      </time>
+        •  Categories: 
+        <a href="/categories#javascript">JavaScript</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Very recently I developed a basic chat function in an application. Users could
+enter and send message to each other. And the messages were shown in a list that
+automatically scrolled down when a new message was received.</p>
+
+<h2 id="the-problem">The problem</h2>
+
+<p>Let says you have a list of messages that looks like this in HTML:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> HTML </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"max-height: 200px; overflow-y: auto"</span> <span class="na">id=</span><span class="s">"chatwindow"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;p&gt;</span>
+        <span class="nt">&lt;strong&gt;</span>10:01:11 Alice<span class="nt">&lt;/strong&gt;&lt;br&gt;</span>
+        Thr first message.
+    <span class="nt">&lt;/p&gt;</span>
+    <span class="nt">&lt;p&gt;</span>
+        <span class="nt">&lt;strong&gt;</span>11:11:11 Bob<span class="nt">&lt;/strong&gt;&lt;br&gt;</span>
+        The second message.
+    <span class="nt">&lt;/p&gt;</span>
+    <span class="nt">&lt;p&gt;</span>
+        <span class="nt">&lt;strong&gt;</span>12:21:21 Carol<span class="nt">&lt;/strong&gt;&lt;br&gt;</span>
+        The third message.
+    <span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;/div&gt;</span></code></pre></figure>
+
+<p>This is simple list were the height is limited. If there are many messages,
+there will be a scrollbar. When new messages are added you want to scroll the
+list to the bottom. Unless the scrollbar is not on the bottom - then we do not
+want to move it because the user have scrolled up to read earlier messages.</p>
+
+<h2 id="the-solution">The solution</h2>
+
+<p>There are some interesting problems here. But the most important for me was to
+make the code reusable. It should work on any page, even if it has several
+message lists.</p>
+
+<p>My solution was to run JavaScript code when every page is loaded, and let it
+monitor changes to the DOM. When it detects elements that has the class
+attribute <code class="language-plaintext highlighter-rouge">auto-scroll-to-bottom</code>, it will add an event listener that then is
+submitting the form. It will also remove the event listeners if the attribute is
+removed.</p>
+
+<p>So, my sample code just needs to change to this:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> HTML </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"max-height: 200px; overflow-y: auto"</span> <span class="na">id=</span><span class="s">"chatwindow"</span> <span class="na">class=</span><span class="s">"auto-scroll-to-bottom"</span><span class="nt">&gt;</span>
+<span class="c">&lt;!-- Nothing else is changed --&gt;</span></code></pre></figure>
+
+<p>No JavaScript is mixed in the HTML which make is nice and simple.</p>
+
+<p>Anyway, the code that do this is this TypeScript code:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> TypeScript </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-typescript" data-lang="typescript"><span class="nb">window</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="dl">"</span><span class="s2">load</span><span class="dl">"</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+
+    <span class="kd">const</span> <span class="nx">noScrollObjects</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="o">&lt;</span><span class="nx">HTMLElement</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    
+    <span class="kd">const</span> <span class="nx">callback</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">:</span> <span class="nx">Event</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="kd">const</span> <span class="nx">target</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span> <span class="k">as</span> <span class="nx">HTMLElement</span><span class="p">;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nx">target</span><span class="p">.</span><span class="nx">scrollHeight</span> <span class="o">-</span> <span class="nx">target</span><span class="p">.</span><span class="nx">scrollTop</span> <span class="o">-</span> <span class="nx">target</span><span class="p">.</span><span class="nx">clientHeight</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="c1">// Scrolled to bottom</span>
+            <span class="kd">const</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">noScrollObjects</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">target</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">index</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">noScrollObjects</span><span class="p">.</span><span class="nx">splice</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+            <span class="p">}</span>
+
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+
+            <span class="c1">// Scroll somewhere else. Prevent scrolling.</span>
+            <span class="nx">noScrollObjects</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">target</span><span class="p">);</span>
+
+        <span class="p">}</span>
+    <span class="p">}</span>
+        
+    <span class="c1">// Create an observer instance linked to the callback function</span>
+    <span class="c1">// Read more: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver</span>
+    <span class="kd">const</span> <span class="nx">observer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">MutationObserver</span><span class="p">(</span>
+        <span class="kd">function</span> <span class="p">(</span><span class="nx">mutations</span><span class="p">:</span> <span class="nx">MutationRecord</span><span class="p">[])</span> <span class="p">{</span>
+            <span class="kd">const</span> <span class="nx">objectsToScroll</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="o">&lt;</span><span class="nx">HTMLElement</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+            <span class="k">for</span> <span class="p">(</span><span class="kd">const</span> <span class="nx">mutation</span> <span class="k">of</span> <span class="nx">mutations</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">mutation</span><span class="p">.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">childList</span><span class="dl">'</span> <span class="o">&amp;&amp;</span> <span class="nx">mutation</span><span class="p">.</span><span class="nx">addedNodes</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="kd">const</span> <span class="nx">target</span> <span class="o">=</span> <span class="nx">mutation</span><span class="p">.</span><span class="nx">target</span> <span class="k">as</span> <span class="nx">HTMLElement</span><span class="p">;</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">noScrollObjects</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="c1">// Scrolling prevented</span>
+                        <span class="k">continue</span><span class="p">;</span>
+                    <span class="p">}</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">target</span> <span class="o">&amp;&amp;</span> <span class="nx">target</span><span class="p">.</span><span class="nx">classList</span><span class="p">.</span><span class="nx">contains</span><span class="p">(</span><span class="dl">"</span><span class="s2">auto-scroll-to-bottom</span><span class="dl">"</span><span class="p">))</span> <span class="p">{</span>
+                        <span class="c1">// Also add event listener</span>
+                        <span class="nx">target</span><span class="p">.</span><span class="nx">onscroll</span> <span class="o">=</span> <span class="nx">callback</span><span class="p">;</span>
+
+                        <span class="k">if</span> <span class="p">(</span><span class="nx">objectsToScroll</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">objectsToScroll</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">target</span><span class="p">);</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>   
+                <span class="p">}</span>
+            <span class="p">}</span>
+
+            <span class="c1">// Scroll all potential objects.</span>
+            <span class="k">for</span> <span class="p">(</span><span class="kd">const</span> <span class="nx">objectToScroll</span> <span class="k">of</span> <span class="nx">objectsToScroll</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">objectToScroll</span><span class="p">.</span><span class="nx">scrollTop</span> <span class="o">=</span> <span class="nx">objectToScroll</span><span class="p">.</span><span class="nx">scrollHeight</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">);</span>
+
+    <span class="c1">// Only observe changes in nodes in the whole tree, but do not observe attributes.</span>
+    <span class="kd">const</span> <span class="nx">observerConfig</span> <span class="o">=</span> <span class="p">{</span> <span class="na">subtree</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="na">childList</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="na">attributes</span><span class="p">:</span> <span class="kc">false</span> <span class="p">};</span>
+
+    <span class="c1">// Start observing the target node for configured mutations</span>
+    <span class="nx">observer</span><span class="p">.</span><span class="nx">observe</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="nx">observerConfig</span><span class="p">);</span>
+<span class="p">});</span></code></pre></figure>
+
+<p>And this is how it looks in JavaScript:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> JavaScript </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nb">window</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="dl">"</span><span class="s2">load</span><span class="dl">"</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">noScrollObjects</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">callback</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">target</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">target</span><span class="p">.</span><span class="nx">scrollHeight</span> <span class="o">-</span> <span class="nx">target</span><span class="p">.</span><span class="nx">scrollTop</span> <span class="o">-</span> <span class="nx">target</span><span class="p">.</span><span class="nx">clientHeight</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// Scrolled to bottom</span>
+            <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">noScrollObjects</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">target</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">index</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">noScrollObjects</span><span class="p">.</span><span class="nx">splice</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="p">{</span>
+            <span class="c1">// Scroll somewhere else. Prevent scrolling.</span>
+            <span class="nx">noScrollObjects</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">target</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+    <span class="c1">// Create an observer instance linked to the callback function</span>
+    <span class="c1">// Read more: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver</span>
+    <span class="kd">var</span> <span class="nx">observer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">MutationObserver</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">mutations</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">objectsToScroll</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">_i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">mutations_1</span> <span class="o">=</span> <span class="nx">mutations</span><span class="p">;</span> <span class="nx">_i</span> <span class="o">&lt;</span> <span class="nx">mutations_1</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">_i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">mutation</span> <span class="o">=</span> <span class="nx">mutations_1</span><span class="p">[</span><span class="nx">_i</span><span class="p">];</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">mutation</span><span class="p">.</span><span class="nx">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">childList</span><span class="dl">'</span> <span class="o">&amp;&amp;</span> <span class="nx">mutation</span><span class="p">.</span><span class="nx">addedNodes</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">target</span> <span class="o">=</span> <span class="nx">mutation</span><span class="p">.</span><span class="nx">target</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">noScrollObjects</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="c1">// Scrolling prevented</span>
+                    <span class="k">continue</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">target</span> <span class="o">&amp;&amp;</span> <span class="nx">target</span><span class="p">.</span><span class="nx">classList</span><span class="p">.</span><span class="nx">contains</span><span class="p">(</span><span class="dl">"</span><span class="s2">auto-scroll-to-bottom</span><span class="dl">"</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="c1">// Also add event listener</span>
+                    <span class="nx">target</span><span class="p">.</span><span class="nx">onscroll</span> <span class="o">=</span> <span class="nx">callback</span><span class="p">;</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">objectsToScroll</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">objectsToScroll</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">target</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="c1">// Scroll all potential objects.</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">_a</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">objectsToScroll_1</span> <span class="o">=</span> <span class="nx">objectsToScroll</span><span class="p">;</span> <span class="nx">_a</span> <span class="o">&lt;</span> <span class="nx">objectsToScroll_1</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">_a</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">objectToScroll</span> <span class="o">=</span> <span class="nx">objectsToScroll_1</span><span class="p">[</span><span class="nx">_a</span><span class="p">];</span>
+            <span class="nx">objectToScroll</span><span class="p">.</span><span class="nx">scrollTop</span> <span class="o">=</span> <span class="nx">objectToScroll</span><span class="p">.</span><span class="nx">scrollHeight</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+    <span class="c1">// Only observe changes in nodes in the whole tree, but do not observe attributes.</span>
+    <span class="kd">var</span> <span class="nx">observerConfig</span> <span class="o">=</span> <span class="p">{</span> <span class="na">subtree</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="na">childList</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="na">attributes</span><span class="p">:</span> <span class="kc">false</span> <span class="p">};</span>
+    <span class="c1">// Start observing the target node for configured mutations</span>
+    <span class="nx">observer</span><span class="p">.</span><span class="nx">observe</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="nx">observerConfig</span><span class="p">);</span>
+<span class="p">});</span></code></pre></figure>
+
+<p>I think this should work in all modern browsers.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>I like this pattern a lot. You only need to make sure it has run once after the
+page has been loaded, and then it will take care of everything after that. The
+code plays nicely with Blazor. In fact, I used this code in the project I created
+for me previous post
+<a href="/posts/detect-and-warn-multiple-editors">Detect and warn multiple editors</a>.</p>
+
+  </div>
+  
+    <div id="archives" class="related"><div class="archive-group">
+    
+      
+      <div id="#javascript"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about JavaScript</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/what-characters-are-whitespace">What characters are whitespace?</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/trimming-whitespace-in-input-controls">Trimming whitespace in input controls</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/submitting-forms-when-a-select-list-changes">Submitting forms when a select list changes</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/prevent-enter-to-submit-forms">Prevent enter to submit forms</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  </div><a class="u-url" href="/posts/autoscroll" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

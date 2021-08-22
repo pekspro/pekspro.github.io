@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Trimming whitespace in input controls | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Trimming whitespace in input controls" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A simple solution to automatically remove whitespaces on input textboxes and text area controls in HTML." />
+<meta property="og:description" content="A simple solution to automatically remove whitespaces on input textboxes and text area controls in HTML." />
+<link rel="canonical" href="https://pekspro.github.io/posts/trimming-whitespace-in-input-controls" />
+<meta property="og:url" content="https://pekspro.github.io/posts/trimming-whitespace-in-input-controls" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-11-01T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Trimming whitespace in input controls" />
+<script type="application/ld+json">
+{"description":"A simple solution to automatically remove whitespaces on input textboxes and text area controls in HTML.","headline":"Trimming whitespace in input controls","dateModified":"2020-11-01T00:00:00+01:00","datePublished":"2020-11-01T00:00:00+01:00","url":"https://pekspro.github.io/posts/trimming-whitespace-in-input-controls","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/trimming-whitespace-in-input-controls"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Trimming whitespace in input controls</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2020-11-01T00:00:00+01:00" itemprop="datePublished">
+        Nov 1, 2020
+      </time>
+        •  Categories: 
+        <a href="/categories#javascript">JavaScript</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>A simple solution to automatically remove whitespaces on input textboxes and
+text area controls in HTML.</p>
+
+<h2 id="the-problem">The problem</h2>
+
+<p>If you have a web form with input controls where users could enter text
+they will sooner or later enter data with leading or trailing whitespaces.
+This is especially common if users copy-and-paste data.</p>
+
+<p>I have often seen tab characters after the actual text. This may be OK in some
+situations and could problems in other cases. For instance, user could bypass
+required fields by entering a space. Or if you concatenate text from input
+controls extra whitespaces could cause you getting unexpected results.</p>
+
+<h2 id="the-solution">The solution</h2>
+
+<p>It is not too hard to remove whitespaces in JavaScript. The simple way is:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> HTML </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;form</span> <span class="na">onsubmit=</span><span class="s">"alert('Form OK');"</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;label&gt;</span>First name:<span class="nt">&lt;/label&gt;</span>
+    <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">required</span> <span class="na">onfocusout=</span><span class="s">"this.value = this.value.trim()"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;label&gt;</span>Last name:<span class="nt">&lt;/label&gt;</span>
+    <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">required</span> <span class="na">onfocusout=</span><span class="s">"this.value = this.value.trim()"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"submit"</span><span class="nt">&gt;</span>Submit<span class="nt">&lt;/button&gt;</span>
+
+<span class="nt">&lt;/form&gt;</span></code></pre></figure>
+
+<p>(By the way, is it just me that found the name of the event <code class="language-plaintext highlighter-rouge">blur</code> is a bit
+strange. It is a bit unclear what it is doing.)</p>
+
+<p>I am not a bit fan of adding JavaScript code on each element like that. Another
+solution is to use the <code class="language-plaintext highlighter-rouge">onfocusout</code> event instead that bubbles up. Then you just
+need JavaScript code in one place:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> HTML </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;form</span> <span class="na">onsubmit=</span><span class="s">"alert('Form OK');"</span>
+      <span class="na">onfocusout=</span><span class="s">"event.target.value = event.target.value.trim();"</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;label&gt;</span>First name:<span class="nt">&lt;/label&gt;</span>
+    <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">required</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;label&gt;</span>Last name:<span class="nt">&lt;/label&gt;</span>
+    <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">required</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"submit"</span><span class="nt">&gt;</span>Submit<span class="nt">&lt;/button&gt;</span>
+
+<span class="nt">&lt;/form&gt;</span></code></pre></figure>
+
+<p>Fairly good, I think. But still you need to do this on every form, and it is a
+bit tricky if you want to allow whitespace on some controls.</p>
+
+<p>So, instead I reused and modified some old code to fix this problem. When the
+page is loaded, it starts monitor changes to the DOM. This gives you better
+control. With this solution you could add the CSS class <code class="language-plaintext highlighter-rouge">no-auto-trim</code> if you do
+not want automatically trimming.</p>
+
+<p>Anyway, the code that do this is this TypeScript code:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> TypeScript </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-typescript" data-lang="typescript"><span class="nb">window</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="dl">"</span><span class="s2">load</span><span class="dl">"</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+
+    <span class="c1">//This will be called when an element lost focus</span>
+    <span class="kd">const</span> <span class="nx">callback</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">:</span> <span class="nx">Event</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">target</span> <span class="k">instanceof</span> <span class="nx">HTMLInputElement</span> <span class="o">||</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span> <span class="k">instanceof</span> <span class="nx">HTMLTextAreaElement</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">const</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span> <span class="k">as</span> <span class="nx">HTMLInputElement</span> <span class="o">|</span> <span class="nx">HTMLTextAreaElement</span><span class="p">;</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">el</span><span class="p">.</span><span class="nx">classList</span><span class="p">.</span><span class="nx">contains</span><span class="p">(</span><span class="dl">"</span><span class="s2">no-auto-trim</span><span class="dl">"</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">el</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">trim</span><span class="p">();</span> 
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    
+    <span class="c1">//This will add blur event listener on all input and text area elements.</span>
+    <span class="kd">function</span> <span class="nx">setupEvent</span><span class="p">(</span><span class="nx">node</span><span class="p">:</span> <span class="nx">HTMLInputElement</span> <span class="o">|</span> <span class="nx">HTMLTextAreaElement</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Adding event listener: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">node</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span>
+        <span class="nx">node</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">blur</span><span class="dl">'</span><span class="p">,</span> <span class="nx">callback</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="c1">//This will add key event listener on all input and text area elements.</span>
+    <span class="kd">function</span> <span class="nx">setupEventsOnElements</span><span class="p">(</span><span class="nx">nodelist</span><span class="p">:</span> <span class="nx">NodeList</span> <span class="o">|</span> <span class="nx">HTMLCollectionOf</span><span class="o">&lt;</span><span class="nx">Element</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">nodelist</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">const</span> <span class="nx">node</span> <span class="o">=</span> <span class="nx">nodelist</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="nx">node</span> <span class="k">instanceof</span> <span class="nx">HTMLInputElement</span> <span class="o">||</span> <span class="nx">node</span> <span class="k">instanceof</span> <span class="nx">HTMLTextAreaElement</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">const</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">node</span> <span class="k">as</span> <span class="nx">HTMLInputElement</span> <span class="o">|</span> <span class="nx">HTMLTextAreaElement</span><span class="p">;</span>
+
+                <span class="nx">setupEvent</span><span class="p">(</span><span class="nx">el</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">node</span> <span class="k">instanceof</span> <span class="nx">HTMLElement</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">const</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">node</span> <span class="k">as</span> <span class="nx">HTMLElement</span><span class="p">;</span>
+
+                <span class="kd">const</span> <span class="nx">inputElements</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="dl">"</span><span class="s2">input</span><span class="dl">"</span><span class="p">);</span>
+                <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">inputElements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">inputElements</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="kd">type</span> <span class="o">!==</span> <span class="dl">"</span><span class="s2">button</span><span class="dl">"</span> <span class="o">&amp;&amp;</span>
+                        <span class="nx">inputElements</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="kd">type</span> <span class="o">!==</span> <span class="dl">"</span><span class="s2">password</span><span class="dl">"</span> <span class="o">&amp;&amp;</span>
+                        <span class="nx">inputElements</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="kd">type</span> <span class="o">!==</span> <span class="dl">"</span><span class="s2">checkbox</span><span class="dl">"</span> <span class="o">&amp;&amp;</span>
+                        <span class="nx">inputElements</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="kd">type</span> <span class="o">!==</span> <span class="dl">"</span><span class="s2">radio</span><span class="dl">"</span> <span class="o">&amp;&amp;</span>
+                        <span class="nx">inputElements</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="kd">type</span> <span class="o">!==</span> <span class="dl">"</span><span class="s2">hidden</span><span class="dl">"</span> <span class="o">&amp;&amp;</span>
+                        <span class="nx">inputElements</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="kd">type</span> <span class="o">!==</span> <span class="dl">"</span><span class="s2">reset</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">setupEvent</span><span class="p">(</span><span class="nx">inputElements</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+                <span class="kd">const</span> <span class="nx">textareaElements</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="dl">"</span><span class="s2">textarea</span><span class="dl">"</span><span class="p">);</span>
+                <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">textareaElements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">setupEvent</span><span class="p">(</span><span class="nx">textareaElements</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Create an observer instance linked to the callback function</span>
+    <span class="c1">// Read more: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver</span>
+    <span class="kd">const</span> <span class="nx">observer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">MutationObserver</span><span class="p">(</span>
+        <span class="kd">function</span> <span class="p">(</span><span class="nx">mutations</span><span class="p">:</span> <span class="nx">MutationRecord</span><span class="p">[])</span> <span class="p">{</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Something happen.</span><span class="dl">"</span><span class="p">);</span>
+
+            <span class="k">for</span> <span class="p">(</span><span class="kd">const</span> <span class="nx">mutation</span> <span class="k">of</span> <span class="nx">mutations</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Something happen: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">mutation</span><span class="p">.</span><span class="kd">type</span><span class="p">);</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nx">mutation</span><span class="p">.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">childList</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">setupEventsOnElements</span><span class="p">(</span><span class="nx">mutation</span><span class="p">.</span><span class="nx">addedNodes</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">);</span>
+
+    <span class="c1">// Configure observer</span>
+    <span class="kd">const</span> <span class="nx">observerConfig</span> <span class="o">=</span> <span class="p">{</span> <span class="na">subtree</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="na">childList</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="na">attributes</span><span class="p">:</span> <span class="kc">false</span> <span class="p">};</span>
+
+    <span class="c1">// Start observing the target node for configured mutations</span>
+    <span class="nx">observer</span><span class="p">.</span><span class="nx">observe</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="nx">observerConfig</span><span class="p">);</span>
+
+    <span class="c1">//Also check all elements when loaded.</span>
+    <span class="nx">setupEventsOnElements</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="dl">"</span><span class="s2">input</span><span class="dl">"</span><span class="p">));</span>
+    <span class="nx">setupEventsOnElements</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="dl">"</span><span class="s2">textarea</span><span class="dl">"</span><span class="p">));</span>
+<span class="p">});</span></code></pre></figure>
+
+<p>And this is how it looks in JavaScript:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> JavaScript </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nb">window</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="dl">"</span><span class="s2">load</span><span class="dl">"</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="c1">//This will be called when an element lost focus</span>
+    <span class="kd">var</span> <span class="nx">callback</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">target</span> <span class="k">instanceof</span> <span class="nx">HTMLInputElement</span> <span class="o">||</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span> <span class="k">instanceof</span> <span class="nx">HTMLTextAreaElement</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">el</span><span class="p">.</span><span class="nx">classList</span><span class="p">.</span><span class="nx">contains</span><span class="p">(</span><span class="dl">"</span><span class="s2">no-auto-trim</span><span class="dl">"</span><span class="p">))</span> <span class="p">{</span>
+                <span class="nx">el</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">trim</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+    <span class="c1">//This will add blur event listener on all input and text area elements.</span>
+    <span class="kd">function</span> <span class="nx">setupEvent</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Adding event listener: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">node</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span>
+        <span class="nx">node</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">blur</span><span class="dl">'</span><span class="p">,</span> <span class="nx">callback</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="c1">//This will add key event listener on all input and text area elements.</span>
+    <span class="kd">function</span> <span class="nx">setupEventsOnElements</span><span class="p">(</span><span class="nx">nodelist</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i_1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i_1</span> <span class="o">&lt;</span> <span class="nx">nodelist</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i_1</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">node</span> <span class="o">=</span> <span class="nx">nodelist</span><span class="p">[</span><span class="nx">i_1</span><span class="p">];</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">node</span> <span class="k">instanceof</span> <span class="nx">HTMLInputElement</span> <span class="o">||</span> <span class="nx">node</span> <span class="k">instanceof</span> <span class="nx">HTMLTextAreaElement</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">node</span><span class="p">;</span>
+                <span class="nx">setupEvent</span><span class="p">(</span><span class="nx">el</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">node</span> <span class="k">instanceof</span> <span class="nx">HTMLElement</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">node</span><span class="p">;</span>
+                <span class="kd">var</span> <span class="nx">inputElements</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="dl">"</span><span class="s2">input</span><span class="dl">"</span><span class="p">);</span>
+                <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i_2</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i_2</span> <span class="o">&lt;</span> <span class="nx">inputElements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i_2</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">inputElements</span><span class="p">[</span><span class="nx">i_2</span><span class="p">].</span><span class="nx">type</span> <span class="o">!==</span> <span class="dl">"</span><span class="s2">button</span><span class="dl">"</span> <span class="o">&amp;&amp;</span>
+                        <span class="nx">inputElements</span><span class="p">[</span><span class="nx">i_2</span><span class="p">].</span><span class="nx">type</span> <span class="o">!==</span> <span class="dl">"</span><span class="s2">password</span><span class="dl">"</span> <span class="o">&amp;&amp;</span>
+                        <span class="nx">inputElements</span><span class="p">[</span><span class="nx">i_2</span><span class="p">].</span><span class="nx">type</span> <span class="o">!==</span> <span class="dl">"</span><span class="s2">checkbox</span><span class="dl">"</span> <span class="o">&amp;&amp;</span>
+                        <span class="nx">inputElements</span><span class="p">[</span><span class="nx">i_2</span><span class="p">].</span><span class="nx">type</span> <span class="o">!==</span> <span class="dl">"</span><span class="s2">radio</span><span class="dl">"</span> <span class="o">&amp;&amp;</span>
+                        <span class="nx">inputElements</span><span class="p">[</span><span class="nx">i_2</span><span class="p">].</span><span class="nx">type</span> <span class="o">!==</span> <span class="dl">"</span><span class="s2">hidden</span><span class="dl">"</span> <span class="o">&amp;&amp;</span>
+                        <span class="nx">inputElements</span><span class="p">[</span><span class="nx">i_2</span><span class="p">].</span><span class="nx">type</span> <span class="o">!==</span> <span class="dl">"</span><span class="s2">reset</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">setupEvent</span><span class="p">(</span><span class="nx">inputElements</span><span class="p">[</span><span class="nx">i_2</span><span class="p">]);</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+                <span class="kd">var</span> <span class="nx">textareaElements</span> <span class="o">=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="dl">"</span><span class="s2">textarea</span><span class="dl">"</span><span class="p">);</span>
+                <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i_3</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i_3</span> <span class="o">&lt;</span> <span class="nx">textareaElements</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i_3</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">setupEvent</span><span class="p">(</span><span class="nx">textareaElements</span><span class="p">[</span><span class="nx">i_3</span><span class="p">]);</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="c1">// Create an observer instance linked to the callback function</span>
+    <span class="c1">// Read more: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver</span>
+    <span class="kd">var</span> <span class="nx">observer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">MutationObserver</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">mutations</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Something happen.</span><span class="dl">"</span><span class="p">);</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">_i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">mutations_1</span> <span class="o">=</span> <span class="nx">mutations</span><span class="p">;</span> <span class="nx">_i</span> <span class="o">&lt;</span> <span class="nx">mutations_1</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">_i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">mutation</span> <span class="o">=</span> <span class="nx">mutations_1</span><span class="p">[</span><span class="nx">_i</span><span class="p">];</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Something happen: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">mutation</span><span class="p">.</span><span class="nx">type</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">mutation</span><span class="p">.</span><span class="nx">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">childList</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">setupEventsOnElements</span><span class="p">(</span><span class="nx">mutation</span><span class="p">.</span><span class="nx">addedNodes</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+    <span class="c1">// Configure observer</span>
+    <span class="kd">var</span> <span class="nx">observerConfig</span> <span class="o">=</span> <span class="p">{</span> <span class="na">subtree</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="na">childList</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="na">attributes</span><span class="p">:</span> <span class="kc">false</span> <span class="p">};</span>
+    <span class="c1">// Start observing the target node for configured mutations</span>
+    <span class="nx">observer</span><span class="p">.</span><span class="nx">observe</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="nx">observerConfig</span><span class="p">);</span>
+    <span class="c1">//Also check all elements when loaded.</span>
+    <span class="nx">setupEventsOnElements</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="dl">"</span><span class="s2">input</span><span class="dl">"</span><span class="p">));</span>
+    <span class="nx">setupEventsOnElements</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="dl">"</span><span class="s2">textarea</span><span class="dl">"</span><span class="p">));</span>
+<span class="p">});</span></code></pre></figure>
+
+<p>And here is some sample code:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> HTML </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;form</span> <span class="na">onsubmit=</span><span class="s">"alert('Form OK');"</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;label&gt;</span>Autotrim:<span class="nt">&lt;/label&gt;</span>
+    <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">required</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;label&gt;</span>No autotrim:<span class="nt">&lt;/label&gt;</span>
+    <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">required</span> <span class="na">class=</span><span class="s">"no-auto-trim"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;label&gt;</span>Autotrim area:<span class="nt">&lt;/label&gt;</span>
+    <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;textarea</span> <span class="na">required</span><span class="nt">&gt;&lt;/textarea&gt;</span>
+    <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;label&gt;</span>No autotrim area:<span class="nt">&lt;/label&gt;</span>
+    <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;textarea</span> <span class="na">required</span> <span class="na">class=</span><span class="s">"no-auto-trim"</span><span class="nt">&gt;&lt;/textarea&gt;</span>
+    <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"submit"</span><span class="nt">&gt;</span>Submit<span class="nt">&lt;/button&gt;</span>
+<span class="nt">&lt;/form&gt;</span></code></pre></figure>
+
+<h2 id="summary">Summary</h2>
+
+<p>This solution works fine most of the time. But be careful if you mix this with
+Blazor. It looks to me that Blazor also is executing code when controls are
+losing focus and could potentially modify the content. So, there is a risk for
+conflict on those cases.</p>
+
+  </div>
+  
+    <div id="archives" class="related"><div class="archive-group">
+    
+      
+      <div id="#javascript"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about JavaScript</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/what-characters-are-whitespace">What characters are whitespace?</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/autoscroll">Autoscroll</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/submitting-forms-when-a-select-list-changes">Submitting forms when a select list changes</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/prevent-enter-to-submit-forms">Prevent enter to submit forms</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  </div><a class="u-url" href="/posts/trimming-whitespace-in-input-controls" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

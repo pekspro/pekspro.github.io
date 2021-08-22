@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>How to use JWT token from query string | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="How to use JWT token from query string" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Normally you authenticate via a HTTP header when you are accessing an API. But how do you configure your server to allow authenticating via the query string too?" />
+<meta property="og:description" content="Normally you authenticate via a HTTP header when you are accessing an API. But how do you configure your server to allow authenticating via the query string too?" />
+<link rel="canonical" href="https://pekspro.github.io/posts/how-to-use-JWT-token-from-query-string" />
+<meta property="og:url" content="https://pekspro.github.io/posts/how-to-use-JWT-token-from-query-string" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-12-06T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="How to use JWT token from query string" />
+<script type="application/ld+json">
+{"description":"Normally you authenticate via a HTTP header when you are accessing an API. But how do you configure your server to allow authenticating via the query string too?","headline":"How to use JWT token from query string","dateModified":"2020-12-06T00:00:00+01:00","datePublished":"2020-12-06T00:00:00+01:00","url":"https://pekspro.github.io/posts/how-to-use-JWT-token-from-query-string","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/how-to-use-JWT-token-from-query-string"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">How to use JWT token from query string</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2020-12-06T00:00:00+01:00" itemprop="datePublished">
+        Dec 6, 2020
+      </time>
+        •  Categories: 
+        <a href="/categories#net">.NET</a>,
+            <a href="/categories#excel">Excel</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Normally you authenticate via a HTTP header when you are accessing an API. But
+how do you configure your server to allow authenticating via the query string
+too?</p>
+
+<h2 id="the-problem">The problem</h2>
+
+<p>Authenticating via a HTTP header is in many cases a better option. But in some
+scenarios, authentication via the query string, is preferable. For instance,
+if you are creating an API that should be used via Excel and you do not want to
+store the credentials in the file.</p>
+
+<p>If you are having a ASP.NET Core service that supports JWT you probably have
+this configured something like this:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> C# </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="n">services</span><span class="p">.</span><span class="nf">AddAuthentication</span><span class="p">(</span><span class="n">JwtBearerDefaults</span><span class="p">.</span><span class="n">AuthenticationScheme</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">AddJwtBearer</span><span class="p">(</span><span class="n">options</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="n">options</span><span class="p">.</span><span class="n">TokenValidationParameters</span> <span class="p">=</span> <span class="k">new</span> <span class="n">TokenValidationParameters</span>
+            <span class="p">{</span>
+                <span class="c1">// Configuration code</span>
+            <span class="p">};</span>
+        <span class="p">});</span></code></pre></figure>
+
+<p>This enables JWT authentication via HTTP. But there is no built-in support for
+authentication via query string.</p>
+
+<h2 id="the-solution">The solution</h2>
+
+<p>Luckily, it is not too hard to manually enable query string authentication.
+You could use the <code class="language-plaintext highlighter-rouge">Events</code> property to hook up some code you want to execute
+when request is processed. It should look something like this:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> C# </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="n">services</span><span class="p">.</span><span class="nf">AddAuthentication</span><span class="p">(</span><span class="n">JwtBearerDefaults</span><span class="p">.</span><span class="n">AuthenticationScheme</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">AddJwtBearer</span><span class="p">(</span><span class="n">options</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="n">options</span><span class="p">.</span><span class="n">TokenValidationParameters</span> <span class="p">=</span> <span class="k">new</span> <span class="n">TokenValidationParameters</span>
+            <span class="p">{</span>
+                <span class="c1">// Configuration code</span>
+            <span class="p">};</span>
+
+            <span class="n">options</span><span class="p">.</span><span class="n">Events</span> <span class="p">=</span> <span class="k">new</span> <span class="n">JwtBearerEvents</span>
+            <span class="p">{</span>
+                <span class="n">OnMessageReceived</span> <span class="p">=</span> <span class="p">(</span><span class="n">context</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(!</span><span class="n">context</span><span class="p">.</span><span class="n">Request</span><span class="p">.</span><span class="n">Query</span><span class="p">.</span><span class="nf">TryGetValue</span><span class="p">(</span><span class="s">"access_token"</span><span class="p">,</span> <span class="k">out</span> <span class="n">StringValues</span> <span class="n">values</span><span class="p">))</span>
+                    <span class="p">{</span>
+                        <span class="k">return</span> <span class="n">Task</span><span class="p">.</span><span class="n">CompletedTask</span><span class="p">;</span>
+                    <span class="p">}</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="n">values</span><span class="p">.</span><span class="n">Count</span> <span class="p">&gt;</span> <span class="m">1</span><span class="p">)</span>
+                    <span class="p">{</span>
+                        <span class="n">context</span><span class="p">.</span><span class="n">Response</span><span class="p">.</span><span class="n">StatusCode</span> <span class="p">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">HttpStatusCode</span><span class="p">.</span><span class="n">Unauthorized</span><span class="p">;</span>
+                        <span class="n">context</span><span class="p">.</span><span class="nf">Fail</span><span class="p">(</span>
+                            <span class="s">"Only one 'access_token' query string parameter can be defined. "</span> <span class="p">+</span>
+                            <span class="s">$"However, </span><span class="p">{</span><span class="n">values</span><span class="p">.</span><span class="n">Count</span><span class="p">}</span><span class="s"> were included in the request."</span>
+                        <span class="p">);</span>
+
+                        <span class="k">return</span> <span class="n">Task</span><span class="p">.</span><span class="n">CompletedTask</span><span class="p">;</span>
+                    <span class="p">}</span>
+
+                    <span class="kt">var</span> <span class="n">token</span> <span class="p">=</span> <span class="n">values</span><span class="p">.</span><span class="nf">Single</span><span class="p">();</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="kt">string</span><span class="p">.</span><span class="nf">IsNullOrWhiteSpace</span><span class="p">(</span><span class="n">token</span><span class="p">))</span>
+                    <span class="p">{</span>
+                        <span class="n">context</span><span class="p">.</span><span class="n">Response</span><span class="p">.</span><span class="n">StatusCode</span> <span class="p">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">HttpStatusCode</span><span class="p">.</span><span class="n">Unauthorized</span><span class="p">;</span>
+                        <span class="n">context</span><span class="p">.</span><span class="nf">Fail</span><span class="p">(</span>
+                            <span class="s">"The 'access_token' query string parameter was defined, "</span> <span class="p">+</span>
+                            <span class="s">"but a value to represent the token was not included."</span>
+                        <span class="p">);</span>
+
+                        <span class="k">return</span> <span class="n">Task</span><span class="p">.</span><span class="n">CompletedTask</span><span class="p">;</span>
+                    <span class="p">}</span>
+
+                    <span class="n">context</span><span class="p">.</span><span class="n">Token</span> <span class="p">=</span> <span class="n">token</span><span class="p">;</span>
+
+                    <span class="k">return</span> <span class="n">Task</span><span class="p">.</span><span class="n">CompletedTask</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">};</span>
+        <span class="p">});</span></code></pre></figure>
+
+<p>With this you could then the authentication string in the query string with the parameter
+name <code class="language-plaintext highlighter-rouge">access_token</code>. So, if you previously authenticated this URL:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://rsptournament/api/players
+</code></pre></div></div>
+
+<p>With this in the HTTP header:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Authorization: Bearer abc123
+</code></pre></div></div>
+
+<p>You now could use this this URL:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://rsptournament/api/players?access_token=abc123
+</code></pre></div></div>
+
+<p>Note that <code class="language-plaintext highlighter-rouge">Bearer</code> should <strong>not</strong> be in the query string. I admit that I did not
+figured out this myself but found the solution in this
+<a href="https://stackoverflow.com/questions/45763149/asp-net-core-jwt-in-uri-query-parameter">Stack Overflow thread</a>.</p>
+
+<h2 id="how-to-use-this-with-power-query">How to use this with Power Query</h2>
+
+<p>If the API service is supporting authentication via query string you could use this
+in Power Query. It is a bit tricky to setup so here is a short tutorial:</p>
+
+<p>In Excel, select <strong>Data</strong> &gt; <strong>Get Data</strong> &gt; <strong>From Other Sources</strong> &gt; <strong>Blank query</strong>:</p>
+
+<p><img src="/assets/images/0036/get_data_blank_query.png" alt="Create blank query" title="Create blank query" /></p>
+
+<p>Next in the Power Query editor, select <strong>Home</strong> &gt; <strong>Advanced editor</strong>:</p>
+
+<p><img src="/assets/images/0036/home_advanced_editor.png" alt="Select Advanced Editor" title="Select Advanced Editor" /></p>
+
+<p>Next, you replaced the query with this:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Advanced editor </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">let
+    Source = Json.Document(Web.Contents("https://rsptournament/api/players", [ApiKeyName="access_token"]))
+in
+    Source</code></pre></figure>
+
+<p>Note that the <code class="language-plaintext highlighter-rouge">ApiKeyName</code> is set to <code class="language-plaintext highlighter-rouge">access_token</code> in the query. This specifies
+the name used in the query string.  Close the editor and now you will be asked
+for credentials.</p>
+
+<p>Select <strong>Web API</strong> and enter the key (without “Bearer”) like this:</p>
+
+<p><img src="/assets/images/0036/enter_api_key.png" alt="Enter API Key" title="Enter API key" /></p>
+
+<p>That should be it. After this you should see the data in the Power Query editor.</p>
+
+<p>Now then Power Query is accessing the API the API key will be read from a local
+storage, not the Excel file, and be added automatically to the query string.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>As I explained in the previous post, it is possible to
+<a href="/posts/using-power-query-and-web-api-with-http-authentication">Using Power Query and web API with HTTP authentication</a>. But this
+requires that the authentication string is stored in the Excel file. The method
+explained above let you avoid that but will make the authentication string to be
+send in the query string instead.</p>
+
+  </div>
+  
+    <div id="archives" class="related"><div class="archive-group">
+    
+      
+      <div id="#net"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about .NET</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/get-time-zone-for-a-user-in-graph">Get time zone for a user in Graph</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/invite-to-a-meeting">Invite to a meeting</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/caching-configuration-from-azure-keyvault">Caching configuration from Azure KeyVault</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-unique-excel-sheet-names">Creating unique Excel sheet names</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/finding-objects-that-are-not-disposed">Finding objects that are not disposed</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/finding-redundant-project-references">Finding redundant project references</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/policyscope">PolicyScope</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/manually-creating-a-dbcontext-and-enable-logging">Manually creating a DbContext and enable logging</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/graphemes">Graphemes</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/withpartitionkey-and-in-memory-database">WithPartitionKey and in-memory database</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/net5-and-azure-functions">.NET 5 and Azure Functions</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/what-characters-are-whitespace">What characters are whitespace?</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/trimming-whitespace-in-objects">Trimming whitespace in objects</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/modifying-query-string">Modifying query strings</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/create-a-time-lapse-video">Create a time lapse video</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-language-version-on-multiple-projects">Change language version on multiple projects</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-encoding-on-your-source-files">Change encoding on your source files</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/build-time">Build time</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  
+  
+    <div class="archive-group">
+    
+      
+      <div id="#excel"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about Excel</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/be-careful-with-references-in-power-query">Be careful with references in Power Query</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-unique-excel-sheet-names">Creating unique Excel sheet names</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/calling-an-api-multiple-times-with-power-query">Calling an API multiple times with Power Query</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-accruals-with-power-query">Creating accruals with Power Query</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/using-power-query-and-web-api-with-http-authentication">Power Query and Web API with HTTP authentication</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/power-query-and-json-arrays">Power Query and JSON arrays</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/format-tables-in-excel-with-macros">Format tables in Excel with macros</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-excel-files-in-azure-functions">Creating Excel-files in Azure Functions</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-excel-files-in-logic-apps">Creating Excel-files in Logic Apps</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/power-query-grouping-and-filtering-data">Power Query - Grouping and filtering data</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/power-query-joining-data">Power Query - Joining data</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/power-query-working-with-columns">Power Query - Working with columns</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/power-query-get-started-in-excel">Power Query - Get started in Excel</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  </div><a class="u-url" href="/posts/how-to-use-JWT-token-from-query-string" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

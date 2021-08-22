@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Creating Excel-files in Logic Apps | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Creating Excel-files in Logic Apps" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Imagine that you day week has to get data from some databases, add this in an Excel file that is then e-mailed to someone. How could you automate this in Logic Apps? Also, is it worth it? Maybe." />
+<meta property="og:description" content="Imagine that you day week has to get data from some databases, add this in an Excel file that is then e-mailed to someone. How could you automate this in Logic Apps? Also, is it worth it? Maybe." />
+<link rel="canonical" href="https://pekspro.github.io/posts/creating-excel-files-in-logic-apps" />
+<meta property="og:url" content="https://pekspro.github.io/posts/creating-excel-files-in-logic-apps" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-08-23T01:00:00+02:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Creating Excel-files in Logic Apps" />
+<script type="application/ld+json">
+{"description":"Imagine that you day week has to get data from some databases, add this in an Excel file that is then e-mailed to someone. How could you automate this in Logic Apps? Also, is it worth it? Maybe.","headline":"Creating Excel-files in Logic Apps","dateModified":"2020-08-23T01:00:00+02:00","datePublished":"2020-08-23T01:00:00+02:00","url":"https://pekspro.github.io/posts/creating-excel-files-in-logic-apps","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/creating-excel-files-in-logic-apps"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Creating Excel-files in Logic Apps</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2020-08-23T01:00:00+02:00" itemprop="datePublished">
+        Aug 23, 2020
+      </time>
+        •  Categories: 
+        <a href="/categories#logic-apps">Logic apps</a>,
+            <a href="/categories#excel">Excel</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Imagine that you day week has to get data from some databases, add this in an
+Excel file that is then e-mailed to someone. How could you automate this in
+Logic Apps? Also, is it worth it? Maybe.</p>
+
+<h2 id="strategy">Strategy</h2>
+
+<p>In short, the logic app will go thru these steps:</p>
+
+<ul>
+  <li>Create an empty Excel file. Believe it or not, this is was the hardest problem
+for me to solve.</li>
+  <li>Prepare the Excel-file by creating a new sheet and a new table.</li>
+  <li>Populate the table with some data.</li>
+  <li>Send the file via e-mail.</li>
+</ul>
+
+<p>In real life, there are some more steps involved. If you follow this tutorial
+you will end up with these steps:</p>
+
+<p><img src="/assets/images/0021/logic_app_overview.png" alt="Logic app overview" title="Logic app overview" /></p>
+
+<p>Start by creating an empty Logic app. Normally I use the <strong>When a HTTP request
+is received</strong> trigger when I do experiment like this, but feel free to use
+whatever you like.</p>
+
+<h3 id="create-an-empty-excel-file">Create an empty Excel file</h3>
+
+<p>There are ready to use connectors for working with Excel files. All these
+assumes that the files exist on OneDrive, so we will use that. The files will
+just be temporary.</p>
+
+<p>But unfortunately, the are no functions that let us use easily create an empty
+Excel file. Not sure why, I find this to be a bit weird to be honest.</p>
+
+<p>One way to solve this is to have a template file ready and then use the OneDrive
+connector to copy to new file. Easy to do and totally works. But I find it a bit
+annoying that need a file on my OneDrive just for that. If I accidentally remove
+that file, the app will stop working.</p>
+
+<p>But the approach we will use is to have the content inside the app and then
+write it to a real file. Since Excel files are binary files, we will work with
+the file content as a base64 string. If you have a file ready that you want to
+use, you could run this PowerShell command to get the content in the right
+format:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> PowerShell </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">[Convert]::ToBase64String([IO.File]::ReadAllBytes(".\MyFile.xlsx"))</code></pre></figure>
+
+<p>Otherwise, just use the sample I have below.</p>
+
+<p>In your Logic app, select to add a new step.</p>
+
+<p>Search for <strong>Variables</strong>.</p>
+
+<p><img src="/assets/images/0021/select_controller_variables.png" alt="Select Variables" title="Select Variables" /></p>
+
+<p>Then select <strong>Initialize variable</strong>.</p>
+
+<p><img src="/assets/images/0021/select_action_initialize_variable.png" alt="Select Initialize Variable" title="Select Initialize Variable" /></p>
+
+<p>Let <strong>Name</strong> be <code class="language-plaintext highlighter-rouge">EmptyFileContent</code>, and the <strong>Type</strong> should be an <code class="language-plaintext highlighter-rouge">Object</code>. The
+<strong>Value</strong> should be this massive string:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> EmptyFileContent </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">{
+  "$content": "UEsDBBQAAAgIAPw7F1H5Vy4RAgEAALoBAAAPAAAAeGwvd29ya2Jvb2sueG1sjZDBbgIhEIZfhcy9sm5i22xEL714aZrUtGeEwSUusGFQ99166CP1FQq7Gk1PPfHPDN8/P/x8fS/Xg+vYCSPZ4AXMZxUw9Cpo6/cCjsk8PMN6tRyac4iHXQgHlu97aqKANqW+4ZxUi07SLPTo88yE6GTKZdzzYIxV+BLU0aFPvK6qRx6xkynvotb2BBe34T9u1EeUmlrE5LrJzEnr4T7dW2Q5O75KhwK2raXPywAYL/eK/LB4pnuoNJixkdJ7MReQ/0CqZE+4lbuxyiz/A485bor5ceVoMAc29jZaQA0sNjaLuNFZT0Y3VqOxHnXJS1NCJTtVXpGPws/rxVO9uILXxKtfUEsDBBQAAAgAAPw7F1HLvzWcnAIAAJwCAAALAAAAX3JlbHMvLnJlbHPvu788P3htbCB2ZXJzaW9uPSIxLjAiIGVuY29kaW5nPSJ1dGYtOCI/PjxSZWxhdGlvbnNoaXBzIHhtbG5zPSJodHRwOi8vc2NoZW1hcy5vcGVueG1sZm9ybWF0cy5vcmcvcGFja2FnZS8yMDA2L3JlbGF0aW9uc2hpcHMiPjxSZWxhdGlvbnNoaXAgVHlwZT0iaHR0cDovL3NjaGVtYXMub3BlbnhtbGZvcm1hdHMub3JnL29mZmljZURvY3VtZW50LzIwMDYvcmVsYXRpb25zaGlwcy9vZmZpY2VEb2N1bWVudCIgVGFyZ2V0PSIveGwvd29ya2Jvb2sueG1sIiBJZD0iUjEyMTdmODJhMzU2YTQwNWUiIC8+PFJlbGF0aW9uc2hpcCBUeXBlPSJodHRwOi8vc2NoZW1hcy5vcGVueG1sZm9ybWF0cy5vcmcvb2ZmaWNlRG9jdW1lbnQvMjAwNi9yZWxhdGlvbnNoaXBzL2V4dGVuZGVkLXByb3BlcnRpZXMiIFRhcmdldD0iL2RvY1Byb3BzL2FwcC54bWwiIElkPSJySWQxIiAvPjxSZWxhdGlvbnNoaXAgVHlwZT0iaHR0cDovL3NjaGVtYXMub3BlbnhtbGZvcm1hdHMub3JnL3BhY2thZ2UvMjAwNi9yZWxhdGlvbnNoaXBzL21ldGFkYXRhL2NvcmUtcHJvcGVydGllcyIgVGFyZ2V0PSIvcGFja2FnZS9zZXJ2aWNlcy9tZXRhZGF0YS9jb3JlLXByb3BlcnRpZXMvZmI2ZTY0MTA0ODdiNDc3MWFkMTc0MTA4MDEzOGFhMmYucHNtZGNwIiBJZD0iUjgwYjdmMDM1YzMxNDRkODEiIC8+PC9SZWxhdGlvbnNoaXBzPlBLAwQUAAAICAD8OxdRIr2HWGIBAAA6AwAAEAAAAGRvY1Byb3BzL2FwcC54bWydk01OwzAQha8SvG/TlgqhKHFVARIbIKIIlsg4k9YisS17GrVcjQVH4grYTmmjlh/Bbvzmy8ybJ+X99S2drOoqasBYoWRGhv0BiUByVQg5z8gSy94pmdCU6SQ3SoNBATZyn0ibNJiRBaJO4tjyBdTM9h0hXbNUpmbonmYeq7IUHM4VX9YgMR4NBidxobifZu/v1hos2cxj+r/zYIUgCyh6euuRBM9TrSvBGbrb6JXgRllVYnSx4lCl8V7f827sDPjSCFzTQSC6iidmnFVw5tbQklUWArPTPHEJzIeXM2EsTRtMGuCoTPTELPh7M9IwI5hEElnx4p5j0mKtGupKWzT0QZlnuwBAm8ZbMZRdtluLMR0GwBU/gu2sa1ZDEd0yOYe/rBh9vSI8wq2uPgjCCXcCK7A3Zc4MfhNNMPAZzHEbTGtq5oNoj9u43Gsd5UZIfJwaYL9TrZWDmzvu98x6afcH0A9QSwMEFAAACAgA/DsXUX5SkQV9AAAAkAAAABQAAAB4bC9zaGFyZWRTdHJpbmdzLnhtbD2MQQ6DIBAAv0L2XqE9NI0RPfgSgquSyELZpfFvPfRJ/UI59TiZyXzfn2E646FeWDgksnDtDCgkn5ZAm4Uq6+UB0zicPbMonyqJhZZUCs+K85/bhLg/Lewiudea/Y7RcZcyUnNrKtFJw7JpzgXdwjuixEPfjLnr6AKB0uMPUEsDBBQAAAgIAPw7F1EM3Eiz4wAAAL4CAAAaAAAAeGwvX3JlbHMvd29ya2Jvb2sueG1sLnJlbHO1kkFOwzAQRa9izZ5MWlCFUN1uuum29AKWM4mjJrblmdL2bCw4ElfABAlhxIJNNrb8x/P0xvL769t6ex0H9UKJ++A1LKoaFHkbmt53Gs7S3j3CdrM+0GAk32DXR1a5xbMGJxKfENk6Gg1XIZLPlTak0Ug+pg6jsSfTES7reoXpJwNKpjreIv2HGNq2t7QL9jySlz/AyM4kap4l5QkY1NGkjkQDXoeyVGUyqH2jIe2be1A4n5HcBvqtMmWFw8OcDpeQTuyIpNT4jj/fLW+Lwmg5p5HkXiptpuhrLUVWkwgWv3DzAVBLAwQUAAAICAD8OxdRwtI/jD8CAABMBgAADQAAAHhsL3N0eWxlcy54bWy9Vc2K2zAQfhWhe9dJoKWEOMt2i2Fh2ZZuCr3K9thWV5aMNM7a+2o99JH6CtWf7WwOLYHSXDTzeb7R/Gny68fP3fXQCnIEbbiSKV1frSgBWaiSyzqlPVZv3tPr/W7YGhwFPDYASCxDmu2Q0gax2yaJKRpomblSHUj7rVK6ZWhVXSem08BK42itSDar1bukZVxS51H2bdaiIYXqJdqrT0ASjrsypTae4PBWlZBSSpL9LpnJjlIpee7FQe60eeGN4LUkRyZSmjMDgkvwTmxKLwFeryNQKKE00XWe0ixb+V/8IlkLwfiWCZ5rHvGKtVyM4ctmii3cHoUQIhdiDnFDJ8idHUMELTOrkigfxs5mKlUMNFmM/0qqNRvXm7eveVHwkeRKl7bZr8sVQFJyVivJxNfOl31SP6pnOxkrbymgQuJHIQb4p7Ilwd6ZaF43FxE9wdmg6i7hWfOQEaJqLyEGhjOa8r6EPXGiK1fOE9FXvgAhHp3Hb9VZ+YfqfN7lLNq+RTG4igrrOjE+9G0OOvOvw/kKqBuKRfvgWQvHv4YWwuUB+qwVQoHh/fuAuhkhQhVPUHrjhpcl+EmISQ+VP04TmxL9FzkO1X9Jlk1GpFGav9i43GOuQYJmgrrViLzw28NPCCUIA35RyIITe9ezZt3Bgl7h0hYpiBqENTrC3QJ97w3yarxnBu/tIvKYaTSXTweV8YnG3Pb9NOfiN83lPTlph2/PWUdmnLjlltIHV1qb8Fz2vOcCuYxacL848+ryp7D/DVBLAwQUAAAICAD8OxdROcsks7gBAAAqAwAAGAAAAHhsL3dvcmtzaGVldHMvc2hlZXQxLnhtbI1S227bMAz9FUHvi70BuyBIUnQtig3YkKAdumfFom0hsihQ9Jz21/awT9ovjJaSYtnT3ngo6vDwkL9//lpdHQevfgAlh2GtXy9qrSA0aF3o1nrk9tUHfbVZHZcT0iH1AKzkQ0hLWuueOS6rKjU9DCYtMEKQtxZpMCyQugrb1jVwi804QODqTV2/qwi8YWmWeheTPrEd/4ctRQJjs4jBF7LBuKBneTm7oznEkb0LsCOVxmEw9PQRPE4ymz4n7l3Xc05Um1V18dk6UTp7oQjatb4uNaeSRwdTukBqtmWPeJjBZ7vW9QXn5Ye7PIvostCa0fM9Tp/gJOXt331uDZsCI7nA25j9Uj2Se8bAxt+Im0BQ+sny2DX/JHtxSlaYMujI2S9iSUGF2HTw1VDnhNdDKxLqxXsRQUVPAYzxHO6RGYcZCZjJQQ4ggxZR2p7rXsgfgMeooolAD+4Ziv2ico5qUTHXbCnTWJzCtx7CVibRSoaUQfKJyFNxSvp70xyug/3eOxYKIbBksmytGvD+Bof5xGTCgAHkhomQBFmXojdPYE/SivS7rLlk2Ow97AxxUg2OoVCWHb7c/OYPUEsDBBQAAAgIAPw7F1F1sZFetwUAALsbAAATAAAAeGwvdGhlbWUvdGhlbWUxLnhtbO1ZTW8bRRj+K6O9U3v91SSqW8WO3UKbNkpMUY/j9Xh36tmd1cw4qW+oPSIhIQrigsSNAwIqtRIHivgxgSIoUv4C78xudnfs3dahqQARH+z5eN7vd9758MmPP1+59iBk6JAISXnUddxLdQeRyOMTGvldZ66m72w4165ewVsqICFBAI7kFu46gVLxVq0mPRjG8hKPSQRzUy5CrKAr/NpE4CNgErJao17v1EJMIwdFOCRd5850Sj2CRpqlkzEfMPiKlNQDHhMHmjWxKAx2MnP1j1zIPhPoELOuA3Im/GhEHigHMSwVTHSduvk4qHb1Si2jYqqCuEA4NJ9TwpRiMmsYQuGPM0p32Nq8vJNLMAimVoGDwaA/cHOOBoE9D6x1V8Ct4Ybby7gWUElzlXu/3q63lggKEporBJu9Xq+9aRMYVNJsrRBs1Dut7YZNYFBJs71qQ2+73+/YBAaVNDsrBMPLm53WEoFBBYxGsxW4jmweogwz5exGKX4D8BtZLuSwWiHTEgaRqsq7EN/nYggAE2WsaITUIiZT7AGuj8OxoNhIwFsEF6bSMU+ujmlxSHqCxqrrvBdjWCA55uT5tyfPn6KT50+OHz47fvjD8aNHxw+/L6O8gSO/SPny60/+/PJD9MfTr14+/qyCQBYJfv3uo19++rQCqYrIF58/+e3ZkxdffPz7N4/L8NsCj4v4EQ2JRLfJEdrnobavRAQZizOSjAJMLRIcALQMOVCBhby9wKwU2CO2D+8KKAulyOvz+5a+B4GYK1qGvBmEFnKXc9bjotymm0ZcwaZ55FfIF/MicB/jw1Lx/aUoD+YxZHaWpDY2IJaqewwCj30SEYX0HJ8RUkZ3j1LLv7vUE1zyqUL3KOphWu6YER2rcqobNIQALXBF1C0P7d5FPc5KBeyQQxsKKwSzUqaEWd68jucKh+Va45AVobewCkoVPVgIz3K8VBB0nzCOBhMiZSnRHaGtzoluYihR5RmwyxahDRWKzkqhtzDnRegOn/UDHMbletMoKILflTPIWIz2uCrXg9trRvchIDiqjvxdStQZF/v71A/Kk0XPzMVpVbfqc0ijVxVrRqFaXxTrpWK9DTsYW6dEVwL/o4V5B8+jPaKT/6IuX9Tli7r8ihW+djXOC3CteK42DMPKQ/aUMnagFozckqZ0S9hPJkMYNB1DlB3q4wCap/IsoC+waSPB1QdUBQcBjkGOa0T4MuXtSxRzCZcJp5K5uZtSMN+MtbMLJcCx2uWTZLxp3TQzRqbny6Kopmaxrrjm5TcV5ybINeW57Qp57VfLqxV8CmcWBEcdYNaBW78hkx5mZKK9n3I4jc65R0oGeELSULnltrjNdX2nr4zry9tsvqm8dWJVFNiqEtg+j2DVV4NVW12dLLJ76AgUazfaDvJw3HWmcPCCZhgDQ6l3ccx8eGPyVGrNa9f2ss0VCerWq222hMRCqh0sg4TMTGWPMlFuQqMNzj0vG8rq05p6NDfcf1SP2nKEyXRKPFUxknfTOT5XRBwEkyM0ZnOxj0FznbRg0YRK2Eoapx14c9MeNz27DqTrYfnpJ10nmMUBTmuUXq6ZjQnetDMlTK+gX61C+b9pS/McbbGy+f9mi05feHZoTsyjGZwPBEY6T7sOFyrgUI/igHpDAScKIwwUg6dbmAYxTD9ha2XJYaGEJUySgucHap/6SFCoeioQhOyp1NLXcHNPK2S6PFJOacXJFJZx8jsmh4SN9CLuaBc4KMjKSuoLA1wOnN1P/TH2h//mU1GaO2c+NuSiEg7riituAoW9YfNNtTjjBpxWrxWBjfb6G3AML0hIf0Ehp8Jj+Rl4xPchC1B+6ISUfCc5kiC9LJPWGLROBxNxmtfbPWPlgcgFv83jacHjzSqP1/XnbXg8bVkOt/KpxN/QWV6w+uR0euUxvZW/u/j4PgjfgTvVnCmZ/onwAF4NwY6EDhilMg3x1b8AUEsDBBQAAAgAAP07F1FcDRM/2gEAANoBAABRAAAAcGFja2FnZS9zZXJ2aWNlcy9tZXRhZGF0YS9jb3JlLXByb3BlcnRpZXMvZmI2ZTY0MTA0ODdiNDc3MWFkMTc0MTA4MDEzOGFhMmYucHNtZGNw77u/PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48Y29yZVByb3BlcnRpZXMgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIiB4bWxuczpkY3Rlcm1zPSJodHRwOi8vcHVybC5vcmcvZGMvdGVybXMvIiB4bWxuczp4c2k9Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvWE1MU2NoZW1hLWluc3RhbmNlIiB4bWxucz0iaHR0cDovL3NjaGVtYXMub3BlbnhtbGZvcm1hdHMub3JnL3BhY2thZ2UvMjAwNi9tZXRhZGF0YS9jb3JlLXByb3BlcnRpZXMiPjxkY3Rlcm1zOmNyZWF0ZWQgeHNpOnR5cGU9ImRjdGVybXM6VzNDRFRGIj4yMDIwLTA4LTIzVDA1OjMxOjU3LjkyMTUxMDdaPC9kY3Rlcm1zOmNyZWF0ZWQ+PGRjdGVybXM6bW9kaWZpZWQgeHNpOnR5cGU9ImRjdGVybXM6VzNDRFRGIj4yMDIwLTA4LTIzVDA1OjMxOjU3LjkyMTc1NjZaPC9kY3Rlcm1zOm1vZGlmaWVkPjwvY29yZVByb3BlcnRpZXM+UEsDBBQAAAgIAP07F1ERlMAIOQEAADcEAAATAAAAW0NvbnRlbnRfVHlwZXNdLnhtbK2UTU7DMBCFrxJ5i2K3LBBCTbsAtlAJLmDZk8aq/+SZlPZsLDgSV2CaooIQokC78ciZmfe9jBO/Pr9MZuvgqxUUdCk2YixHooJoknVx0Yie2vpSzKaTx00GrLg0YiM6onylFJoOgkaZMkTOtKkETbwtC5W1WeoFqPPR6EKZFAki1bTVENPJDbS691TdrvnxDsvtorre1W1RjdA5e2c0cVqtov0CqVPbOgM2mT5wi8RcQFvsACh4OUQZtItng7D6llnA49+g728luXOowc5l/AmRMViT/wcxqUCdC2cLOfjA3PNZFWehmutCdzqwouI5zLkSFWvLY2cJW/8W7G/ha6+w0wXsAxX+aFCe+jA/aR80QhsPJ3cwiB5CP6WyHDqQx8FhfGIXe/1DRoj/Stitx3sYZPZENVwD0zdQSwECFAAUAAAICAD8OxdR+VcuEQIBAAC6AQAADwAAAAAAAAAAAAAAAAAAAAAAeGwvd29ya2Jvb2sueG1sUEsBAhQAFAAACAAA/DsXUcu/NZycAgAAnAIAAAsAAAAAAAAAAAAAAAAALwEAAF9yZWxzLy5yZWxzUEsBAhQAFAAACAgA/DsXUSK9h1hiAQAAOgMAABAAAAAAAAAAAAAAAAAA9AMAAGRvY1Byb3BzL2FwcC54bWxQSwECFAAUAAAICAD8OxdRflKRBX0AAACQAAAAFAAAAAAAAAAAAAAAAACEBQAAeGwvc2hhcmVkU3RyaW5ncy54bWxQSwECFAAUAAAICAD8OxdRDNxIs+MAAAC+AgAAGgAAAAAAAAAAAAAAAAAzBgAAeGwvX3JlbHMvd29ya2Jvb2sueG1sLnJlbHNQSwECFAAUAAAICAD8OxdRwtI/jD8CAABMBgAADQAAAAAAAAAAAAAAAABOBwAAeGwvc3R5bGVzLnhtbFBLAQIUABQAAAgIAPw7F1E5yySzuAEAACoDAAAYAAAAAAAAAAAAAAAAALgJAAB4bC93b3Jrc2hlZXRzL3NoZWV0MS54bWxQSwECFAAUAAAICAD8OxdRdbGRXrcFAAC7GwAAEwAAAAAAAAAAAAAAAACmCwAAeGwvdGhlbWUvdGhlbWUxLnhtbFBLAQIUABQAAAgAAP07F1FcDRM/2gEAANoBAABRAAAAAAAAAAAAAAAAAI4RAABwYWNrYWdlL3NlcnZpY2VzL21ldGFkYXRhL2NvcmUtcHJvcGVydGllcy9mYjZlNjQxMDQ4N2I0NzcxYWQxNzQxMDgwMTM4YWEyZi5wc21kY3BQSwECFAAUAAAICAD9OxdREZTACDkBAAA3BAAAEwAAAAAAAAAAAAAAAADXEwAAW0NvbnRlbnRfVHlwZXNdLnhtbFBLBQYAAAAACgAKAMACAABBFQAAAAA=",
+  "$content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+}</code></pre></figure>
+
+<p><img src="/assets/images/0021/step_initialize_variable_configuration.png" alt="Initialize Variable configuration" title="Initialize Variable configuration" /></p>
+
+<p>Now add a new step. I will use <strong>OneDrive for Business</strong>, but I think ordinary
+<strong>OneDrive</strong> will work too.</p>
+
+<p><img src="/assets/images/0021/select_controller_onedrive.png" alt="OneDrive for Business" title="OneDrive for Business" /></p>
+
+<p>Select the <strong>Create file</strong> action.</p>
+
+<p><img src="/assets/images/0021/select_action_create_file.png" alt="Create file" title="Create file" /></p>
+
+<p>Pick any folder you think is appropriate. I will use a temp folder.</p>
+
+<p>The file name could be whatever you like. I prefer to use a file name that will
+be unique, so I have added the date with the expression:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Date expression </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">substring(utcNow(), 0, 10)</code></pre></figure>
+
+<p>And the time with the expression:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Time expression </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">replace(substring(utcNow(), 11, 8), ':', '')</code></pre></figure>
+
+<p>The file content should be the variable the created in the previous step. If you
+cannot see the variable in the dynamic content list, just use this expression
+instead:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> File content expression </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">variables('EmptyFileContent')</code></pre></figure>
+
+<p>The configuration should look like this:</p>
+
+<p><img src="/assets/images/0021/step_create_file_configuration.png" alt="Create file configuration" title="Create file configuration" /></p>
+
+<h3 id="prepare-the-excel-file">Prepare the Excel file</h3>
+
+<p>Now when we have an Excel file to play with, we could start to modify it.</p>
+
+<p>We start by creating a new worksheet. Add a new step and select <strong>Excel Online
+(Business)</strong>.</p>
+
+<p><img src="/assets/images/0021/select_controller_excel_online.png" alt="Excel Online (Business)" title="Excel Online (Business)" /></p>
+
+<p>Select the action <strong>Create worksheet</strong>.</p>
+
+<p><img src="/assets/images/0021/select_action_create_worksheet.png" alt="Create worksheet" title="Create worksheet" /></p>
+
+<p>The <strong>Location</strong> should be <code class="language-plaintext highlighter-rouge">OneDrive for Business</code>, and the <strong>Document Library</strong> should have the value <code class="language-plaintext highlighter-rouge">OneDrive</code>.</p>
+
+<p>The file parameter should be the file we previously created. Add this as a dynamic expression. Select the <code class="language-plaintext highlighter-rouge">File locator</code> value.</p>
+
+<p>Lastly, let the <strong>Name</strong> be <code class="language-plaintext highlighter-rouge">Players</code>.</p>
+
+<p><img src="/assets/images/0021/step_create_worksheet_configuration.png" alt="Create worksheet configuration" title="Create worksheet configuration" /></p>
+
+<p>Now we will create a table on the worksheet we just created. Add a new step again. Select <strong>OneDrive for Business</strong>, and select the action <strong>Create table</strong>.</p>
+
+<p><img src="/assets/images/0021/select_action_create_table.png" alt="Create table" title="Create table" /></p>
+
+<p>Setup up <strong>Location</strong>, <strong>Document Library</strong> and <strong>File</strong> just like you did in the previous step.</p>
+
+<p>In the <strong>Table range</strong> parameter enter:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Table range expression </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">Players!A1:C1</code></pre></figure>
+
+<p>Also add the <strong>Table name</strong> and <strong>Column names</strong> parameters.</p>
+
+<p>Let <strong>Table name</strong> have the value <code class="language-plaintext highlighter-rouge">TablePlayers</code>.</p>
+
+<p>Let <strong>Columns names</strong> have the value:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Column names </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">PlayerID; First name; Last name</code></pre></figure>
+
+<p>The configuration should look like this:</p>
+
+<p><img src="/assets/images/0021/step_create_table_configuration.png" alt="Create table configuration" title="Create configuration" /></p>
+
+<h3 id="adding-some-data">Adding some data</h3>
+
+<p>Now it is time to add some data. Normally you will get the data from a SQL database or something similar. There are connectors for this that is easy to use. But to keep this tutorial simple we will hard code some values instead.</p>
+
+<p>Add a new step and search for <strong>Data Operations</strong>.</p>
+
+<p><img src="/assets/images/0021/select_controller_data_operations.png" alt="Data operations" title="Data operations" /></p>
+
+<p>Select the action <strong>Parse JSON</strong>.</p>
+
+<p><img src="/assets/images/0021/select_action_parse_json.png" alt="Parse JSON" title="Parse JSON" /></p>
+
+<p>Add this as <strong>Content</strong>:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> JSON Data </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"Players"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"PlayerID"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"FirstName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Alice"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"LastName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Aliceson"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"PlayerID"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"FirstName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Bob"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"LastName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Bobsson"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"PlayerID"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"FirstName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Carol"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"LastName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Carlsson"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"PlayerID"</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"FirstName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"David"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"LastName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Davidsson"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"PlayerID"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"FirstName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Eric"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"LastName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Ericsson"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"PlayerID"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"FirstName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Frank"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"LastName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Franksson"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span></code></pre></figure>
+
+<p>Also click on <strong>Use sample payload to generate schema</strong> and paste the data and press <strong>OK</strong>.</p>
+
+<p><img src="/assets/images/0021/step_parse_json_configuration.png" alt="Parse JSON configuration" title="Parse JSON configuration" /></p>
+
+<p>Now we will iterate thru all this data. Add a new step and select the <strong>Control</strong> connector.</p>
+
+<p><img src="/assets/images/0021/select_controller_control.png" alt="Control" title="Control" /></p>
+
+<p>Select the <strong>For each</strong> action.</p>
+
+<p><img src="/assets/images/0021/select_action_for_each.png" alt="For each" title="For each" /></p>
+
+<p>In <strong>Select an output from previous step</strong> select <code class="language-plaintext highlighter-rouge">Players</code> from <strong>Dynamic content</strong>.</p>
+
+<p><img src="/assets/images/0021/step_for_each_configuration.png" alt="For each configuration" title="For each configuration" /></p>
+
+<p>Now select add an action inside the <strong>For each</strong> controller. Select <strong>Excel
+Online (Business)</strong> and then select the action <strong>Add a row into a table</strong>.</p>
+
+<p><img src="/assets/images/0021/select_action_add_a_row_into_a_table.png" alt="Add a row into a table" title="Add a row into a table" /></p>
+
+<p>Setup up <strong>Location</strong>, <strong>Document Library</strong> and <strong>File</strong> just like you did in the previous step.</p>
+
+<p>In <strong>Table</strong> enter <code class="language-plaintext highlighter-rouge">TablePlayers</code>.</p>
+
+<p>The <strong>Body</strong> parameter should be an JSON object. Configure it like this:</p>
+
+<p><img src="/assets/images/0021/step_add_row_configuration.png" alt="Add row configuration" title="Add row configuration" /></p>
+
+<p>You find the variables in the <strong>Dynamic content</strong>.</p>
+
+<p>In the documentation of the <a href="https://docs.microsoft.com/en-us/connectors/excelonlinebusiness/#limits"><strong>Excel Online (Business)</strong>
+connector</a>
+you find that there is a limit of 100 calls per minute. If you do more than this
+your app will stop working. So, in the <strong>For each loop</strong> it might be a good idea
+to add a short delay after each row has been written. With the sample data we
+are using this is not an issue so we will skip that.</p>
+
+<p>Also, when all the rows have been written it might be a good idea to add a delay
+for a minute or so. I have noticed that sometimes some data has been missing in
+the e-mail that we soon will be send.</p>
+
+<h3 id="sending-file-as-an-e-mail-attachment">Sending file as an E-mail attachment</h3>
+
+<p>Now when the file is created, we will send the file via e-mail. Before we do that, we need to read the file content.</p>
+
+<p>Add a new step and select the connector <strong>OneDrive for Business</strong>.</p>
+
+<p><img src="/assets/images/0021/select_controller_onedrive.png" alt="OneDrive for Business" title="OneDrive for Business" /></p>
+
+<p>Select the action <strong>Get file content</strong>.</p>
+
+<p><img src="/assets/images/0021/select_action_get_file_content.png" alt="Get file content" title="Get file content" /></p>
+
+<p>Let the <strong>File</strong> parameter be the <strong>File locator</strong> variable that you have use many times before.</p>
+
+<p><img src="/assets/images/0021/step_get_file_content_configuration.png" alt="Get file content configuration" title="Get file content configuration" /></p>
+
+<p>Now, add a step. This time use the connector <strong>Office 365 Outlook</strong>.</p>
+
+<p><img src="/assets/images/0021/select_action_outlook.png" alt="Office 365 Outlook" title="Office 365 Outlook" /></p>
+
+<p>Use the action <strong>Send an email</strong>.</p>
+
+<p><img src="/assets/images/0021/select_action_send_an_email.png" alt="Send an e-mail" title="Send an e-mail" /></p>
+
+<p>The parameters <strong>To</strong>, <strong>Subject</strong> and <strong>Body</strong> is obvious so enter whatever you like in the.</p>
+
+<p>Then add <strong>Attachments</strong> parameter.</p>
+
+<p>In the <strong>Attachments Name</strong> enter <code class="language-plaintext highlighter-rouge">playerreport.xlsx</code>.</p>
+
+<p>In the <strong>Attachments Content</strong> use the value from the previous <strong>Get file content</strong> step. You might need to click on <strong>See more</strong>.</p>
+
+<p><img src="/assets/images/0021/step_action_send_an_email_configuration.png" alt="Send an email configuration" title="Send an email configuration" /></p>
+
+<p>That is all! You Logic app is now completed. Run the app to see if it works.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>I think this was a fun little experiment and it works OK once all pieces are in place. I struggled a long time on how to create the Excel file, but once that was solve things were pretty much straightforward.</p>
+
+<p>All this said, there are a couple of downsides with this solution:</p>
+
+<ul>
+  <li>The temporary file that is created is never removed. I did this intentionally to keep the app as simple as possible. It is easy to add a new step that remove the file via the OneDrive for Business connector. Note that you may need to add a delay for several minutes before you remove the file.</li>
+  <li>The first worksheet in the Excel file is empty. Unfortunately, there is no support to delete existing sheets when I write this. You could workaround this by using another template and not adding a worksheet in the logic app.</li>
+  <li>All columns in the table is just 64 pixels wide or so. I have not an elegant solution for this. Again, you could workaround this with a different template were all tables and sheets are premade.</li>
+  <li>Writing rows is due the limit of 100 actions per minute a bit slow. So large reports could take a couple of hours to generate. Might not be a problem be is something to be aware of.</li>
+</ul>
+
+<p>I am not totally satisfied with the solution. Generating Excel is nothing new to me, there are some good NuGet packages out there that make this pretty easy. If you do this you have better control of everything, and it will be way faster. But I could see where a solution with a logic app would be good enough, so it is good have this this in the toolbox.</p>
+
+  </div>
+  
+    <div id="archives" class="related"><div class="archive-group">
+    
+      
+      <div id="#logic-apps"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about Logic apps</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-database-SKU-with-logic-apps">Change database SKU with Logic apps</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/use-teams-as-a-terminal">Use Teams as a Terminal</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-sql-server-firewall-settings-with-logic-apps">Change SQL Server firewall settings with Logic apps</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/start-and-stop-virtual-machines-with-logic-apps">Start and stop virtual machines with Logic apps</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/escape-sequences-in-logic-apps">Escape sequences in Logic apps</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  
+  
+    <div class="archive-group">
+    
+      
+      <div id="#excel"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about Excel</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/be-careful-with-references-in-power-query">Be careful with references in Power Query</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-unique-excel-sheet-names">Creating unique Excel sheet names</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/calling-an-api-multiple-times-with-power-query">Calling an API multiple times with Power Query</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-accruals-with-power-query">Creating accruals with Power Query</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/how-to-use-JWT-token-from-query-string">How to use JWT token from query string</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/using-power-query-and-web-api-with-http-authentication">Power Query and Web API with HTTP authentication</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/power-query-and-json-arrays">Power Query and JSON arrays</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/format-tables-in-excel-with-macros">Format tables in Excel with macros</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-excel-files-in-azure-functions">Creating Excel-files in Azure Functions</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/power-query-grouping-and-filtering-data">Power Query - Grouping and filtering data</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/power-query-joining-data">Power Query - Joining data</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/power-query-working-with-columns">Power Query - Working with columns</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/power-query-get-started-in-excel">Power Query - Get started in Excel</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  </div><a class="u-url" href="/posts/creating-excel-files-in-logic-apps" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

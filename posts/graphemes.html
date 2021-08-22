@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Graphemes | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Graphemes" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Since 1998 I have been developing an application to make it easier and fun to learn languages, Vokabel. For about a year ago I got some complains that the application in some scenarios did not work properly with some languages." />
+<meta property="og:description" content="Since 1998 I have been developing an application to make it easier and fun to learn languages, Vokabel. For about a year ago I got some complains that the application in some scenarios did not work properly with some languages." />
+<link rel="canonical" href="https://pekspro.github.io/posts/graphemes" />
+<meta property="og:url" content="https://pekspro.github.io/posts/graphemes" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-12-27T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Graphemes" />
+<script type="application/ld+json">
+{"description":"Since 1998 I have been developing an application to make it easier and fun to learn languages, Vokabel. For about a year ago I got some complains that the application in some scenarios did not work properly with some languages.","headline":"Graphemes","dateModified":"2020-12-27T00:00:00+01:00","datePublished":"2020-12-27T00:00:00+01:00","url":"https://pekspro.github.io/posts/graphemes","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/graphemes"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Graphemes</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2020-12-27T00:00:00+01:00" itemprop="datePublished">
+        Dec 27, 2020
+      </time>
+        •  Categories: 
+        <a href="/categories#net">.NET</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Since 1998 I have been developing an application to make it easier
+and fun to learn languages, <a href="https://pekspro.com/products/vokabel/">Vokabel</a>.
+For about a year ago I got some complains that the application in some scenarios
+did not work properly with some languages.</p>
+
+<h2 id="the-problem">The problem</h2>
+
+<p>In Vokabel there are some games. One game is Anagram where the word is separated
+into its individual characters and then the user should be putting the back
+together.</p>
+
+<p>It is easy to split a string into characters in C#. This is one way to do it:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> CSharp </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="n">List</span><span class="p">&lt;</span><span class="kt">char</span><span class="p">&gt;</span> <span class="nf">CreateList</span><span class="p">(</span><span class="kt">string</span> <span class="n">input</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">input</span><span class="p">.</span><span class="nf">ToList</span><span class="p">();</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>If you call this method with the string “Hello” you will get back:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1: H
+2: e
+3: l
+4: l
+5: o
+</code></pre></div></div>
+
+<p>This is just as expected. But if you this for the string “כִּי־טֽוֹב” instead you
+will get:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> 1: כ
+ 2:  ּ
+ 3:  ִ 
+ 4: י
+ 5: ־
+ 6: ט
+ 7:  ֽ
+ 8: ו
+ 9:  ֹ
+10: ב
+</code></pre></div></div>
+
+<p>The first surprise might be that the characters are in the incorrect order. But that
+is because “כִּי־טֽוֹב” is Hebrew and that is written from right to left so that is fine.</p>
+
+<p>But you also see that there are too many characters. The original string had 6, and
+now it is 10.</p>
+
+<h2 id="the-solution">The solution</h2>
+
+<p>Actually, the original string also had 10 characters. But when it is printed on
+the screen it has just 6 <em>graphemes</em>. A grapheme is
+“<a href="https://en.wikipedia.org/wiki/Grapheme">the smallest functional unit of a writing system</a>”.
+An accent for instance (`) has no meaning on its own in a human language, it is
+only useful when it is combined with another character, like é. That character
+has its own Unicode representation so that is not a problem.</p>
+
+<p>To my understanding, Hebrew only consist of consonants in writing. But it is
+possible to indicate which vowels to use with diacritic marks. For instance,
+this grapheme:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>כִּ
+</code></pre></div></div>
+
+<p>Is the constant כ written with two diacritic marks. These combinations
+are not individual characters in Unicode.</p>
+
+<p>So, how should you do if you want to split a string into its individual
+graphemes? In .NET this is luckily built-in in the framework. This code will do
+it:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> CSharp </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="k">public</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="nf">SplitToGraphemes</span><span class="p">(</span><span class="kt">string</span> <span class="n">text</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">list</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;();</span>
+
+    <span class="n">TextElementEnumerator</span> <span class="n">graphemeEnumerator</span> <span class="p">=</span> <span class="n">StringInfo</span><span class="p">.</span><span class="nf">GetTextElementEnumerator</span><span class="p">(</span><span class="n">text</span><span class="p">);</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">graphemeEnumerator</span><span class="p">.</span><span class="nf">MoveNext</span><span class="p">())</span>
+    <span class="p">{</span>
+        <span class="kt">string</span> <span class="n">grapheme</span> <span class="p">=</span> <span class="n">graphemeEnumerator</span><span class="p">.</span><span class="nf">GetTextElement</span><span class="p">();</span>
+        <span class="n">list</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">grapheme</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">list</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>Or, if you are using Java this code solves it:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Java </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">static</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="nf">SplitToGraphemes</span><span class="o">(</span><span class="nc">String</span> <span class="n">text</span><span class="o">)</span>
+<span class="o">{</span>
+    <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;();</span>
+
+    <span class="nc">BreakIterator</span> <span class="n">boundary</span> <span class="o">=</span> <span class="nc">BreakIterator</span><span class="o">.</span><span class="na">getCharacterInstance</span><span class="o">();</span>
+
+    <span class="n">boundary</span><span class="o">.</span><span class="na">setText</span><span class="o">(</span><span class="n">text</span><span class="o">);</span>
+
+    <span class="kt">int</span> <span class="n">start</span> <span class="o">=</span> <span class="n">boundary</span><span class="o">.</span><span class="na">first</span><span class="o">();</span>
+    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">end</span> <span class="o">=</span> <span class="n">boundary</span><span class="o">.</span><span class="na">next</span><span class="o">();</span> <span class="n">end</span> <span class="o">!=</span> <span class="nc">BreakIterator</span><span class="o">.</span><span class="na">DONE</span><span class="o">;</span> <span class="n">end</span> <span class="o">=</span> <span class="n">boundary</span><span class="o">.</span><span class="na">next</span><span class="o">())</span> <span class="o">{</span>
+        <span class="nc">String</span> <span class="n">t</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="n">start</span><span class="o">,</span> <span class="n">end</span><span class="o">);</span>
+        <span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">t</span><span class="o">);</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">end</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="k">return</span> <span class="n">list</span><span class="o">;</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>This sample string above will be separated into this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1: כִּ  
+2: י
+3: ־
+4: טֽ
+5: וֹ
+6: ב
+</code></pre></div></div>
+
+<p>This is exactly what we were looking for.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>Human languages are messy :-) I am sure that things I have written above are not fully
+correct, but I hope it is understandable at least.</p>
+
+<p>Multi-character graphemes are also used for some emojis. These have not been
+handled correctly in .NET Framework and .NET Core 3.1 or below. But in
+<a href="https://docs.microsoft.com/en-us/dotnet/core/compatibility/globalization/5.0/uax29-compliant-grapheme-enumeration">.NET 5 this has been fixed.</a></p>
+
+  </div>
+  
+    <div id="archives" class="related"><div class="archive-group">
+    
+      
+      <div id="#net"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about .NET</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/get-time-zone-for-a-user-in-graph">Get time zone for a user in Graph</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/invite-to-a-meeting">Invite to a meeting</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/caching-configuration-from-azure-keyvault">Caching configuration from Azure KeyVault</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-unique-excel-sheet-names">Creating unique Excel sheet names</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/finding-objects-that-are-not-disposed">Finding objects that are not disposed</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/finding-redundant-project-references">Finding redundant project references</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/policyscope">PolicyScope</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/manually-creating-a-dbcontext-and-enable-logging">Manually creating a DbContext and enable logging</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/withpartitionkey-and-in-memory-database">WithPartitionKey and in-memory database</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/net5-and-azure-functions">.NET 5 and Azure Functions</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/how-to-use-JWT-token-from-query-string">How to use JWT token from query string</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/what-characters-are-whitespace">What characters are whitespace?</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/trimming-whitespace-in-objects">Trimming whitespace in objects</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/modifying-query-string">Modifying query strings</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/create-a-time-lapse-video">Create a time lapse video</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-language-version-on-multiple-projects">Change language version on multiple projects</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-encoding-on-your-source-files">Change encoding on your source files</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/build-time">Build time</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  </div><a class="u-url" href="/posts/graphemes" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

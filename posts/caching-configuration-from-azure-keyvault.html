@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Caching configuration from Azure KeyVault | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Caching configuration from Azure KeyVault" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Azure KeyVault is a great service. With this you store secrets on a share location and could use on several services. But it is not fun to use during development." />
+<meta property="og:description" content="Azure KeyVault is a great service. With this you store secrets on a share location and could use on several services. But it is not fun to use during development." />
+<link rel="canonical" href="https://pekspro.github.io/posts/caching-configuration-from-azure-keyvault" />
+<meta property="og:url" content="https://pekspro.github.io/posts/caching-configuration-from-azure-keyvault" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-03-21T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Caching configuration from Azure KeyVault" />
+<script type="application/ld+json">
+{"description":"Azure KeyVault is a great service. With this you store secrets on a share location and could use on several services. But it is not fun to use during development.","headline":"Caching configuration from Azure KeyVault","dateModified":"2021-03-21T00:00:00+01:00","datePublished":"2021-03-21T00:00:00+01:00","url":"https://pekspro.github.io/posts/caching-configuration-from-azure-keyvault","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/caching-configuration-from-azure-keyvault"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Caching configuration from Azure KeyVault</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2021-03-21T00:00:00+01:00" itemprop="datePublished">
+        Mar 21, 2021
+      </time>
+        •  Categories: 
+        <a href="/categories#net">.NET</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Azure KeyVault is a great service. With this you store secrets on a share
+location and could use on several services. But it is not fun to use during
+development.</p>
+
+<h2 id="the-problem">The problem</h2>
+
+<p><a href="https://docs.microsoft.com/en-us/azure/key-vault/general/overview">Azure
+KeyVault</a> is
+a service where you store your secrets, like connection strings, in a service in
+Azure. Then when your application starts you could connect to this service and
+it to your configuration. But it has a downside. It will take a couple of
+seconds to download the secrets. Not a problem in production, but during
+development this is a pain.</p>
+
+<h2 id="the-solution">The solution</h2>
+
+<p>One solution is to not use Azure KeyVault when you do development. Instead, you
+store your secrets locally. But then your application will behave quite
+differently in production which may be a bad thing.</p>
+
+<p>Another approach I have been using a while is to cache the configuration. And
+then I refresh it every 12 hour or so. With this I get the best of both worlds.
+I could use Azure KeyVault during development and still have good performance.</p>
+
+<p>My solution is in the following code that is using
+<a href="https://www.nuget.org/packages/Azure.Security.KeyVault.Secrets">Azure.Security.KeyVault.Secrets</a>
+that is replacing the deprecated
+<a href="https://www.nuget.org/packages/Microsoft.Azure.KeyVault">Microsoft.Azure.KeyVault</a>.</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Code </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">using</span> <span class="nn">Azure.Extensions.AspNetCore.Configuration.Secrets</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">Azure.Identity</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">Azure.Security.KeyVault.Secrets</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">Microsoft.Extensions.Configuration</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">Microsoft.Extensions.DependencyInjection</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">Microsoft.Extensions.Hosting</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Diagnostics</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Linq</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Text.Json</span><span class="p">;</span>
+
+<span class="k">namespace</span> <span class="nn">ConfigurationCache</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">class</span> <span class="nc">Program</span>
+    <span class="p">{</span>
+        <span class="k">private</span> <span class="k">static</span> <span class="k">readonly</span> <span class="n">Stopwatch</span> <span class="n">Stopwatch</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Stopwatch</span><span class="p">();</span>
+
+        <span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">(</span><span class="kt">string</span><span class="p">[]</span> <span class="n">args</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">Stopwatch</span><span class="p">.</span><span class="nf">Start</span><span class="p">();</span>
+            <span class="nf">CreateHostBuilder</span><span class="p">(</span><span class="n">args</span><span class="p">).</span><span class="nf">Build</span><span class="p">().</span><span class="nf">Run</span><span class="p">();</span>
+        <span class="p">}</span>
+
+        <span class="k">public</span> <span class="k">static</span> <span class="n">IHostBuilder</span> <span class="nf">CreateHostBuilder</span><span class="p">(</span><span class="kt">string</span><span class="p">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">=&gt;</span>
+            <span class="n">Host</span><span class="p">.</span><span class="nf">CreateDefaultBuilder</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+                <span class="p">.</span><span class="nf">ConfigureAppConfiguration</span><span class="p">((</span><span class="n">ctx</span><span class="p">,</span> <span class="n">builder</span><span class="p">)</span> <span class="p">=&gt;</span>
+                <span class="p">{</span>
+                    <span class="n">builder</span><span class="p">.</span><span class="nf">AddAzureConfigurationServices</span><span class="p">();</span>
+                <span class="p">})</span>
+                <span class="p">.</span><span class="nf">ConfigureServices</span><span class="p">((</span><span class="n">hostContext</span><span class="p">,</span> <span class="n">services</span><span class="p">)</span> <span class="p">=&gt;</span>
+                <span class="p">{</span>
+                    <span class="n">Stopwatch</span><span class="p">.</span><span class="nf">Stop</span><span class="p">();</span>
+
+                    <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">$"Start time: </span><span class="p">{</span><span class="n">Stopwatch</span><span class="p">.</span><span class="n">Elapsed</span><span class="p">}</span><span class="s">"</span><span class="p">);</span>
+                    <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">$"Config: </span><span class="p">{</span><span class="n">hostContext</span><span class="p">.</span><span class="n">Configuration</span><span class="p">.</span><span class="nf">GetSection</span><span class="p">(</span><span class="s">"ConnectionStrings:MyContext"</span><span class="p">).</span><span class="n">Value</span><span class="p">}</span><span class="s">"</span><span class="p">);</span>
+
+                    <span class="n">services</span><span class="p">.</span><span class="n">AddHostedService</span><span class="p">&lt;</span><span class="n">Worker</span><span class="p">&gt;();</span>
+                <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">static</span> <span class="k">class</span> <span class="nc">AzureExtensions</span>
+    <span class="p">{</span>
+        <span class="k">public</span> <span class="k">static</span> <span class="n">IConfigurationBuilder</span> <span class="nf">AddAzureConfigurationServices</span><span class="p">(</span><span class="k">this</span> <span class="n">IConfigurationBuilder</span> <span class="n">builder</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="c1">// Build current configuration. This is later used to get environment variables.</span>
+            <span class="n">IConfiguration</span> <span class="n">config</span> <span class="p">=</span> <span class="n">builder</span><span class="p">.</span><span class="nf">Build</span><span class="p">();</span>
+
+<span class="cp">#if DEBUG
+</span>            <span class="k">if</span> <span class="p">(</span><span class="n">Debugger</span><span class="p">.</span><span class="n">IsAttached</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="c1">// If the debugger is attached, we use cached configuration instead of</span>
+                <span class="c1">// configurations from Azure.</span>
+                <span class="nf">AddCachedConfiguration</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">config</span><span class="p">);</span>
+
+                <span class="k">return</span> <span class="n">builder</span><span class="p">;</span>
+            <span class="p">}</span>
+<span class="cp">#endif
+</span>
+            <span class="c1">// Add the standard configuration services</span>
+            <span class="k">return</span> <span class="nf">AddAzureConfigurationServicesInternal</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">config</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">private</span> <span class="k">static</span> <span class="n">IConfigurationBuilder</span> <span class="nf">AddAzureConfigurationServicesInternal</span><span class="p">(</span><span class="n">IConfigurationBuilder</span> <span class="n">builder</span><span class="p">,</span> <span class="n">IConfiguration</span> <span class="n">currentConfig</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="c1">// Get keyvault endpoint. This is normally an environment variable.</span>
+            <span class="kt">string</span> <span class="n">keyVaultEndpoint</span> <span class="p">=</span> <span class="n">currentConfig</span><span class="p">[</span><span class="s">"KEYVAULT_ENDPOINT"</span><span class="p">];</span>
+
+            <span class="c1">// Setup keyvault services</span>
+            <span class="n">SecretClient</span> <span class="n">secretClient</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">SecretClient</span><span class="p">(</span><span class="k">new</span> <span class="nf">Uri</span><span class="p">(</span><span class="n">keyVaultEndpoint</span><span class="p">),</span> <span class="k">new</span> <span class="nf">DefaultAzureCredential</span><span class="p">());</span>
+            <span class="n">builder</span><span class="p">.</span><span class="nf">AddAzureKeyVault</span><span class="p">(</span><span class="n">secretClient</span><span class="p">,</span> <span class="k">new</span> <span class="nf">AzureKeyVaultConfigurationOptions</span><span class="p">());</span>
+
+            <span class="k">return</span> <span class="n">builder</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">private</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">AddCachedConfiguration</span><span class="p">(</span><span class="n">IConfigurationBuilder</span> <span class="n">builder</span><span class="p">,</span> <span class="n">IConfiguration</span> <span class="n">currentConfig</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="c1">//Setup full path to cached configuration file.</span>
+            <span class="kt">string</span> <span class="n">path</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">IO</span><span class="p">.</span><span class="n">Path</span><span class="p">.</span><span class="nf">Combine</span><span class="p">(</span>
+                <span class="n">Environment</span><span class="p">.</span><span class="nf">GetFolderPath</span><span class="p">(</span><span class="n">Environment</span><span class="p">.</span><span class="n">SpecialFolder</span><span class="p">.</span><span class="n">LocalApplicationData</span><span class="p">),</span>
+                <span class="s">"MyApplication"</span><span class="p">);</span>
+            <span class="kt">string</span> <span class="n">filename</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">IO</span><span class="p">.</span><span class="n">Path</span><span class="p">.</span><span class="nf">Combine</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s">$"configcache.dat"</span><span class="p">);</span>
+
+            <span class="c1">// If the file does not exists, or is more than 12 hours, update the cached configuration.</span>
+            <span class="k">if</span> <span class="p">(!</span><span class="n">System</span><span class="p">.</span><span class="n">IO</span><span class="p">.</span><span class="n">File</span><span class="p">.</span><span class="nf">Exists</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="p">||</span> <span class="n">System</span><span class="p">.</span><span class="n">IO</span><span class="p">.</span><span class="n">File</span><span class="p">.</span><span class="nf">GetLastAccessTimeUtc</span><span class="p">(</span><span class="n">filename</span><span class="p">).</span><span class="nf">AddHours</span><span class="p">(</span><span class="m">12</span><span class="p">)</span> <span class="p">&lt;</span> <span class="n">DateTime</span><span class="p">.</span><span class="n">UtcNow</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="n">System</span><span class="p">.</span><span class="n">IO</span><span class="p">.</span><span class="n">Directory</span><span class="p">.</span><span class="nf">CreateDirectory</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+
+                <span class="nf">UpdateCacheConfiguration</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">currentConfig</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="c1">// Read the file</span>
+            <span class="kt">string</span> <span class="n">encryptedFile</span> <span class="p">=</span> <span class="n">System</span><span class="p">.</span><span class="n">IO</span><span class="p">.</span><span class="n">File</span><span class="p">.</span><span class="nf">ReadAllText</span><span class="p">(</span><span class="n">filename</span><span class="p">);</span>
+
+            <span class="c1">// Decrypt the content</span>
+            <span class="kt">string</span> <span class="n">jsonString</span> <span class="p">=</span> <span class="nf">Decrypt</span><span class="p">(</span><span class="n">encryptedFile</span><span class="p">);</span>
+
+            <span class="c1">// Create key-value pairs</span>
+            <span class="kt">var</span> <span class="n">keyVaultPairs</span> <span class="p">=</span> <span class="n">JsonSerializer</span><span class="p">.</span><span class="n">Deserialize</span><span class="p">&lt;</span><span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="kt">string</span><span class="p">&gt;&gt;(</span><span class="n">jsonString</span><span class="p">);</span>
+
+            <span class="c1">// Use the key-value pairs as configuration</span>
+            <span class="n">builder</span><span class="p">.</span><span class="nf">AddInMemoryCollection</span><span class="p">(</span><span class="n">keyVaultPairs</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">private</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">UpdateCacheConfiguration</span><span class="p">(</span><span class="kt">string</span> <span class="n">filename</span><span class="p">,</span> <span class="n">IConfiguration</span> <span class="n">currentConfig</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="c1">// Create a configuration builder. We will just use this to get the</span>
+            <span class="c1">// configuration from Azure.</span>
+            <span class="n">ConfigurationBuilder</span> <span class="n">configurationBuilder</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ConfigurationBuilder</span><span class="p">();</span>
+
+            <span class="c1">// Add the services we want to use.</span>
+            <span class="nf">AddAzureConfigurationServicesInternal</span><span class="p">(</span><span class="n">configurationBuilder</span><span class="p">,</span> <span class="n">currentConfig</span><span class="p">);</span>
+
+            <span class="c1">// Build the configuration</span>
+            <span class="n">IConfigurationRoot</span> <span class="n">azureConfig</span> <span class="p">=</span> <span class="n">configurationBuilder</span><span class="p">.</span><span class="nf">Build</span><span class="p">();</span>
+
+            <span class="c1">// Serialize the configuration to a JSON-string.</span>
+            <span class="kt">string</span> <span class="n">jsonString</span> <span class="p">=</span> <span class="n">JsonSerializer</span><span class="p">.</span><span class="nf">Serialize</span><span class="p">(</span>
+                <span class="n">azureConfig</span><span class="p">.</span><span class="nf">AsEnumerable</span><span class="p">().</span><span class="nf">ToDictionary</span><span class="p">(</span><span class="n">a</span> <span class="p">=&gt;</span> <span class="n">a</span><span class="p">.</span><span class="n">Key</span><span class="p">,</span> <span class="n">a</span> <span class="p">=&gt;</span> <span class="n">a</span><span class="p">.</span><span class="n">Value</span><span class="p">),</span>
+                <span class="n">options</span><span class="p">:</span> <span class="k">new</span> <span class="nf">JsonSerializerOptions</span><span class="p">()</span>
+                <span class="p">{</span>
+                    <span class="n">WriteIndented</span> <span class="p">=</span> <span class="k">true</span>
+                <span class="p">}</span>
+                <span class="p">);</span>
+
+            <span class="c1">//Encrypt the string</span>
+            <span class="kt">string</span> <span class="n">encryptedString</span> <span class="p">=</span> <span class="nf">Encrypt</span><span class="p">(</span><span class="n">jsonString</span><span class="p">);</span>
+
+            <span class="c1">// Save the encrypted string.</span>
+            <span class="n">System</span><span class="p">.</span><span class="n">IO</span><span class="p">.</span><span class="n">File</span><span class="p">.</span><span class="nf">WriteAllText</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">encryptedString</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="c1">// Replace the following with your favorite encryption code.</span>
+
+        <span class="k">private</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">Encrypt</span><span class="p">(</span><span class="kt">string</span> <span class="n">str</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="n">Convert</span><span class="p">.</span><span class="nf">ToBase64String</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="n">Text</span><span class="p">.</span><span class="n">Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">.</span><span class="nf">GetBytes</span><span class="p">(</span><span class="n">str</span><span class="p">));</span>
+        <span class="p">}</span>
+
+        <span class="k">private</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">Decrypt</span><span class="p">(</span><span class="kt">string</span> <span class="n">str</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="n">System</span><span class="p">.</span><span class="n">Text</span><span class="p">.</span><span class="n">Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">.</span><span class="nf">GetString</span><span class="p">(</span><span class="n">Convert</span><span class="p">.</span><span class="nf">FromBase64String</span><span class="p">(</span><span class="n">str</span><span class="p">));</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>The project file looks like this:</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Project File </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;Project</span> <span class="na">Sdk=</span><span class="s">"Microsoft.NET.Sdk.Worker"</span><span class="nt">&gt;</span>
+
+  <span class="nt">&lt;PropertyGroup&gt;</span>
+    <span class="nt">&lt;TargetFramework&gt;</span>netcoreapp3.1<span class="nt">&lt;/TargetFramework&gt;</span>
+  <span class="nt">&lt;/PropertyGroup&gt;</span>
+
+  <span class="nt">&lt;ItemGroup&gt;</span>
+    <span class="nt">&lt;PackageReference</span> <span class="na">Include=</span><span class="s">"Azure.Extensions.AspNetCore.Configuration.Secrets"</span> <span class="na">Version=</span><span class="s">"1.0.2"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;PackageReference</span> <span class="na">Include=</span><span class="s">"Azure.Identity"</span> <span class="na">Version=</span><span class="s">"1.3.0"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;PackageReference</span> <span class="na">Include=</span><span class="s">"Azure.Security.KeyVault.Secrets"</span> <span class="na">Version=</span><span class="s">"4.1.0"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;PackageReference</span> <span class="na">Include=</span><span class="s">"Microsoft.Extensions.Configuration.AzureAppConfiguration"</span> <span class="na">Version=</span><span class="s">"4.1.0"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;PackageReference</span> <span class="na">Include=</span><span class="s">"Microsoft.Extensions.Hosting"</span> <span class="na">Version=</span><span class="s">"5.0.0"</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;/ItemGroup&gt;</span>
+<span class="nt">&lt;/Project&gt;</span></code></pre></figure>
+
+<h2 id="summary">Summary</h2>
+
+<p>This approach also works for <a href="https://docs.microsoft.com/en-us/azure/azure-app-configuration/overview">Azure
+AppConfiguration</a>
+(I use that too), but I have ignored this in the sample above to keep the code
+simple. AppConfiguration is also a lot faster than KeyVault so the problem less
+noticeable.</p>
+
+  </div>
+  
+    <div id="archives" class="related"><div class="archive-group">
+    
+      
+      <div id="#net"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about .NET</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/get-time-zone-for-a-user-in-graph">Get time zone for a user in Graph</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/invite-to-a-meeting">Invite to a meeting</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-unique-excel-sheet-names">Creating unique Excel sheet names</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/finding-objects-that-are-not-disposed">Finding objects that are not disposed</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/finding-redundant-project-references">Finding redundant project references</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/policyscope">PolicyScope</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/manually-creating-a-dbcontext-and-enable-logging">Manually creating a DbContext and enable logging</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/graphemes">Graphemes</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/withpartitionkey-and-in-memory-database">WithPartitionKey and in-memory database</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/net5-and-azure-functions">.NET 5 and Azure Functions</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/how-to-use-JWT-token-from-query-string">How to use JWT token from query string</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/what-characters-are-whitespace">What characters are whitespace?</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/trimming-whitespace-in-objects">Trimming whitespace in objects</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/modifying-query-string">Modifying query strings</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/create-a-time-lapse-video">Create a time lapse video</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-language-version-on-multiple-projects">Change language version on multiple projects</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-encoding-on-your-source-files">Change encoding on your source files</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/build-time">Build time</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  </div><a class="u-url" href="/posts/caching-configuration-from-azure-keyvault" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

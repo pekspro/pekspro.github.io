@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>PolicyScope | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="PolicyScope" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="I recently decided to use Polly in a project. Polly is a solution to make it ease to implement retry logic in an application. It is a really nice framework. But when using in with dependency injection I thought that something was missing. This ended up me creating my first public NuGet packet." />
+<meta property="og:description" content="I recently decided to use Polly in a project. Polly is a solution to make it ease to implement retry logic in an application. It is a really nice framework. But when using in with dependency injection I thought that something was missing. This ended up me creating my first public NuGet packet." />
+<link rel="canonical" href="https://pekspro.github.io/posts/policyscope" />
+<meta property="og:url" content="https://pekspro.github.io/posts/policyscope" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-17T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="PolicyScope" />
+<script type="application/ld+json">
+{"description":"I recently decided to use Polly in a project. Polly is a solution to make it ease to implement retry logic in an application. It is a really nice framework. But when using in with dependency injection I thought that something was missing. This ended up me creating my first public NuGet packet.","headline":"PolicyScope","dateModified":"2021-01-17T00:00:00+01:00","datePublished":"2021-01-17T00:00:00+01:00","url":"https://pekspro.github.io/posts/policyscope","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/policyscope"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">PolicyScope</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2021-01-17T00:00:00+01:00" itemprop="datePublished">
+        Jan 17, 2021
+      </time>
+        •  Categories: 
+        <a href="/categories#net">.NET</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>I recently decided to use <a href="https://github.com/App-vNext/Polly">Polly</a> in a
+project. Polly is a solution to make it ease to implement retry logic in an
+application. It is a really nice framework. But when using in with dependency
+injection I thought that something was missing. This ended up me creating my
+first public NuGet packet.</p>
+
+<h2 id="the-problem">The problem</h2>
+
+<p>When you are using Polly you often should make sure that the services you are
+using are recreated for each attempt. If not, you are reusing your objects for
+each time your logic is executed. This could make your logic behave differently
+the second time it is executed. For instance, if you have a <code class="language-plaintext highlighter-rouge">DbContext</code> it is
+not good if you have things in the <code class="language-plaintext highlighter-rouge">ChangeTracker</code>.</p>
+
+<p>You could solve this by creating objects with an <code class="language-plaintext highlighter-rouge">IServiceScopeFactory</code>
+instance. It is not that hard to too. The problem comes when you want to create
+a unit test for this logic. There is a lot of things you may need to mock.</p>
+
+<h2 id="the-solution">The solution</h2>
+
+<p>My solution was to create PolicyScope. With PolicyScope you will define which
+policy and which services you want to use in a fluent framework. It makes the
+code compact and easy to read. There is also a NuGet packet designed for mocking
+this service. This makes it easy to create unit tests.</p>
+
+<p>If you want to try it, have a look on the <a href="https://github.com/pekspro/PolicyScope">GitHub
+repository</a>.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>I learned a lot of doing this. Since I decided to have this on GitHub, just like
+most other projects like this, I dig into GitHub actions to make it compile,
+test and even publish to NuGet when wanted. I also learned some about NuGet,
+since this is my <a href="https://www.nuget.org/packages/Pekspro.PolicyScope/">first public NuGet
+package</a>. Maybe I create
+some more someday :-)</p>
+
+  </div>
+  
+    <div id="archives" class="related"><div class="archive-group">
+    
+      
+      <div id="#net"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about .NET</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/get-time-zone-for-a-user-in-graph">Get time zone for a user in Graph</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/invite-to-a-meeting">Invite to a meeting</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/caching-configuration-from-azure-keyvault">Caching configuration from Azure KeyVault</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-unique-excel-sheet-names">Creating unique Excel sheet names</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/finding-objects-that-are-not-disposed">Finding objects that are not disposed</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/finding-redundant-project-references">Finding redundant project references</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/manually-creating-a-dbcontext-and-enable-logging">Manually creating a DbContext and enable logging</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/graphemes">Graphemes</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/withpartitionkey-and-in-memory-database">WithPartitionKey and in-memory database</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/net5-and-azure-functions">.NET 5 and Azure Functions</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/how-to-use-JWT-token-from-query-string">How to use JWT token from query string</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/what-characters-are-whitespace">What characters are whitespace?</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/trimming-whitespace-in-objects">Trimming whitespace in objects</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/modifying-query-string">Modifying query strings</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/create-a-time-lapse-video">Create a time lapse video</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-language-version-on-multiple-projects">Change language version on multiple projects</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-encoding-on-your-source-files">Change encoding on your source files</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/build-time">Build time</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  </div><a class="u-url" href="/posts/policyscope" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

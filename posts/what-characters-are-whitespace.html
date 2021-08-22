@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>What characters are whitespace? | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="What characters are whitespace?" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="What characters are considered to be whitespace? Space obviously, also tab and line break characters are easy. But what about U+00A0, the no-break space character? Or U+180E, the Mongolian vowel separator? It turns out that the computer languages we are using are not agreeing on this." />
+<meta property="og:description" content="What characters are considered to be whitespace? Space obviously, also tab and line break characters are easy. But what about U+00A0, the no-break space character? Or U+180E, the Mongolian vowel separator? It turns out that the computer languages we are using are not agreeing on this." />
+<link rel="canonical" href="https://pekspro.github.io/posts/what-characters-are-whitespace" />
+<meta property="og:url" content="https://pekspro.github.io/posts/what-characters-are-whitespace" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-11-15T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="What characters are whitespace?" />
+<script type="application/ld+json">
+{"description":"What characters are considered to be whitespace? Space obviously, also tab and line break characters are easy. But what about U+00A0, the no-break space character? Or U+180E, the Mongolian vowel separator? It turns out that the computer languages we are using are not agreeing on this.","headline":"What characters are whitespace?","dateModified":"2020-11-15T00:00:00+01:00","datePublished":"2020-11-15T00:00:00+01:00","url":"https://pekspro.github.io/posts/what-characters-are-whitespace","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/what-characters-are-whitespace"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">What characters are whitespace?</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2020-11-15T00:00:00+01:00" itemprop="datePublished">
+        Nov 15, 2020
+      </time>
+        •  Categories: 
+        <a href="/categories#net">.NET</a>,
+            <a href="/categories#javascript">JavaScript</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>What characters are considered to be whitespace? Space obviously, also tab and
+line break characters are easy. But what about U+00A0, the <strong>no-break space</strong>
+character? Or U+180E, the <strong>Mongolian vowel separator</strong>? It turns out that
+the computer languages we are using are not agreeing on this.</p>
+
+<h2 id="overview">Overview</h2>
+
+<p>I created some code just to figure out which characters that are considered to
+be whitespace in different languages/frameworks. I will not claim that this is
+correct in any way.</p>
+
+<p><a href="https://en.wikipedia.org/wiki/Whitespace_character">Wikipedia has a nice page</a>
+listing characters that are whitespaces according to the Unicode standard. Both
+<strong>C#</strong> and <strong>Go</strong> follow this strictly.</p>
+
+<p>With <strong>C++</strong> the result varied depending on which platform I was using. With
+VS2019 the result was close to <strong>C#</strong>/<strong>Go</strong>, the only exception is
+<code class="language-plaintext highlighter-rouge">180E</code> - the <strong>Mongolian vowel separator</strong>. But this character was a whitespace
+is earlier Unicode standard, but are no more. In theory, this could affect how
+<a href="https://codeblog.jonskeet.uk/2014/12/01/when-is-an-identifier-not-an-identifier-attack-of-the-Mongolian-vowel-separator">your C#-code is compiled</a>.
+When I run the <strong>C++</strong> in Linux with gpp the difference where larger.</p>
+
+<p>There was also a difference with <strong>JavaScript</strong>. Modern browser seems to agree,
+but IE11 have two extra white space characters.</p>
+
+<p>You find the code for each language later in this post. Either way, this is what
+I found out:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: right"><strong>Hex</strong></th>
+      <th><strong>Name</strong></th>
+      <th><strong>Java</strong></th>
+      <th><strong>Python</strong></th>
+      <th><strong>C#</strong></th>
+      <th><strong>Go</strong></th>
+      <th><strong>C++</strong></th>
+      <th><strong>JS</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right">0009</td>
+      <td>character tabulation</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">000A</td>
+      <td>line feed</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">000B</td>
+      <td>line tabulation</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">000C</td>
+      <td>form feed</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">000D</td>
+      <td>carriage return</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">001C</td>
+      <td>information separator four</td>
+      <td>Y</td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td style="text-align: right">001D</td>
+      <td>information separator three</td>
+      <td>Y</td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td style="text-align: right">001E</td>
+      <td>information separator two</td>
+      <td>Y</td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td style="text-align: right">001F</td>
+      <td>information separator one</td>
+      <td>Y</td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td style="text-align: right">0020</td>
+      <td>space</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">0085</td>
+      <td>next line</td>
+      <td> </td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Win</td>
+      <td>IE 11</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">00A0</td>
+      <td>no-break space</td>
+      <td> </td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Win</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">1680</td>
+      <td>ogham space mark</td>
+      <td>Y</td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">180E</td>
+      <td>en quad</td>
+      <td>Y</td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td>Win</td>
+      <td>IE 11</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2000</td>
+      <td>em quad</td>
+      <td>Y</td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2001</td>
+      <td>en space</td>
+      <td>Y</td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2002</td>
+      <td>em space</td>
+      <td>Y</td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2003</td>
+      <td>three-per-em space</td>
+      <td>Y</td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2004</td>
+      <td>four-per-em space</td>
+      <td>Y</td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2005</td>
+      <td>six-per-em space</td>
+      <td>Y</td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2006</td>
+      <td>figure space</td>
+      <td>Y</td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2007</td>
+      <td>punctuation space</td>
+      <td> </td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2008</td>
+      <td>thin space</td>
+      <td>Y</td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2009</td>
+      <td>hair space</td>
+      <td>Y</td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">200A</td>
+      <td>line separator</td>
+      <td>Y</td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2028</td>
+      <td>paragraph separator</td>
+      <td>Y</td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2029</td>
+      <td>narrow no-break space</td>
+      <td>Y</td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">202F</td>
+      <td>medium mathematical space</td>
+      <td> </td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Win</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">205F</td>
+      <td>ideographic space</td>
+      <td>Y</td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">3000</td>
+      <td>ideographic space</td>
+      <td>Y</td>
+      <td> </td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">FEFF</td>
+      <td>zero width no-break space</td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td>Y</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><code class="language-plaintext highlighter-rouge">FEFF</code> is <strong>zero width no-break space</strong> in the block <strong>Arabic Presentation Forms-B</strong>. This
+is most often used as a <strong>Byte order mark</strong>.</p>
+
+<h2 id="test-code">Test code</h2>
+
+<p>This is the code I have used to generate the table.</p>
+
+<h3 id="javascript">JavaScript</h3>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> JavaScript </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="mh">0xffff</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">s</span> <span class="o">=</span> <span class="nb">String</span><span class="p">.</span><span class="nx">fromCharCode</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">s</span><span class="p">.</span><span class="nx">trim</span><span class="p">().</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">i</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="mi">16</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+
+<h3 id="csharp">CSharp</h3>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> C# </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">public</span> <span class="k">class</span> <span class="nc">Program</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;=</span> <span class="m">0xffff</span><span class="p">;</span> <span class="n">i</span><span class="p">++)</span>
+    <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="kt">char</span><span class="p">.</span><span class="nf">IsWhiteSpace</span><span class="p">((</span><span class="kt">char</span><span class="p">)</span><span class="n">i</span><span class="p">))</span>
+      <span class="p">{</span>
+          <span class="n">System</span><span class="p">.</span><span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="nf">ToString</span><span class="p">(</span><span class="s">"x4"</span><span class="p">));</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>Try this with <a href="https://try.dot.net/">try.dot.net</a>.</p>
+
+<h3 id="c">C++</h3>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> C++ </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="cp">#include &lt;iostream&gt;
+#include &lt;clocale&gt;
+#include &lt;cwctype&gt;
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mh">0xffff</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">wchar_t</span> <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="kt">wchar_t</span><span class="p">)</span><span class="n">i</span><span class="p">;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">iswspace</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">hex</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+
+<h3 id="java">Java</h3>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Java </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Main</span>
+<span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mh">0xffff</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span>
+        <span class="o">{</span>
+            <span class="k">if</span><span class="o">(</span><span class="nc">Character</span><span class="o">.</span><span class="na">isWhitespace</span><span class="o">((</span><span class="kt">char</span><span class="o">)</span> <span class="n">i</span><span class="o">))</span>
+            <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Integer</span><span class="o">.</span><span class="na">toHexString</span><span class="o">(</span><span class="n">i</span><span class="o">));</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>Try this on <a href="https://www.jdoodle.com/online-java-compiler">JDoodle</a>.</p>
+
+<h3 id="python">Python</h3>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Python </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">string</span>
+
+<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">string</span><span class="p">.</span><span class="n">whitespace</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="nb">hex</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span></code></pre></figure>
+
+<p>Try this on <a href="https://www.learnpython.org/en/Loops">learnpython.org</a>.</p>
+
+<h3 id="go">Go</h3>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Python </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">package</span> <span class="n">main</span>
+
+<span class="k">import</span> <span class="s">"fmt"</span>
+<span class="k">import</span> <span class="s">"unicode"</span>
+
+<span class="n">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="p">:</span><span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;=</span><span class="mh">0xffff</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span> <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">unicode</span><span class="p">.</span><span class="n">IsSpace</span><span class="p">(</span><span class="n">rune</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span> <span class="p">{</span>
+            <span class="n">fmt</span><span class="p">.</span><span class="n">Printf</span><span class="p">(</span><span class="s">"%x</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>Try this on <a href="https://play.golang.org/">golang</a>.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>Is it a problem that different languages have different opinion about what is
+and what is not a whitespace?</p>
+
+<p>Let say you have a web application with a user that has a username that ends with
+the <strong>Mongolian vowel separator</strong>. Now the user tries to login running IE11.
+Before the data is send to the server, the data is trimmed by JavaScript code, so
+the <strong>Mongolian vowel separator</strong> is now removed. Then, when data is processed
+in the backend written in C#, it will never be able to find the user.</p>
+
+<p>Sure, this is a bit extreme example :-). But it shows that unexpected things could
+happen, and it might be worth to at least we aware of that.</p>
+
+  </div>
+  
+    <div id="archives" class="related"><div class="archive-group">
+    
+      
+      <div id="#net"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about .NET</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/get-time-zone-for-a-user-in-graph">Get time zone for a user in Graph</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/invite-to-a-meeting">Invite to a meeting</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/caching-configuration-from-azure-keyvault">Caching configuration from Azure KeyVault</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-unique-excel-sheet-names">Creating unique Excel sheet names</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/finding-objects-that-are-not-disposed">Finding objects that are not disposed</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/finding-redundant-project-references">Finding redundant project references</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/policyscope">PolicyScope</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/manually-creating-a-dbcontext-and-enable-logging">Manually creating a DbContext and enable logging</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/graphemes">Graphemes</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/withpartitionkey-and-in-memory-database">WithPartitionKey and in-memory database</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/net5-and-azure-functions">.NET 5 and Azure Functions</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/how-to-use-JWT-token-from-query-string">How to use JWT token from query string</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/trimming-whitespace-in-objects">Trimming whitespace in objects</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/modifying-query-string">Modifying query strings</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/create-a-time-lapse-video">Create a time lapse video</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-language-version-on-multiple-projects">Change language version on multiple projects</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-encoding-on-your-source-files">Change encoding on your source files</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/build-time">Build time</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  
+  
+    <div class="archive-group">
+    
+      
+      <div id="#javascript"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about JavaScript</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/trimming-whitespace-in-input-controls">Trimming whitespace in input controls</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/autoscroll">Autoscroll</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/submitting-forms-when-a-select-list-changes">Submitting forms when a select list changes</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/prevent-enter-to-submit-forms">Prevent enter to submit forms</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  </div><a class="u-url" href="/posts/what-characters-are-whitespace" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

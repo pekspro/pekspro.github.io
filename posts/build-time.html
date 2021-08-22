@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Build time | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Build time" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Waiting on the compiler could be a large part of the developer’s life. What can you do to make this process faster? I have tried different way to organize code and projects and measure the build time." />
+<meta property="og:description" content="Waiting on the compiler could be a large part of the developer’s life. What can you do to make this process faster? I have tried different way to organize code and projects and measure the build time." />
+<link rel="canonical" href="https://pekspro.github.io/posts/build-time" />
+<meta property="og:url" content="https://pekspro.github.io/posts/build-time" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-05-31T01:00:00+02:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Build time" />
+<script type="application/ld+json">
+{"description":"Waiting on the compiler could be a large part of the developer’s life. What can you do to make this process faster? I have tried different way to organize code and projects and measure the build time.","headline":"Build time","dateModified":"2020-05-31T01:00:00+02:00","datePublished":"2020-05-31T01:00:00+02:00","url":"https://pekspro.github.io/posts/build-time","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/build-time"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Build time</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2020-05-31T01:00:00+02:00" itemprop="datePublished">
+        May 31, 2020
+      </time>
+        •  Categories: 
+        <a href="/categories#net">.NET</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Waiting on the compiler could be a large part of the developer’s life. What can
+you do to make this process faster? I have tried different way to organize code
+and projects and measure the build time.</p>
+
+<h2 id="tooling">Tooling</h2>
+<p>I have not find any tool that could auto generate a large solutions with many
+files and project, so I created <a href="https://github.com/pekspro/NetProjectMockupCreator">.NET Project Mockup
+Creator</a>. This tool makes it
+easy to create projects with a custom number of files with a custom number of
+source code. You could also define how many projects it should be. See the image
+as an example. In this case there are two libraries on the first level (main is
+on level zero), and each of these project have three sub libraries.</p>
+
+<p><img src="/assets/images/0009/structure-2-3.svg" alt="Structure 2-3" title="Structure 2-3" /></p>
+
+<p>The tool also generates a PowerShell script that measure how long time it takes
+to build and rebuild a solutions. I used this to measure:</p>
+
+<ul>
+  <li>The time it took rebuild the whole project.</li>
+  <li>The time it took too build after no change.</li>
+  <li>The time it took too build after a change in the main project.</li>
+  <li>The time it took too build after a change in a library.</li>
+</ul>
+
+<p>The changes were made by adding a comment in a source file.</p>
+
+<h2 id="source-files">Source files</h2>
+<p>Let say you have 100 000 lines of code in a single project. In how many files
+should these be organized to makes compiling as fast as possible? I created four
+projects to test this. The first one had just one file with 100 000 lines of
+code. The last one had 1 000 files with 100 lines of code each.</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Test setup </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">./NetProjectMockupCreator --name Single   --level-sizes 1 --file-count 1    --line-count 100000
+./NetProjectMockupCreator --name Ten      --level-sizes 1 --file-count 10   --line-count 10000
+./NetProjectMockupCreator --name Hundred  --level-sizes 1 --file-count 100  --line-count 1000
+./NetProjectMockupCreator --name Thousand --level-sizes 1 --file-count 1000 --line-count 100</code></pre></figure>
+
+<p>This is the result:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: right">Files</th>
+      <th style="text-align: right">Lines</th>
+      <th style="text-align: right">Rebuild</th>
+      <th style="text-align: right">Lib change</th>
+      <th style="text-align: right">Main change</th>
+      <th style="text-align: right">No change</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right">1</td>
+      <td style="text-align: right">100 000</td>
+      <td style="text-align: right">21.9</td>
+      <td style="text-align: right">21.1</td>
+      <td style="text-align: right">1.8</td>
+      <td style="text-align: right">0.4</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">10</td>
+      <td style="text-align: right">10 000</td>
+      <td style="text-align: right">10.0</td>
+      <td style="text-align: right">9.8</td>
+      <td style="text-align: right">1.8</td>
+      <td style="text-align: right">0.4</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">100</td>
+      <td style="text-align: right">1 000</td>
+      <td style="text-align: right">9.8</td>
+      <td style="text-align: right">9.5</td>
+      <td style="text-align: right">1.8</td>
+      <td style="text-align: right">0.4</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">1 000</td>
+      <td style="text-align: right">100</td>
+      <td style="text-align: right">7.5</td>
+      <td style="text-align: right">7.2</td>
+      <td style="text-align: right">1.8</td>
+      <td style="text-align: right">0.4</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>I thought that when I created this setup it would not be any large difference
+when it comes to rebuild time. After all, on each rebuild the same amount of
+lines needs to be processed. But the difference between the first and last on is
+huge. I have watched how the CPU is utilized and I have noticed that when just a
+large file is building the CPU is used less. My guess is that each file is
+compiled in it is on thread.</p>
+
+<p>Even the difference between the last and second last one is large, and I have
+not been able to figure out why.</p>
+
+<p>In real life you most likely have many large small files instead few extremely
+large one so I guess this result would not change anything.</p>
+
+<h2 id="libraries-files">Libraries files</h2>
+<p>In this scenario I organized 1 000 sources files with 200 lines in a different
+number of libraries. I tried with 1, 5, 10, 20, 50, 100 and 1 000 libraries.
+Every library where directly referenced by main.</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Test setup </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">./NetProjectMockupCreator --name Single   --level-sizes 1    --file-count 1000 --line-count 200
+./NetProjectMockupCreator --name Five     --level-sizes 5    --file-count 200  --line-count 200
+./NetProjectMockupCreator --name Ten      --level-sizes 10   --file-count 100  --line-count 200
+./NetProjectMockupCreator --name Twenty   --level-sizes 20   --file-count 50   --line-count 200
+./NetProjectMockupCreator --name Fifty    --level-sizes 50   --file-count 20   --line-count 200
+./NetProjectMockupCreator --name Hundred  --level-sizes 100  --file-count 10   --line-count 200
+./NetProjectMockupCreator --name Thousand --level-sizes 1000 --file-count 1    --line-count 200</code></pre></figure>
+
+<p>And this is the result:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: right">Libraries</th>
+      <th style="text-align: right">Rebuild</th>
+      <th style="text-align: right">Lib change</th>
+      <th style="text-align: right">Main change</th>
+      <th style="text-align: right">No change</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right">1</td>
+      <td style="text-align: right">12.9</td>
+      <td style="text-align: right">12.5</td>
+      <td style="text-align: right">1.9</td>
+      <td style="text-align: right">0.4</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">5</td>
+      <td style="text-align: right">17.0</td>
+      <td style="text-align: right">5.2</td>
+      <td style="text-align: right">2.0</td>
+      <td style="text-align: right">0.4</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">10</td>
+      <td style="text-align: right">18.2</td>
+      <td style="text-align: right">3.7</td>
+      <td style="text-align: right">2.3</td>
+      <td style="text-align: right">0.4</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">20</td>
+      <td style="text-align: right">18.2</td>
+      <td style="text-align: right">3.7</td>
+      <td style="text-align: right">2.9</td>
+      <td style="text-align: right">0.4</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">50</td>
+      <td style="text-align: right">20.2</td>
+      <td style="text-align: right">4.8</td>
+      <td style="text-align: right">4.1</td>
+      <td style="text-align: right">0.4</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">100</td>
+      <td style="text-align: right">26.0</td>
+      <td style="text-align: right">6.7</td>
+      <td style="text-align: right">6.8</td>
+      <td style="text-align: right">0.4</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">1 000</td>
+      <td style="text-align: right">122.1</td>
+      <td style="text-align: right">51.2</td>
+      <td style="text-align: right">53.6</td>
+      <td style="text-align: right">0.4</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>I am not surprised that having all files in a single library in the fastest in
+most scenarios. But as a developer the most important time for me is the time it
+takes to make a change and having the application running again. And this is the
+fastest when we have 10 - 20 libraries and adding a couple of more libraries
+will not make any major difference. But having many libraries will slow things
+down.</p>
+
+<h2 id="tree-structure">Tree structure</h2>
+
+<p>Having all libraries referenced by your main project and no reference between
+libraries is not realistic in a large solution. In this test I organized 50
+projects in different ways.</p>
+
+<p>In the first solution all 50 libraries where referenced by main directly. In the
+second solution there were just 5 libraries below main, and each of these
+projects had 9 sub-libraries. And the third solution had 2 libraries below main,
+each of these had 4 sub-libraries and each of these had 5 sub-libraries.</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Test setup </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">./NetProjectMockupCreator --name L50    --level-sizes 50    --file-count 20 --line-count 200
+./NetProjectMockupCreator --name L5_9   --level-sizes 5 9   --file-count 20 --line-count 200
+./NetProjectMockupCreator --name L2_4_5 --level-sizes 2 4 5 --file-count 20 --line-count 200</code></pre></figure>
+
+<p>And this is the result for rebuilding and building with no change:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Level sizes</th>
+      <th style="text-align: right">Rebuild</th>
+      <th style="text-align: right">No change</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">50</td>
+      <td style="text-align: right">20.0</td>
+      <td style="text-align: right">0.4</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">5, 9</td>
+      <td style="text-align: right">18.5</td>
+      <td style="text-align: right">0.4</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">2, 4, 5</td>
+      <td style="text-align: right">19.6</td>
+      <td style="text-align: right">0.4</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The numbers are pretty much the same no matter which solutions. The next table
+show how long it took the build the project after a change. The changes were
+done on each level in the structure:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Level sizes</th>
+      <th style="text-align: right">Main</th>
+      <th style="text-align: right">Level 1</th>
+      <th style="text-align: right">Level 2</th>
+      <th style="text-align: right">Level 3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">50</td>
+      <td style="text-align: right">4.2</td>
+      <td style="text-align: right">4.8</td>
+      <td style="text-align: right"> </td>
+      <td style="text-align: right"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: left">5, 9</td>
+      <td style="text-align: right">4.7</td>
+      <td style="text-align: right">4.7</td>
+      <td style="text-align: right">5.1</td>
+      <td style="text-align: right">-</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">2, 4, 5</td>
+      <td style="text-align: right">4.7</td>
+      <td style="text-align: right">5.0</td>
+      <td style="text-align: right">5.0</td>
+      <td style="text-align: right">5.8</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>In this test the numbers are pretty much the same. But you could see that the
+longer down you make the change, more time is spent on building. And this makes
+sense. When you make a change in a library all other libraries that a
+referencing that library needs to be compiled again. And these triggers other
+libraries to be compiled.</p>
+
+<h2 id="nuget-packages">NuGet packages</h2>
+<p>Having all projects in one large solution is nice, but another option is
+to change some libraries to NuGet packages. In this last test I will reuse
+that last solution in the previous test with two libraries, each of them has
+four sub-libraries and each of these has five sub-libraries.</p>
+
+<p>In the first test I build everything as I have done before. In the second I
+compile the libraries in the bottom to NuGet packages. That is 40 of the total
+50 projects. Since the NuGet packages are built separately I will not show
+any build times to for a total rebuild.</p>
+
+<div class="codeHeader" data-bi-name="code-header">
+    <span class="language"> Test setup </span>
+    <button type="button" class="action is-relative copy-code-button" aria-label="Copy code">
+        <span style="font-size: .800em; margin-right: .25em; position: relative; top: -.25em; left: -.200em; pointer-events: none;">
+            📄<span style="position: absolute; top: .25em; left: .25em">📄</span>
+        </span>
+        <span style="pointer-events: none;">Copy</span>
+        <div class="successful-copy-alert is-transparent" style="pointer-events: none;" aria-hidden="true">
+            &#10003;
+        </div>
+    </button> 
+</div>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">./NetProjectMockupCreator --name L2_4_5  --level-sizes 2 4 5 --file-count 20 --line-count 200
+./NetProjectMockupCreator --name L2_4_5n --level-sizes 2 4 5 --file-count 20 --line-count 200 --nuget-level 3</code></pre></figure>
+
+<p>This is the times when a build is done of a change on each level:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">NuGet</th>
+      <th style="text-align: right">Main</th>
+      <th style="text-align: right">Level 1</th>
+      <th style="text-align: right">Level 2</th>
+      <th style="text-align: right">Level 3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">No</td>
+      <td style="text-align: right">4.3</td>
+      <td style="text-align: right">4.9</td>
+      <td style="text-align: right">5.1</td>
+      <td style="text-align: right">5.3</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Yes</td>
+      <td style="text-align: right">2.3</td>
+      <td style="text-align: right">2.7</td>
+      <td style="text-align: right">2.9</td>
+      <td style="text-align: right">-</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Here we clearly see that using NuGet packages could reduce the build time
+significantly.</p>
+
+<h2 id="summary">Summary</h2>
+<p>Even if the tests are not realistic, I think the results could be useful. It
+clearly shows that having many small libraries will make the build time
+significantly slower. Also, when you many small libraries you most likely have a
+lot of references between libraries that could trigger several more compiles
+after a change.</p>
+
+<p>The tests also show that changing some libraries to NuGet packages could have a
+large impact on build time. The downside with this is that is makes your
+solution more complicated, both in architecture on how to build them. But if you
+have libraries that you rarely change this is worth to try.</p>
+
+<p>When I did these tests, I also did some quick tests to see if the project type
+matter. I compared .NET Standard library with .NET Core library but did not see
+any clear difference.</p>
+
+  </div>
+  
+    <div id="archives" class="related"><div class="archive-group">
+    
+      
+      <div id="#net"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about .NET</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/get-time-zone-for-a-user-in-graph">Get time zone for a user in Graph</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/invite-to-a-meeting">Invite to a meeting</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/caching-configuration-from-azure-keyvault">Caching configuration from Azure KeyVault</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/creating-unique-excel-sheet-names">Creating unique Excel sheet names</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/finding-objects-that-are-not-disposed">Finding objects that are not disposed</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/finding-redundant-project-references">Finding redundant project references</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/policyscope">PolicyScope</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/manually-creating-a-dbcontext-and-enable-logging">Manually creating a DbContext and enable logging</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/graphemes">Graphemes</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/withpartitionkey-and-in-memory-database">WithPartitionKey and in-memory database</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/net5-and-azure-functions">.NET 5 and Azure Functions</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/how-to-use-JWT-token-from-query-string">How to use JWT token from query string</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/what-characters-are-whitespace">What characters are whitespace?</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/trimming-whitespace-in-objects">Trimming whitespace in objects</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/modifying-query-string">Modifying query strings</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/create-a-time-lapse-video">Create a time lapse video</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-language-version-on-multiple-projects">Change language version on multiple projects</a></h4>
+      </article>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/change-encoding-on-your-source-files">Change encoding on your source files</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  </div><a class="u-url" href="/posts/build-time" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

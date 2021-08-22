@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Redirect with Azure CDN | PEK’s developer blog</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Redirect with Azure CDN" />
+<meta name="author" content="PEK" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A while ago I needed to make a redirect from www.oldcomain.com to www.newdomain.com. This needed to be done with the HTTP status 301 – moved permanently. I could not do this with the service that was hosting the new address. But I found a cheap solution in Azure CDN." />
+<meta property="og:description" content="A while ago I needed to make a redirect from www.oldcomain.com to www.newdomain.com. This needed to be done with the HTTP status 301 – moved permanently. I could not do this with the service that was hosting the new address. But I found a cheap solution in Azure CDN." />
+<link rel="canonical" href="https://pekspro.github.io/posts/redirect-with-azure-cdn" />
+<meta property="og:url" content="https://pekspro.github.io/posts/redirect-with-azure-cdn" />
+<meta property="og:site_name" content="PEK’s developer blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-06-27T01:00:00+02:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Redirect with Azure CDN" />
+<script type="application/ld+json">
+{"description":"A while ago I needed to make a redirect from www.oldcomain.com to www.newdomain.com. This needed to be done with the HTTP status 301 – moved permanently. I could not do this with the service that was hosting the new address. But I found a cheap solution in Azure CDN.","headline":"Redirect with Azure CDN","dateModified":"2021-06-27T01:00:00+02:00","datePublished":"2021-06-27T01:00:00+02:00","url":"https://pekspro.github.io/posts/redirect-with-azure-cdn","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://pekspro.github.io/posts/redirect-with-azure-cdn"},"author":{"@type":"Person","name":"PEK"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://pekspro.github.io/feed.xml" title="PEK's developer blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">PEK&#39;s developer blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about">About</a><a class="page-link" href="/categories">Categories</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Redirect with Azure CDN</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2021-06-27T01:00:00+02:00" itemprop="datePublished">
+        Jun 27, 2021
+      </time>
+        •  Categories: 
+        <a href="/categories#azure">Azure</a>
+      </p>
+  </header>
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>A while ago I needed to make a redirect from www.oldcomain.com to
+www.newdomain.com. This needed to be done with the <a href="https://en.wikipedia.org/wiki/HTTP_301">HTTP status 301 – moved
+permanently</a>. I could not do this with
+the service that was hosting the new address. But I found a cheap solution in
+Azure CDN.</p>
+
+<h2 id="the-problem">The problem</h2>
+
+<p>Let say you want to redirect a domain. Maybe one of these scenarios:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Old domain</th>
+      <th>New domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>www.olddomain.com</td>
+      <td>www.domain.com</td>
+    </tr>
+    <tr>
+      <td>www.newdomain.com</td>
+      <td>domain.com</td>
+    </tr>
+    <tr>
+      <td>domain.uk</td>
+      <td>domain.co.uk</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>In many cases you could solve this on the service that is hosting the server.
+But what if that is not an option?</p>
+
+<h2 id="the-solution">The solution</h2>
+
+<p><a href="https://azure.microsoft.com/sv-se/services/cdn/">Azure CDN</a> is a content
+delivery network you could use to make sure you have content closer to your
+users. This could reduce bandwidth on your services and reduce loading time for
+your users.</p>
+
+<p>But it also has support for redirecting request, and this is what we will use.
+Once we have setup everything this will happen when the old domain is requested
+in a browser:</p>
+
+<ul>
+  <li>The browser will use DNS to get the address to server. There will be CNAME
+entry here that will redirect to browser to an Azure CDN service.</li>
+  <li>The Azure CDN service will have a rule to redirect the browser to the new
+domain.</li>
+  <li>The browser will be redirected to the new domain address.</li>
+</ul>
+
+<h3 id="create-a-cdn-service">Create a CDN service</h3>
+
+<p>In Azure, search for CDN, and select to create the service:</p>
+
+<p><img src="/assets/images/0056/create-new.png" alt="Create CDN Service" title="Create CDN Service" /></p>
+
+<p>Setup up the service. Give it an appropriate name. To save some time, select
+<strong>Create a new CDN endpoint</strong>.</p>
+
+<p><img src="/assets/images/0056/create-setup.png" alt="Setup CDN Service" title="Setup CDN Service" /></p>
+
+<p>In the endpoint settings, you first need to setup which domain name in should
+have in Azure. It must end with <code class="language-plaintext highlighter-rouge">azureedge.net</code>. Later we will hook up your
+domain to this.</p>
+
+<p>You also need to setup your origin type. In a normal CDN scenario, this is where
+Azure will fetch data and distribute to your users. But we will just use the
+redirect service, so this does not matter. To make is simple, select <strong>Custom
+origin</strong> and enter some hostname.</p>
+
+<p><img src="/assets/images/0056/create-setup-endpoints.png" alt="Setup endpoints" title="Setup endpoints" /></p>
+
+<p>When this is completed, create the service.</p>
+
+<h3 id="test-the-service">Test the service</h3>
+
+<p>Once the service is created, you should be able to test it. If you enter the
+domain you wanted to use in a browser, <code class="language-plaintext highlighter-rouge">redirectme.azureedge.net</code> in my example,
+you should see the origin loaded (<code class="language-plaintext highlighter-rouge">example.com</code>) but with the domain you
+entered. Note, it may take several minutes (10 – 30 minutes) before this works.</p>
+
+<h3 id="configure-redirect">Configure redirect</h3>
+
+<p>Next step is to configure the redirect. In the CDN service you have created you
+should see the endpoint you have created:</p>
+
+<p><img src="/assets/images/0056/setup-rules-select-endpoint.png" alt="Select endpoint" title="Select endpoint" /></p>
+
+<p>Select the endpoint in the list. Once it loaded, scroll down to the settings and
+select <strong>Rules engine</strong>.</p>
+
+<p><img src="/assets/images/0056/setup-rules-select-rules.png" alt="Select Rules engine" title="Select Rules engine" /></p>
+
+<p>The rules engine you could create several complex rules. The only thing we will
+do is to select a redirect action in the global rule:</p>
+
+<p><img src="/assets/images/0056/setup-rules-add-action.png" alt="Add action" title="Add action" /></p>
+
+<p>Select type to <strong>Moved (301)</strong> and in the hostname enter to which domain the
+user should be redirected. Once you are done, click on <strong>Save</strong>.</p>
+
+<p><img src="/assets/images/0056/setup-rules-configure-action
+.png" alt="Configure action" title="Configure action" /></p>
+
+<p>Now, you could verify that you now are being redirect to the new domain by
+testing the domain in a browser (<code class="language-plaintext highlighter-rouge">redirectme.azureedge.net</code> in my example). The
+domain that you have entered should be replaced. Again, note that it could take
+several minutes (10 – 30 minutes), before this works.</p>
+
+<h4 id="configure-domains">Configure domains</h4>
+
+<p>Next step is to configure your domains. I will use the DNS services in these
+samples, but it should not be hard to transfer this to other services. You will
+need to make some different settings, depending on if it is an apex/root domain
+(like example.com) or if it is an subdomain (like <code class="language-plaintext highlighter-rouge">www.example.com</code>).</p>
+
+<h4 id="configure-apex-domain">Configure apex domain</h4>
+
+<p>If you have an apex/root domain, configure it to be an alias and set it up to
+use your Azure CDN resource.</p>
+
+<p><img src="/assets/images/0056/domain-setup-apex.png" alt="Configure apex domain" title="Configure apex domain" /></p>
+
+<h3 id="configure-subdomain">Configure subdomain</h3>
+
+<p>If you have a subdomain, then type should be a <strong>CNAME</strong> and the alias should be
+domain to the CDN resource.</p>
+
+<p><img src="/assets/images/0056/domain-setup-subdomain.png" alt="Configure subdomain" title="Configure subdomain" /></p>
+
+<h3 id="configure-cdn-to-use-custom-domain">Configure CDN to use custom domain</h3>
+
+<p>Next step is to configure the CDN to use the custom domain. In the settings
+section, select <strong>Custom domain</strong>:</p>
+
+<p><img src="/assets/images/0056/domain-setup-cdn-select-custom-domain.png" alt="Select Custom domain" title="Select Custom domain" /></p>
+
+<p>Add the domain the end user should use:</p>
+
+<p><img src="/assets/images/0056/domain-setup-cdn-configure-custom-domain.png" alt="Configure Custom domain" title="Configure Custom domain" /></p>
+
+<p>Again, after you added the domain, it could take several minutes before. But
+when it works you should be able to verify that redirect now works in your
+custom domain in a browser – but only when http is used!</p>
+
+<h3 id="add-support-for-https">Add support for https</h3>
+
+<p>Must browser now warn you if you are not using https, so it is better to add
+support for this. In the custom domain list, select the domain you just added.
+Then enable <strong>Custom domain HTTPS</strong>. If you do not want to handle the
+certificate yourself select <strong>CDN managed</strong>. Note that this only works for
+subdomains, you need to use your own certificate for apex domains.</p>
+
+<p><img src="/assets/images/0056/cdn-enable-https.png" alt="Enable HTTPS" title="Enable HTTPS" /></p>
+
+<p>Once you are done, select <strong>Save</strong>. Again, it may take some time before
+everything was applied.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>There were some steps to solve this, I hope it is not too hard to follow. It is
+quite logical once you have done it. What is great with this solution is that is
+close to free.</p>
+
+  </div>
+  
+    <div id="archives" class="related"><div class="archive-group">
+    
+      
+      <div id="#azure"></div>
+      <p></p>
+  
+      <h3 class="category-head">More about Azure</h3>
+      
+      <article class="archive-item">
+        <h4><a href="/posts/avoid-connecting-to-resources-by-mistake">Avoid connecting to resources by mistake</a></h4>
+      </article>
+      
+    </div>
+    
+  
+  </div><a class="u-url" href="/posts/redirect-with-azure-cdn" hidden></a>
+</article>
+
+<script src="/assets/javascript/copybutton.js"></script>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+        <ul class="contact-list">
+          <li class="p-name">PEK</li>
+          <li><a class="u-email" href="mailto:"></a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p>Interesting problems with interesting solutions.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/pekspro" title="pekspro"><svg class="svg-icon grey"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
