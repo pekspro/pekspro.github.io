@@ -15,3 +15,4 @@ repository](https://github.com/pekspro/pekspro.github.io). There you will find
 the complete code of the blog. Feel free to clone it if you want to use it as a
 base for you own blog.
 
+Visit [PEK's Productions](https://pekspro.com/) to check out some software I've built.
