@@ -2,7 +2,7 @@
 layout: post
 title:  "Batch upgrade to .NET 6"
 date:   2021-08-22 01:00:00 +0200
-categories: [.NET. PowerShell]
+categories: [.NET, PowerShell]
 ---
 
 .NET 6 preview has been out for a while, and I decided to give it a go. New
