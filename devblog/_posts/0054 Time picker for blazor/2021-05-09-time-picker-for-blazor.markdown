@@ -152,6 +152,7 @@ This is a basic component. It formats the time as a 24-hour clock and it does
 not let you select the second on the time. But all these are easy to tweaks if
 you need to.
 
-In my [next post]({% post_url /0055 Date time picker for
-blazor/2021-05-16-date-time-picker-for-blazor %}) I show you could create a date
-and time picker component based on this time picker component.
+In my 
+[next post]({% post_url /0055 Date time picker for blazor/2021-05-16-date-time-picker-for-blazor %}) 
+I show you could create a date and time picker component based on this time
+picker component.

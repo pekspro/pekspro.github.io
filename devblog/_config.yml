@@ -23,14 +23,16 @@ minima:
 
   # generate social links in footer
   social_links:
-    twitter: false
-    github:  pekspro
-  
+    - { platform: github,  user_url: "https://github.com/pekspro/pekspro.github.io" }
+
+header_pages:
+  - about.md
+  - categories.md
+
 markdown: kramdown
 theme: minima
 plugins:
   - jekyll-timeago
-  - jekyll-paginate  
 
 defaults:
   -

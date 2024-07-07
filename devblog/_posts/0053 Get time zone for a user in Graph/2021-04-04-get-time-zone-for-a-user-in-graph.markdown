@@ -10,7 +10,7 @@ But you could work around this.
 
 ## The problem
 
-[Last week]({% post_url /0052-Invite to a meeting/2021-03-28-invite-to-a-meeting
+[Last week]({% post_url /0052 Invite to a meeting/2021-03-28-invite-to-a-meeting
 %}) I showed how to create an event in Microsoft Graph. That example used a hard
 coded time zone. Of course, it would be better if we could get this directly
 from Graph.
