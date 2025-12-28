@@ -11,9 +11,6 @@
       "version": "lts"
     }
   },
-  "mounts": [
-    "source=jekyll-bundle,target=${containerWorkspaceFolder}/vendor/bundle,type=volume"
-  ],
   "remoteUser": "vscode",
   "containerEnv": {
     "JEKYLL_ENV": "development"
@@ -31,8 +28,6 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "Shopify.ruby-lsp",
-        "rebornix.Ruby",
         "DavidAnson.vscode-markdownlint",
         "yzhang.markdown-all-in-one",
         "EditorConfig.EditorConfig"
