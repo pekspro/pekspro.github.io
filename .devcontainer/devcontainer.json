@@ -1,0 +1,42 @@
+{
+  "name": "Jekyll Dev Container",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "VARIANT": "3.1"
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    }
+  },
+  "mounts": [
+    "source=jekyll-bundle,target=${containerWorkspaceFolder}/vendor/bundle,type=volume"
+  ],
+  "remoteUser": "vscode",
+  "containerEnv": {
+    "JEKYLL_ENV": "development"
+  },
+  "postCreateCommand": "bundle config set path vendor/bundle && bundle install",
+  "forwardPorts": [4000, 35729],
+  "portsAttributes": {
+    "4000": {
+      "label": "Jekyll"
+    },
+    "35729": {
+      "label": "Live Reload"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Shopify.ruby-lsp",
+        "rebornix.Ruby",
+        "DavidAnson.vscode-markdownlint",
+        "yzhang.markdown-all-in-one",
+        "EditorConfig.EditorConfig"
+      ]
+    }
+  }
+}
